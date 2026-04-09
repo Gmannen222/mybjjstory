@@ -9,6 +9,18 @@ import { BELT_COLORS } from '@/components/ui/BeltBadge'
 
 const BELT_RANKS: BeltRank[] = ['white', 'blue', 'purple', 'brown', 'black']
 
+const GUARDS = [
+  'Closed Guard', 'Half Guard', 'De La Riva', 'Butterfly', 'X-Guard',
+  'Spider Guard', 'Lasso Guard', '50/50', 'Rubber Guard', 'Z-Guard',
+  'Deep Half', 'Reverse De La Riva', 'Worm Guard', 'Annet',
+]
+
+const SUBMISSIONS = [
+  'Armbar', 'Triangle', 'Guillotine', 'RNC', 'Kimura', 'Americana',
+  'Omoplata', 'Leg Lock', 'Heel Hook', 'Knee Bar', 'Ezekiel',
+  'D\'Arce', 'Anaconda', 'Loop Choke', 'Bow & Arrow', 'Cross Choke', 'Annet',
+]
+
 export default function ProfileForm({
   profile,
   locale,
@@ -19,17 +31,27 @@ export default function ProfileForm({
   const [displayName, setDisplayName] = useState(profile?.display_name || '')
   const [username, setUsername] = useState(profile?.username || '')
   const [bio, setBio] = useState(profile?.bio || '')
-  const [beltRank, setBeltRank] = useState<BeltRank | ''>(
-    profile?.belt_rank || ''
-  )
-  const [beltDegrees, setBeltDegrees] = useState(
-    String(profile?.belt_degrees || 0)
-  )
+  const [beltRank, setBeltRank] = useState<BeltRank | ''>(profile?.belt_rank || '')
+  const [beltDegrees, setBeltDegrees] = useState(String(profile?.belt_degrees || 0))
   const [academyName, setAcademyName] = useState(profile?.academy_name || '')
+  const [favoriteGuard, setFavoriteGuard] = useState(profile?.favorite_guard || '')
+  const [favoriteSubmission, setFavoriteSubmission] = useState(profile?.favorite_submission || '')
+  const [trainingSinceYear, setTrainingSinceYear] = useState(String(profile?.training_since_year || ''))
   const [isPublic, setIsPublic] = useState(profile?.is_public || false)
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [avatarFile, setAvatarFile] = useState<File | null>(null)
+
+  // Visibility toggles
+  const [showBelt, setShowBelt] = useState(profile?.show_belt ?? true)
+  const [showAcademy, setShowAcademy] = useState(profile?.show_academy ?? true)
+  const [showTrainingSince, setShowTrainingSince] = useState(profile?.show_training_since ?? true)
+  const [showFavoriteGuard, setShowFavoriteGuard] = useState(profile?.show_favorite_guard ?? false)
+  const [showFavoriteSubmission, setShowFavoriteSubmission] = useState(profile?.show_favorite_submission ?? false)
+  const [showInjuries, setShowInjuries] = useState(profile?.show_injuries ?? false)
+  const [showCompetitions, setShowCompetitions] = useState(profile?.show_competitions ?? true)
+  const [showStats, setShowStats] = useState(profile?.show_stats ?? false)
+  const [showFeed, setShowFeed] = useState(profile?.show_feed ?? true)
 
   const router = useRouter()
   const supabase = createClient()
@@ -50,15 +72,11 @@ export default function ProfileForm({
     if (avatarFile) {
       const ext = avatarFile.name.split('.').pop()
       const path = `${userId}/avatar.${ext}`
-
       const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(path, avatarFile, { upsert: true })
-
       if (!uploadError) {
-        const { data: urlData } = supabase.storage
-          .from('avatars')
-          .getPublicUrl(path)
+        const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path)
         avatarUrl = urlData.publicUrl
       }
     }
@@ -73,16 +91,24 @@ export default function ProfileForm({
         belt_degrees: parseInt(beltDegrees),
         academy_name: academyName || null,
         avatar_url: avatarUrl,
+        favorite_guard: favoriteGuard || null,
+        favorite_submission: favoriteSubmission || null,
+        training_since_year: trainingSinceYear ? parseInt(trainingSinceYear) : null,
         is_public: isPublic,
+        show_belt: showBelt,
+        show_academy: showAcademy,
+        show_training_since: showTrainingSince,
+        show_favorite_guard: showFavoriteGuard,
+        show_favorite_submission: showFavoriteSubmission,
+        show_injuries: showInjuries,
+        show_competitions: showCompetitions,
+        show_stats: showStats,
+        show_feed: showFeed,
       })
       .eq('id', userId)
 
     if (updateError) {
-      setError(
-        updateError.code === '23505'
-          ? 'Brukernavnet er allerede tatt'
-          : tCommon('error')
-      )
+      setError(updateError.code === '23505' ? 'Brukernavnet er allerede tatt' : tCommon('error'))
       setSaving(false)
       return
     }
@@ -91,131 +117,149 @@ export default function ProfileForm({
     router.refresh()
   }
 
+  const currentYear = new Date().getFullYear()
+  const yearsTrained = trainingSinceYear ? currentYear - parseInt(trainingSinceYear) : null
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <label className="block text-sm font-medium text-muted mb-2">
-          Profilbilde
-        </label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
-          className="block w-full text-sm text-muted file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-background file:font-semibold file:cursor-pointer hover:file:bg-primary-hover"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-muted mb-2">
-          Visningsnavn
-        </label>
-        <input
-          type="text"
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-          className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-muted mb-2">
-          Brukernavn
-        </label>
-        <div className="flex items-center">
-          <span className="text-muted mr-1">@</span>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) =>
-              setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))
-            }
-            className="flex-1 px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary"
-            placeholder="dittbrukernavn"
-          />
+    <form onSubmit={handleSubmit} className="space-y-8">
+      {/* Basic info */}
+      <section>
+        <h2 className="text-lg font-bold mb-4">Grunnleggende</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-muted mb-2">Profilbilde</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
+              className="block w-full text-sm text-muted file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-background file:font-semibold file:cursor-pointer hover:file:bg-primary-hover"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-muted mb-2">Visningsnavn</label>
+            <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)}
+              className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-muted mb-2">Brukernavn</label>
+            <div className="flex items-center">
+              <span className="text-muted mr-1">@</span>
+              <input type="text" value={username}
+                onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                placeholder="brukernavn"
+                className="flex-1 px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-muted mb-2">Om meg</label>
+            <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3}
+              className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary resize-none" />
+          </div>
         </div>
-      </div>
+      </section>
 
-      <div>
-        <label className="block text-sm font-medium text-muted mb-2">
-          Belte
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {BELT_RANKS.map((rank) => {
-            const colors = BELT_COLORS[rank]
-            return (
-              <button
-                key={rank}
-                type="button"
-                onClick={() => setBeltRank(rank)}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                  beltRank === rank
-                    ? 'ring-2 ring-primary scale-105'
-                    : 'opacity-60 hover:opacity-100'
-                }`}
-                style={{ backgroundColor: colors.bg, color: colors.text }}
-              >
-                {tBelts(rank)}
-              </button>
-            )
-          })}
+      {/* BJJ info */}
+      <section>
+        <h2 className="text-lg font-bold mb-4">BJJ-info</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-muted mb-2">Belte</label>
+            <div className="flex flex-wrap gap-2">
+              {BELT_RANKS.map((rank) => {
+                const colors = BELT_COLORS[rank]
+                return (
+                  <button key={rank} type="button" onClick={() => setBeltRank(rank)}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                      beltRank === rank ? 'ring-2 ring-primary scale-105' : 'opacity-60 hover:opacity-100'
+                    }`}
+                    style={{ backgroundColor: colors.bg, color: colors.text }}>
+                    {tBelts(rank)}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-muted mb-2">Grader (striper)</label>
+            <input type="number" value={beltDegrees} onChange={(e) => setBeltDegrees(e.target.value)}
+              min="0" max="6"
+              className="w-24 px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-muted mb-2">Akademi / klubb</label>
+            <input type="text" value={academyName} onChange={(e) => setAcademyName(e.target.value)}
+              className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-muted mb-2">
+              Trent BJJ siden (år)
+              {yearsTrained !== null && yearsTrained >= 0 && (
+                <span className="text-primary ml-2">— {yearsTrained} år</span>
+              )}
+            </label>
+            <input type="number" value={trainingSinceYear}
+              onChange={(e) => setTrainingSinceYear(e.target.value)}
+              placeholder="2020" min="1990" max={currentYear}
+              className="w-32 px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-muted mb-2">Favorittguard</label>
+            <select value={favoriteGuard} onChange={(e) => setFavoriteGuard(e.target.value)}
+              className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary">
+              <option value="">Velg...</option>
+              {GUARDS.map((g) => <option key={g} value={g}>{g}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-muted mb-2">Favorittsubmission</label>
+            <select value={favoriteSubmission} onChange={(e) => setFavoriteSubmission(e.target.value)}
+              className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary">
+              <option value="">Velg...</option>
+              {SUBMISSIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <div>
-        <label className="block text-sm font-medium text-muted mb-2">
-          Grader (striper)
-        </label>
-        <input
-          type="number"
-          value={beltDegrees}
-          onChange={(e) => setBeltDegrees(e.target.value)}
-          min="0"
-          max="6"
-          className="w-24 px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary"
-        />
-      </div>
+      {/* Visibility */}
+      <section>
+        <h2 className="text-lg font-bold mb-4">Synlighet</h2>
+        <p className="text-sm text-muted mb-4">Velg hva andre kan se på profilen din.</p>
+        <div className="space-y-3">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)}
+              className="w-5 h-5 rounded accent-primary" />
+            <span className="text-sm font-medium">Offentlig profil</span>
+          </label>
 
-      <div>
-        <label className="block text-sm font-medium text-muted mb-2">
-          Akademi
-        </label>
-        <input
-          type="text"
-          value={academyName}
-          onChange={(e) => setAcademyName(e.target.value)}
-          className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-muted mb-2">
-          Om meg
-        </label>
-        <textarea
-          value={bio}
-          onChange={(e) => setBio(e.target.value)}
-          rows={3}
-          className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary resize-none"
-        />
-      </div>
-
-      <label className="flex items-center gap-3 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={isPublic}
-          onChange={(e) => setIsPublic(e.target.checked)}
-          className="w-5 h-5 rounded accent-primary"
-        />
-        <span className="text-sm">Gjør profilen min synlig for andre</span>
-      </label>
+          {isPublic && (
+            <div className="ml-8 space-y-2 border-l-2 border-primary/20 pl-4">
+              {[
+                { label: 'Belte', checked: showBelt, set: setShowBelt },
+                { label: 'Akademi', checked: showAcademy, set: setShowAcademy },
+                { label: 'År trent', checked: showTrainingSince, set: setShowTrainingSince },
+                { label: 'Favorittguard', checked: showFavoriteGuard, set: setShowFavoriteGuard },
+                { label: 'Favorittsubmission', checked: showFavoriteSubmission, set: setShowFavoriteSubmission },
+                { label: 'Skader', checked: showInjuries, set: setShowInjuries },
+                { label: 'Konkurranser', checked: showCompetitions, set: setShowCompetitions },
+                { label: 'Treningsstatistikk', checked: showStats, set: setShowStats },
+                { label: 'Innlegg i feed', checked: showFeed, set: setShowFeed },
+              ].map(({ label, checked, set }) => (
+                <label key={label} className="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" checked={checked} onChange={(e) => set(e.target.checked)}
+                    className="w-4 h-4 rounded accent-primary" />
+                  <span className="text-sm text-muted">{label}</span>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
 
-      <button
-        type="submit"
-        disabled={saving}
-        className="w-full py-3 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
-      >
+      <button type="submit" disabled={saving}
+        className="w-full py-3 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50">
         {saving ? tCommon('loading') : tCommon('save')}
       </button>
     </form>

@@ -17,15 +17,21 @@ export default function Header() {
           MyBJJStory
         </Link>
 
-        <nav className="hidden sm:flex items-center gap-6 text-sm text-muted">
+        <nav className="hidden sm:flex items-center gap-5 text-sm text-muted">
           <Link href={`/${locale}/training`} className="hover:text-foreground transition-colors">
             Trening
+          </Link>
+          <Link href={`/${locale}/competitions`} className="hover:text-foreground transition-colors">
+            Konkurranser
           </Link>
           <Link href={`/${locale}/feed`} className="hover:text-foreground transition-colors">
             Feed
           </Link>
           <Link href={`/${locale}/gradings`} className="hover:text-foreground transition-colors">
             Graderinger
+          </Link>
+          <Link href={`/${locale}/injuries`} className="hover:text-foreground transition-colors">
+            Skader
           </Link>
           <Link href={`/${locale}/profile`} className="hover:text-foreground transition-colors">
             Profil

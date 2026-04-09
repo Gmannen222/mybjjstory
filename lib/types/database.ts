@@ -17,6 +17,16 @@ export type ReactionType = 'oss' | 'high_five' | 'fire'
 
 export type PostType = 'training' | 'grading' | 'media' | 'text'
 
+export type CompetitionResult = 'gold' | 'silver' | 'bronze' | 'participant'
+
+export type CompetitionSource = 'manual' | 'smoothcomp' | 'ibjjf' | 'adcc' | 'other'
+
+export type InjuryType = 'sprain' | 'tear' | 'fracture' | 'bruise' | 'dislocation' | 'other'
+
+export type Severity = 'mild' | 'moderate' | 'severe'
+
+export type TrainingImpact = 'none' | 'modified' | 'rest'
+
 export interface Profile {
   id: string
   username: string | null
@@ -28,6 +38,18 @@ export interface Profile {
   academy_name: string | null
   role: UserRole
   is_public: boolean
+  favorite_guard: string | null
+  favorite_submission: string | null
+  training_since_year: number | null
+  show_belt: boolean
+  show_academy: boolean
+  show_training_since: boolean
+  show_favorite_guard: boolean
+  show_favorite_submission: boolean
+  show_injuries: boolean
+  show_competitions: boolean
+  show_stats: boolean
+  show_feed: boolean
   created_at: string
   updated_at: string
 }
@@ -75,6 +97,41 @@ export interface Media {
   session_id: string | null
   grading_id: string | null
   is_public: boolean
+  created_at: string
+}
+
+export interface Competition {
+  id: string
+  user_id: string
+  event_name: string
+  event_date: string | null
+  organization: string | null
+  weight_class: string | null
+  belt_division: string | null
+  gi_nogi: 'gi' | 'nogi' | null
+  result: CompetitionResult | null
+  wins: number
+  losses: number
+  source: CompetitionSource
+  source_url: string | null
+  source_id: string | null
+  verified: boolean
+  notes: string | null
+  is_public: boolean
+  created_at: string
+}
+
+export interface Injury {
+  id: string
+  user_id: string
+  body_part: string
+  injury_type: InjuryType | null
+  description: string | null
+  date_occurred: string
+  date_recovered: string | null
+  severity: Severity
+  training_impact: TrainingImpact
+  notes: string | null
   created_at: string
 }
 

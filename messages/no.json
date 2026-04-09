@@ -1,8 +1,10 @@
 {
   "nav": {
     "training": "Trening",
+    "competitions": "Konkurranser",
     "feed": "Feed",
     "gradings": "Graderinger",
+    "injuries": "Skader",
     "profile": "Profil"
   },
   "home": {

@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from 'next-intl'
 
 const NAV_ITEMS = [
   { key: 'training', path: '/training', icon: '🥋' },
+  { key: 'competitions', path: '/competitions', icon: '🏆' },
   { key: 'feed', path: '/feed', icon: '📰' },
   { key: 'gradings', path: '/gradings', icon: '🏅' },
   { key: 'profile', path: '/profile', icon: '👤' },
