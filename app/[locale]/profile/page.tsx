@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import type { Profile } from '@/lib/types/database'
 import { BeltBadge } from '@/components/ui/BeltBadge'
 
@@ -34,6 +35,12 @@ export default async function ProfilePage({
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold">{t('title')}</h1>
+        <Link
+          href={`/${locale}/profile/edit`}
+          className="px-4 py-2 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors text-sm"
+        >
+          {t('edit')}
+        </Link>
       </div>
 
       <div className="bg-surface rounded-xl p-6">

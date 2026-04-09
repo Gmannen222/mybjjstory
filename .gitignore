@@ -46,3 +46,5 @@ public/swe-worker-*.js
 
 # supabase
 supabase/.temp/
+
+.vercel

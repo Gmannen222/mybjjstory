@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { TrainingSession } from '@/lib/types/database'
+import ShareButton from '@/components/training/ShareButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -67,7 +68,14 @@ export default async function TrainingPage({
                     {s.duration_min && ` · ${s.duration_min} ${t('durationMin')}`}
                   </div>
                 </div>
-                <span className="text-muted text-sm">→</span>
+                <div className="flex items-center gap-3">
+                  <ShareButton
+                    sessionId={s.id}
+                    sessionDate={s.date}
+                    sessionType={s.type}
+                  />
+                  <span className="text-muted text-sm">→</span>
+                </div>
               </div>
               {s.notes && (
                 <p className="text-sm text-muted mt-2 line-clamp-2">
