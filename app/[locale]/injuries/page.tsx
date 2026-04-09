@@ -59,7 +59,7 @@ export default async function InjuriesPage({
       {allInjuries.length === 0 ? (
         <div className="text-center py-20 text-muted">
           <p className="text-lg">Ingen skader registrert</p>
-          <p className="text-sm mt-2">Forhåpentligvis forblir det slik! 🤞</p>
+          <p className="text-sm mt-2">Forhåpentligvis forblir det slik!</p>
         </div>
       ) : (
         <>
@@ -71,7 +71,7 @@ export default async function InjuriesPage({
               </h2>
               <div className="space-y-3">
                 {active.map((injury) => (
-                  <InjuryCard key={injury.id} injury={injury} />
+                  <InjuryCard key={injury.id} injury={injury} locale={locale} />
                 ))}
               </div>
             </section>
@@ -85,7 +85,7 @@ export default async function InjuriesPage({
               </h2>
               <div className="space-y-3">
                 {recovered.map((injury) => (
-                  <InjuryCard key={injury.id} injury={injury} />
+                  <InjuryCard key={injury.id} injury={injury} locale={locale} />
                 ))}
               </div>
             </section>
@@ -96,11 +96,14 @@ export default async function InjuriesPage({
   )
 }
 
-function InjuryCard({ injury }: { injury: Injury }) {
+function InjuryCard({ injury, locale }: { injury: Injury; locale: string }) {
   const isActive = !injury.date_recovered
 
   return (
-    <div className={`bg-surface rounded-xl p-4 ${isActive ? 'border-l-4 border-red-400' : ''}`}>
+    <Link
+      href={`/${locale}/injuries/${injury.id}`}
+      className={`block bg-surface rounded-xl p-4 hover:bg-surface-hover transition-colors ${isActive ? 'border-l-4 border-red-400' : ''}`}
+    >
       <div className="flex items-center justify-between">
         <div className="font-semibold">{injury.body_part}</div>
         <span className={`text-sm font-medium ${SEVERITY_COLORS[injury.severity]}`}>
@@ -118,6 +121,6 @@ function InjuryCard({ injury }: { injury: Injury }) {
       <div className="text-xs text-muted mt-2">
         {IMPACT_LABELS[injury.training_impact]}
       </div>
-    </div>
+    </Link>
   )
 }

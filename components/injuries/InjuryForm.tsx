@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import type { InjuryType, Severity, TrainingImpact } from '@/lib/types/database'
+import type { Injury, InjuryType, Severity, TrainingImpact } from '@/lib/types/database'
 
 const BODY_PARTS = [
   'Kne', 'Skulder', 'Nakke', 'Rygg', 'Fingre', 'Ribben',
@@ -32,16 +32,24 @@ const IMPACTS: { value: TrainingImpact; label: string }[] = [
   { value: 'rest', label: 'Full hvile' },
 ]
 
-export default function InjuryForm({ locale }: { locale: string }) {
-  const [bodyPart, setBodyPart] = useState('')
-  const [injuryType, setInjuryType] = useState<InjuryType | ''>('')
-  const [description, setDescription] = useState('')
-  const [dateOccurred, setDateOccurred] = useState(new Date().toISOString().split('T')[0])
-  const [dateRecovered, setDateRecovered] = useState('')
-  const [severity, setSeverity] = useState<Severity>('mild')
-  const [trainingImpact, setTrainingImpact] = useState<TrainingImpact>('none')
-  const [notes, setNotes] = useState('')
+export default function InjuryForm({
+  locale,
+  injury,
+}: {
+  locale: string
+  injury?: Injury
+}) {
+  const isEdit = !!injury
+  const [bodyPart, setBodyPart] = useState(injury?.body_part ?? '')
+  const [injuryType, setInjuryType] = useState<InjuryType | ''>(injury?.injury_type ?? '')
+  const [description, setDescription] = useState(injury?.description ?? '')
+  const [dateOccurred, setDateOccurred] = useState(injury?.date_occurred ?? new Date().toISOString().split('T')[0])
+  const [dateRecovered, setDateRecovered] = useState(injury?.date_recovered ?? '')
+  const [severity, setSeverity] = useState<Severity>(injury?.severity ?? 'mild')
+  const [trainingImpact, setTrainingImpact] = useState<TrainingImpact>(injury?.training_impact ?? 'none')
+  const [notes, setNotes] = useState(injury?.notes ?? '')
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const router = useRouter()
@@ -56,8 +64,7 @@ export default function InjuryForm({ locale }: { locale: string }) {
     const { data: sessionData } = await supabase.auth.getSession()
     if (!sessionData.session) { setSaving(false); return }
 
-    const { error: insertError } = await supabase.from('injuries').insert({
-      user_id: sessionData.session.user.id,
+    const payload = {
       body_part: bodyPart,
       injury_type: injuryType || null,
       description: description || null,
@@ -66,9 +73,13 @@ export default function InjuryForm({ locale }: { locale: string }) {
       severity,
       training_impact: trainingImpact,
       notes: notes || null,
-    })
+    }
 
-    if (insertError) {
+    const { error: dbError } = isEdit
+      ? await supabase.from('injuries').update(payload).eq('id', injury.id)
+      : await supabase.from('injuries').insert({ ...payload, user_id: sessionData.session.user.id })
+
+    if (dbError) {
       setError('Noe gikk galt')
       setSaving(false)
       return
@@ -78,8 +89,52 @@ export default function InjuryForm({ locale }: { locale: string }) {
     router.refresh()
   }
 
+  const handleMarkRecovered = async () => {
+    if (!injury) return
+    setSaving(true)
+    const today = new Date().toISOString().split('T')[0]
+
+    const { error: dbError } = await supabase
+      .from('injuries')
+      .update({ date_recovered: today })
+      .eq('id', injury.id)
+
+    if (dbError) {
+      setError('Kunne ikke oppdatere')
+      setSaving(false)
+      return
+    }
+
+    router.push(`/${locale}/injuries`)
+    router.refresh()
+  }
+
+  const handleDelete = async () => {
+    if (!injury || !confirm('Er du sikker på at du vil slette denne skaden?')) return
+    setDeleting(true)
+
+    const { error: dbError } = await supabase.from('injuries').delete().eq('id', injury.id)
+
+    if (dbError) {
+      setError('Kunne ikke slette')
+      setDeleting(false)
+      return
+    }
+
+    router.push(`/${locale}/injuries`)
+    router.refresh()
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Mark as recovered quick action */}
+      {isEdit && !injury.date_recovered && (
+        <button type="button" onClick={handleMarkRecovered} disabled={saving}
+          className="w-full py-3 bg-green-500/10 text-green-400 font-semibold rounded-lg hover:bg-green-500/20 transition-colors disabled:opacity-50">
+          ✓ Marker som frisk
+        </button>
+      )}
+
       <div>
         <label className="block text-sm font-medium text-muted mb-2">Kroppsdel *</label>
         <div className="flex flex-wrap gap-2">
@@ -164,8 +219,15 @@ export default function InjuryForm({ locale }: { locale: string }) {
 
       <button type="submit" disabled={saving}
         className="w-full py-3 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50">
-        {saving ? 'Lagrer...' : 'Lagre skade'}
+        {saving ? 'Lagrer...' : isEdit ? 'Oppdater skade' : 'Lagre skade'}
       </button>
+
+      {isEdit && (
+        <button type="button" onClick={handleDelete} disabled={deleting}
+          className="w-full py-3 bg-red-500/10 text-red-400 font-semibold rounded-lg hover:bg-red-500/20 transition-colors disabled:opacity-50">
+          {deleting ? 'Sletter...' : 'Slett skade'}
+        </button>
+      )}
     </form>
   )
 }

@@ -160,6 +160,90 @@
     "brown": "Brunt",
     "black": "Svart"
   },
+  "competitions": {
+    "title": "Konkurranser",
+    "new": "Ny konkurranse",
+    "register": "Registrer konkurranse",
+    "noCompetitions": "Ingen konkurranser registrert ennå",
+    "event": "Arrangement",
+    "date": "Dato",
+    "organization": "Organisasjon",
+    "weightClass": "Vektklasse",
+    "beltDivision": "Beltedivisjon",
+    "giNogi": "Gi / No-Gi",
+    "result": "Resultat",
+    "results": {
+      "gold": "Gull",
+      "silver": "Sølv",
+      "bronze": "Bronse",
+      "participant": "Deltaker"
+    },
+    "wins": "Seire",
+    "losses": "Tap",
+    "source": "Kilde",
+    "sources": {
+      "manual": "Manuell registrering",
+      "smoothcomp": "Smoothcomp",
+      "ibjjf": "IBJJF",
+      "adcc": "ADCC",
+      "other": "Annen kilde"
+    },
+    "sourceUrl": "Lenke til resultat",
+    "verified": "Verifisert",
+    "viewSource": "Se kilde",
+    "notes": "Notater",
+    "save": "Lagre konkurranse",
+    "update": "Oppdater konkurranse",
+    "delete": "Slett konkurranse",
+    "deleteConfirm": "Er du sikker på at du vil slette denne konkurransen?",
+    "edit": "Rediger konkurranse",
+    "stats": {
+      "total": "Totalt",
+      "wins": "Seire",
+      "losses": "Tap"
+    }
+  },
+  "injuries": {
+    "title": "Skader",
+    "new": "Registrer skade",
+    "noInjuries": "Ingen skader registrert",
+    "noInjuriesHope": "Forhåpentligvis forblir det slik!",
+    "active": "Aktive skader",
+    "recovered": "Tilfrisknet",
+    "bodyPart": "Kroppsdel",
+    "injuryType": "Type skade",
+    "types": {
+      "sprain": "Forstuing",
+      "tear": "Ruptur / avrivning",
+      "fracture": "Brudd",
+      "bruise": "Blåmerke / klemskade",
+      "dislocation": "Luksasjon",
+      "other": "Annet"
+    },
+    "severity": "Alvorlighetsgrad",
+    "severities": {
+      "mild": "Mild",
+      "moderate": "Moderat",
+      "severe": "Alvorlig"
+    },
+    "impact": "Påvirkning på trening",
+    "impacts": {
+      "none": "Ingen påvirkning",
+      "modified": "Tilpasset trening",
+      "rest": "Full hvile"
+    },
+    "description": "Beskrivelse",
+    "dateOccurred": "Dato skadet",
+    "dateRecovered": "Dato frisk",
+    "dateRecoveredOptional": "Dato frisk (valgfritt)",
+    "markRecovered": "Marker som frisk",
+    "notes": "Notater",
+    "save": "Lagre skade",
+    "update": "Oppdater skade",
+    "delete": "Slett skade",
+    "deleteConfirm": "Er du sikker på at du vil slette denne skaden?",
+    "edit": "Rediger skade"
+  },
   "pwa": {
     "install": "Installer appen",
     "offline": "Du er offline. Endringer lagres lokalt."

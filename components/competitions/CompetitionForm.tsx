@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import type { CompetitionResult, CompetitionSource } from '@/lib/types/database'
+import type { Competition, CompetitionResult, CompetitionSource } from '@/lib/types/database'
 
 const RESULTS: { value: CompetitionResult; label: string; icon: string }[] = [
   { value: 'gold', label: 'Gull', icon: '🥇' },
@@ -20,20 +20,28 @@ const SOURCES: { value: CompetitionSource; label: string }[] = [
   { value: 'other', label: 'Annen kilde' },
 ]
 
-export default function CompetitionForm({ locale }: { locale: string }) {
-  const [eventName, setEventName] = useState('')
-  const [eventDate, setEventDate] = useState(new Date().toISOString().split('T')[0])
-  const [organization, setOrganization] = useState('')
-  const [weightClass, setWeightClass] = useState('')
-  const [beltDivision, setBeltDivision] = useState('')
-  const [giNogi, setGiNogi] = useState<'gi' | 'nogi'>('gi')
-  const [result, setResult] = useState<CompetitionResult | ''>('')
-  const [wins, setWins] = useState('0')
-  const [losses, setLosses] = useState('0')
-  const [source, setSource] = useState<CompetitionSource>('manual')
-  const [sourceUrl, setSourceUrl] = useState('')
-  const [notes, setNotes] = useState('')
+export default function CompetitionForm({
+  locale,
+  competition,
+}: {
+  locale: string
+  competition?: Competition
+}) {
+  const isEdit = !!competition
+  const [eventName, setEventName] = useState(competition?.event_name ?? '')
+  const [eventDate, setEventDate] = useState(competition?.event_date ?? new Date().toISOString().split('T')[0])
+  const [organization, setOrganization] = useState(competition?.organization ?? '')
+  const [weightClass, setWeightClass] = useState(competition?.weight_class ?? '')
+  const [beltDivision, setBeltDivision] = useState(competition?.belt_division ?? '')
+  const [giNogi, setGiNogi] = useState<'gi' | 'nogi'>(competition?.gi_nogi ?? 'gi')
+  const [result, setResult] = useState<CompetitionResult | ''>(competition?.result ?? '')
+  const [wins, setWins] = useState(String(competition?.wins ?? 0))
+  const [losses, setLosses] = useState(String(competition?.losses ?? 0))
+  const [source, setSource] = useState<CompetitionSource>(competition?.source ?? 'manual')
+  const [sourceUrl, setSourceUrl] = useState(competition?.source_url ?? '')
+  const [notes, setNotes] = useState(competition?.notes ?? '')
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const router = useRouter()
@@ -48,8 +56,7 @@ export default function CompetitionForm({ locale }: { locale: string }) {
     const { data: sessionData } = await supabase.auth.getSession()
     if (!sessionData.session) { setSaving(false); return }
 
-    const { error: insertError } = await supabase.from('competitions').insert({
-      user_id: sessionData.session.user.id,
+    const payload = {
       event_name: eventName.trim(),
       event_date: eventDate || null,
       organization: organization || null,
@@ -63,11 +70,31 @@ export default function CompetitionForm({ locale }: { locale: string }) {
       source_url: sourceUrl || null,
       verified: source !== 'manual',
       notes: notes || null,
-    })
+    }
 
-    if (insertError) {
+    const { error: dbError } = isEdit
+      ? await supabase.from('competitions').update(payload).eq('id', competition.id)
+      : await supabase.from('competitions').insert({ ...payload, user_id: sessionData.session.user.id })
+
+    if (dbError) {
       setError('Noe gikk galt')
       setSaving(false)
+      return
+    }
+
+    router.push(`/${locale}/competitions`)
+    router.refresh()
+  }
+
+  const handleDelete = async () => {
+    if (!competition || !confirm('Er du sikker på at du vil slette denne konkurransen?')) return
+    setDeleting(true)
+
+    const { error: dbError } = await supabase.from('competitions').delete().eq('id', competition.id)
+
+    if (dbError) {
+      setError('Kunne ikke slette')
+      setDeleting(false)
       return
     }
 
@@ -185,8 +212,15 @@ export default function CompetitionForm({ locale }: { locale: string }) {
 
       <button type="submit" disabled={saving}
         className="w-full py-3 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50">
-        {saving ? 'Lagrer...' : 'Lagre konkurranse'}
+        {saving ? 'Lagrer...' : isEdit ? 'Oppdater konkurranse' : 'Lagre konkurranse'}
       </button>
+
+      {isEdit && (
+        <button type="button" onClick={handleDelete} disabled={deleting}
+          className="w-full py-3 bg-red-500/10 text-red-400 font-semibold rounded-lg hover:bg-red-500/20 transition-colors disabled:opacity-50">
+          {deleting ? 'Sletter...' : 'Slett konkurranse'}
+        </button>
+      )}
     </form>
   )
 }

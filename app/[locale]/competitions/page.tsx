@@ -86,7 +86,11 @@ export default async function CompetitionsPage({
       ) : (
         <div className="space-y-3">
           {comps.map((c) => (
-            <div key={c.id} className="bg-surface rounded-xl p-4">
+            <Link
+              key={c.id}
+              href={`/${locale}/competitions/${c.id}`}
+              className="block bg-surface rounded-xl p-4 hover:bg-surface-hover transition-colors"
+            >
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-semibold flex items-center gap-2">
@@ -124,17 +128,12 @@ export default async function CompetitionsPage({
                   </span>
                 )}
                 {c.source_url && (
-                  <a
-                    href={c.source_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-primary hover:underline"
-                  >
-                    Se kilde →
-                  </a>
+                  <span className="text-xs text-primary">
+                    Kilde lenket
+                  </span>
                 )}
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}

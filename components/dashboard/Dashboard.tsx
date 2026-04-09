@@ -12,6 +12,30 @@ interface Stats {
   totalCount: number
   currentBelt: string | null
   displayName: string | null
+  competitionCount: number
+  goldCount: number
+  activeInjuries: number
+}
+
+interface RecentSession {
+  id: string
+  date: string
+  type: string
+  duration_min: number | null
+}
+
+interface ActiveInjury {
+  id: string
+  body_part: string
+  severity: string
+  date_occurred: string
+  training_impact: string
+}
+
+const SEVERITY_COLORS: Record<string, string> = {
+  mild: 'text-yellow-400',
+  moderate: 'text-orange-400',
+  severe: 'text-red-400',
 }
 
 export default function Dashboard({
@@ -33,7 +57,7 @@ export default function Dashboard({
       const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
       const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())
 
-      const [weekRes, monthRes, totalRes, profileRes] = await Promise.all([
+      const [weekRes, monthRes, totalRes, profileRes, compRes, goldRes, injuryRes] = await Promise.all([
         supabase
           .from('training_sessions')
           .select('id', { count: 'exact', head: true })
@@ -53,6 +77,20 @@ export default function Dashboard({
           .select('belt_rank, display_name')
           .eq('id', userId)
           .single(),
+        supabase
+          .from('competitions')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', userId),
+        supabase
+          .from('competitions')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', userId)
+          .eq('result', 'gold'),
+        supabase
+          .from('injuries')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', userId)
+          .is('date_recovered', null),
       ])
 
       setStats({
@@ -61,6 +99,9 @@ export default function Dashboard({
         totalCount: totalRes.count ?? 0,
         currentBelt: profileRes.data?.belt_rank ?? null,
         displayName: profileRes.data?.display_name ?? null,
+        competitionCount: compRes.count ?? 0,
+        goldCount: goldRes.count ?? 0,
+        activeInjuries: injuryRes.count ?? 0,
       })
       setLoading(false)
     }
@@ -105,34 +146,54 @@ export default function Dashboard({
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-10">
+      <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-10">
         {[
           { label: tTraining('stats.thisWeek'), value: stats?.weekCount ?? 0 },
           { label: tTraining('stats.thisMonth'), value: stats?.monthCount ?? 0 },
           { label: tTraining('stats.total'), value: stats?.totalCount ?? 0 },
+          { label: 'Konkurranser', value: stats?.competitionCount ?? 0 },
+          { label: 'Gull', value: stats?.goldCount ?? 0 },
         ].map(({ label, value }) => (
-          <div key={label} className="bg-surface rounded-xl p-5 text-center">
-            <div className="text-3xl font-bold text-primary">{value}</div>
-            <div className="text-sm text-muted mt-1">{label}</div>
+          <div key={label} className="bg-surface rounded-xl p-4 text-center">
+            <div className="text-2xl sm:text-3xl font-bold text-primary">{value}</div>
+            <div className="text-xs sm:text-sm text-muted mt-1">{label}</div>
           </div>
         ))}
       </div>
 
+      {/* Active injuries alert */}
+      {(stats?.activeInjuries ?? 0) > 0 && (
+        <Link
+          href={`/${locale}/injuries`}
+          className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-8 hover:bg-red-500/15 transition-colors"
+        >
+          <span className="text-2xl">🩹</span>
+          <div>
+            <div className="font-semibold text-red-400">
+              {stats!.activeInjuries} aktiv{stats!.activeInjuries > 1 ? 'e' : ''} skade{stats!.activeInjuries > 1 ? 'r' : ''}
+            </div>
+            <div className="text-xs text-muted">Trykk for å se detaljer</div>
+          </div>
+        </Link>
+      )}
+
       {/* Quick actions */}
       <h2 className="text-lg font-bold mb-4">Hurtigvalg</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-10">
         {[
           { href: `/${locale}/training/new`, icon: '🥋', label: tTraining('newSession') },
           { href: `/${locale}/training`, icon: '📋', label: tTraining('title') },
+          { href: `/${locale}/competitions`, icon: '🏆', label: 'Konkurranser' },
           { href: `/${locale}/feed`, icon: '📰', label: 'Feed' },
           { href: `/${locale}/gradings`, icon: '🏅', label: 'Graderinger' },
+          { href: `/${locale}/injuries`, icon: '🩹', label: 'Skader' },
         ].map(({ href, icon, label }) => (
           <Link
             key={href}
             href={href}
             className="bg-surface hover:bg-surface-hover rounded-xl p-4 text-center transition-colors"
           >
-            <div className="text-3xl mb-2">{icon}</div>
+            <div className="text-2xl sm:text-3xl mb-2">{icon}</div>
             <div className="text-sm font-medium">{label}</div>
           </Link>
         ))}
@@ -140,14 +201,15 @@ export default function Dashboard({
 
       {/* Recent training */}
       <RecentTraining userId={userId} locale={locale} />
+
+      {/* Active injuries detail */}
+      <ActiveInjuriesList userId={userId} locale={locale} />
     </div>
   )
 }
 
 function RecentTraining({ userId, locale }: { userId: string; locale: string }) {
-  const [sessions, setSessions] = useState<
-    { id: string; date: string; type: string; duration_min: number | null }[]
-  >([])
+  const [sessions, setSessions] = useState<RecentSession[]>([])
   const supabase = createClient()
   const tTraining = useTranslations('training')
 
@@ -164,7 +226,7 @@ function RecentTraining({ userId, locale }: { userId: string; locale: string }) 
   if (sessions.length === 0) return null
 
   return (
-    <div className="mt-10">
+    <div className="mb-10">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-bold">Siste treninger</h2>
         <Link
@@ -192,6 +254,55 @@ function RecentTraining({ userId, locale }: { userId: string; locale: string }) 
                 {s.duration_min} min
               </span>
             )}
+          </Link>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function ActiveInjuriesList({ userId, locale }: { userId: string; locale: string }) {
+  const [injuries, setInjuries] = useState<ActiveInjury[]>([])
+  const supabase = createClient()
+
+  useEffect(() => {
+    supabase
+      .from('injuries')
+      .select('id, body_part, severity, date_occurred, training_impact')
+      .eq('user_id', userId)
+      .is('date_recovered', null)
+      .order('date_occurred', { ascending: false })
+      .limit(5)
+      .then(({ data }) => setInjuries(data || []))
+  }, [userId, supabase])
+
+  if (injuries.length === 0) return null
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-bold">Aktive skader</h2>
+        <Link
+          href={`/${locale}/injuries`}
+          className="text-sm text-primary hover:text-primary-hover transition-colors"
+        >
+          Se alle →
+        </Link>
+      </div>
+      <div className="space-y-2">
+        {injuries.map((i) => (
+          <Link
+            key={i.id}
+            href={`/${locale}/injuries/${i.id}`}
+            className="flex items-center justify-between bg-surface hover:bg-surface-hover rounded-xl p-4 transition-colors border-l-4 border-red-400"
+          >
+            <div>
+              <span className="font-medium">{i.body_part}</span>
+              <span className={`text-sm ml-3 ${SEVERITY_COLORS[i.severity]}`}>
+                {i.severity}
+              </span>
+            </div>
+            <span className="text-sm text-muted">{i.date_occurred}</span>
           </Link>
         ))}
       </div>
