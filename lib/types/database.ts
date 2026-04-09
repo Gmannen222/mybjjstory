@@ -171,3 +171,15 @@ export interface Follow {
   following_id: string
   created_at: string
 }
+
+export type FeedbackType = 'suggestion' | 'wish' | 'bug' | 'other'
+
+export interface Feedback {
+  id: string
+  user_id: string
+  type: FeedbackType
+  message: string
+  contact_email: string | null
+  status: 'new' | 'read' | 'resolved'
+  created_at: string
+}

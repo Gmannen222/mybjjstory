@@ -35,12 +35,20 @@ export default async function ProfilePage({
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold">{t('title')}</h1>
-        <Link
-          href={`/${locale}/profile/edit`}
-          className="px-4 py-2 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors text-sm"
-        >
-          {t('edit')}
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            href={`/${locale}/profile/edit`}
+            className="px-4 py-2 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors text-sm"
+          >
+            {t('edit')}
+          </Link>
+          <Link
+            href={`/${locale}/settings`}
+            className="px-3 py-2 border border-white/10 rounded-lg text-sm text-muted hover:text-foreground hover:bg-surface transition-colors"
+          >
+            ⚙
+          </Link>
+        </div>
       </div>
 
       <div className="bg-surface rounded-xl p-6">
