@@ -1,0 +1,93 @@
+{
+  "nav": {
+    "training": "Trening",
+    "feed": "Feed",
+    "gradings": "Graderinger",
+    "profile": "Profil"
+  },
+  "home": {
+    "title": "MyBJJStory",
+    "subtitle": "Din personlige BJJ-reise",
+    "logTraining": "Logg trening",
+    "viewFeed": "Se feed",
+    "welcome": "Velkommen tilbake"
+  },
+  "training": {
+    "title": "Treningslogg",
+    "newSession": "Ny trening",
+    "date": "Dato",
+    "duration": "Varighet",
+    "durationMin": "minutter",
+    "type": "Type",
+    "types": {
+      "gi": "Gi",
+      "nogi": "No-Gi",
+      "open_mat": "Open Mat",
+      "private": "Privattimer",
+      "competition": "Konkurranse"
+    },
+    "techniques": "Teknikker",
+    "notes": "Notater",
+    "save": "Lagre",
+    "noSessions": "Ingen treninger registrert ennå",
+    "stats": {
+      "thisWeek": "Denne uken",
+      "thisMonth": "Denne måneden",
+      "total": "Totalt",
+      "sessions": "treninger"
+    }
+  },
+  "gradings": {
+    "title": "Graderinger",
+    "newGrading": "Ny gradering",
+    "belt": "Belte",
+    "date": "Dato",
+    "instructor": "Instruktør",
+    "academy": "Akademi",
+    "notes": "Notater",
+    "noGradings": "Ingen graderinger registrert ennå"
+  },
+  "feed": {
+    "title": "Feed",
+    "empty": "Ingen innlegg ennå",
+    "comment": "Kommenter",
+    "comments": "kommentarer",
+    "share": "Del"
+  },
+  "profile": {
+    "title": "Min profil",
+    "edit": "Rediger profil",
+    "belt": "Belte",
+    "academy": "Akademi",
+    "memberSince": "Medlem siden",
+    "bio": "Om meg",
+    "stats": "Statistikk"
+  },
+  "auth": {
+    "login": "Logg inn",
+    "loginWithGoogle": "Logg inn med Google",
+    "logout": "Logg ut",
+    "loginRequired": "Du må logge inn for å bruke denne funksjonen"
+  },
+  "common": {
+    "loading": "Laster...",
+    "save": "Lagre",
+    "cancel": "Avbryt",
+    "delete": "Slett",
+    "edit": "Rediger",
+    "back": "Tilbake",
+    "error": "Noe gikk galt",
+    "success": "Lagret!"
+  },
+  "belts": {
+    "white": "Hvitt",
+    "blue": "Blått",
+    "purple": "Lilla",
+    "brown": "Brunt",
+    "black": "Svart"
+  },
+  "pwa": {
+    "install": "Installer appen",
+    "offline": "Du er offline. Endringer lagres lokalt."
+  }
+}
