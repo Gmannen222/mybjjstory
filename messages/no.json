@@ -12,6 +12,78 @@
     "viewFeed": "Se feed",
     "welcome": "Velkommen tilbake"
   },
+  "landing": {
+    "hero": {
+      "badge": "Gratis for alle BJJ-utøvere",
+      "title1": "Din BJJ-reise,",
+      "title2": "dokumentert.",
+      "subtitle": "Logg treninger, dokumenter graderinger, del med fellesskapet. Alt du trenger for å følge din progresjon i brasiliansk jiu-jitsu.",
+      "cta": "Kom i gang gratis",
+      "secondary": "Se funksjoner"
+    },
+    "stats": {
+      "free": "Gratis for alltid",
+      "mobile": "Fungerer på mobil",
+      "community": "For fellesskapet"
+    },
+    "features": {
+      "title": "Alt du trenger for din BJJ-reise",
+      "subtitle": "Fra hvitt til svart belte — MyBJJStory følger deg hele veien.",
+      "training": {
+        "title": "Treningslogg",
+        "desc": "Logg hver trening med type, varighet, teknikker og notater. Se statistikk over tid."
+      },
+      "gradings": {
+        "title": "Graderingsjournal",
+        "desc": "Dokumenter hver gradering med belte, instruktør, akademi og bilder."
+      },
+      "media": {
+        "title": "Bilder & video",
+        "desc": "Last opp bilder og videosnutter fra trening og konkurranse. Ta bilder direkte i appen."
+      },
+      "stats": {
+        "title": "Statistikk",
+        "desc": "Se hvor ofte du trener, hvilke teknikker du fokuserer på og din progresjon over tid."
+      },
+      "social": {
+        "title": "Fellesskap",
+        "desc": "Del treninger og graderinger. Gi og motta tips, kommentarer og oppmuntring."
+      },
+      "pwa": {
+        "title": "Mobilapp",
+        "desc": "Installer appen på telefonen. Fungerer offline — perfekt for når du er på matta."
+      }
+    },
+    "howItWorks": {
+      "title": "Slik fungerer det",
+      "step1": {
+        "title": "Opprett konto",
+        "desc": "Logg inn med Google på sekunder. Velg belte og sett opp profilen din."
+      },
+      "step2": {
+        "title": "Logg treninger",
+        "desc": "Registrer treningsøkter med type, teknikker og notater etter hver økt."
+      },
+      "step3": {
+        "title": "Følg progresjonen",
+        "desc": "Se statistikk, del med fellesskapet og dokumenter din unike BJJ-reise."
+      }
+    },
+    "belts": {
+      "title": "Alle belter, én reise",
+      "subtitle": "Uansett om du nettopp begynte eller har trent i 20 år — MyBJJStory er for deg."
+    },
+    "cta": {
+      "title": "Klar til å starte?",
+      "subtitle": "Bli med i fellesskapet og begynn å dokumentere din BJJ-reise i dag.",
+      "button": "Opprett gratis konto"
+    },
+    "footer": {
+      "about": "Om oss",
+      "privacy": "Personvern",
+      "terms": "Vilkår"
+    }
+  },
   "training": {
     "title": "Treningslogg",
     "newSession": "Ny trening",
@@ -49,7 +121,7 @@
   },
   "feed": {
     "title": "Feed",
-    "empty": "Ingen innlegg ennå",
+    "empty": "Ingen innlegg ennå. Vær den første til å dele noe!",
     "comment": "Kommenter",
     "comments": "kommentarer",
     "share": "Del"
