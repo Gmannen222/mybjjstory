@@ -50,6 +50,10 @@ export interface Profile {
   show_competitions: boolean
   show_stats: boolean
   show_feed: boolean
+  training_preference: 'gi' | 'nogi' | 'both' | null
+  passion_level: number | null
+  currently_training: boolean
+  heard_about_from: string | null
   created_at: string
   updated_at: string
 }

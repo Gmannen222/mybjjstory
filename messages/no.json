@@ -54,7 +54,8 @@
       "pwa": {
         "title": "Mobilapp",
         "desc": "Installer appen på telefonen. Fungerer offline — perfekt for når du er på matta."
-      }
+      },
+      "cta": "Kom i gang gratis"
     },
     "howItWorks": {
       "title": "Slik fungerer det",

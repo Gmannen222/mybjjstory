@@ -96,15 +96,21 @@ async function LandingPage({ locale }: { locale: string }) {
           ].map(({ icon, key }) => (
             <div
               key={key}
-              className="bg-surface rounded-2xl p-6 hover:bg-surface-hover transition-colors"
+              className="group relative bg-surface rounded-2xl p-6 border border-white/5 hover:border-primary/30 hover:scale-[1.03] hover:shadow-[0_0_30px_-5px_rgba(201,168,76,0.15)] transition-all duration-300 cursor-default"
             >
-              <div className="text-4xl mb-4">{icon}</div>
-              <h3 className="text-lg font-bold mb-2">
-                {t(`features.${key}.title`)}
-              </h3>
-              <p className="text-sm text-muted">
-                {t(`features.${key}.desc`)}
-              </p>
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="relative">
+                <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">{icon}</div>
+                <h3 className="text-lg font-bold mb-2">
+                  {t(`features.${key}.title`)}
+                </h3>
+                <p className="text-sm text-muted mb-4">
+                  {t(`features.${key}.desc`)}
+                </p>
+                <span className="text-xs text-primary font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  {t('features.cta')} →
+                </span>
+              </div>
             </div>
           ))}
         </div>
