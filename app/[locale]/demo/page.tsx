@@ -4,6 +4,12 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { BeltDisplay, BELT_LABELS } from '@/components/ui/BeltBadge'
 import AvatarSVG, { DEFAULT_AVATAR, type AvatarConfig } from '@/components/avatar/AvatarSVG'
+import dynamic from 'next/dynamic'
+
+// Lazy-load 3D components (heavy deps)
+const Avatar3D_CSS = dynamic(() => import('@/components/avatar/Avatar3D_CSS'), { ssr: false })
+const Avatar3D_ThreeJS = dynamic(() => import('@/components/avatar/Avatar3D_ThreeJS'), { ssr: false })
+const Avatar3D_RPM = dynamic(() => import('@/components/avatar/Avatar3D_RPM'), { ssr: false })
 
 // Mock data for preview
 const MOCK_AVATAR: AvatarConfig = {
@@ -12,6 +18,7 @@ const MOCK_AVATAR: AvatarConfig = {
   hairColor: '#2C1810',
   outfit: 'gi_white',
   beltRank: 'blue',
+  beltDegrees: 2,
   academyColor: '#3b82f6',
   showInjuries: [],
   gender: 'male',
@@ -36,7 +43,7 @@ const MOCK_AVATAR: AvatarConfig = {
 const AVATAR_GALLERY: { name: string; desc: string; belt: string; config: AvatarConfig }[] = [
   {
     name: 'Erik', desc: 'Erfaren competitor, liker no-gi', belt: 'purple',
-    config: { ...DEFAULT_AVATAR, skinTone: '#FADCBC', hairStyle: 'buzz', hairColor: '#D4A76A', outfit: 'nogi_dark', beltRank: 'purple', gender: 'male', facialHair: 'stubble', bodyType: 'athletic', earType: 'cauliflower', eyeColor: '#4A7CB5', eyeShape: 'default', mouthStyle: 'serious', fingerTape: true, scar: 'eyebrow' },
+    config: { ...DEFAULT_AVATAR, skinTone: '#FADCBC', hairStyle: 'buzz', hairColor: '#D4A76A', outfit: 'nogi_dark', beltRank: 'purple', beltDegrees: 2, gender: 'male', facialHair: 'stubble', bodyType: 'athletic', earType: 'cauliflower', eyeColor: '#4A7CB5', eyeShape: 'default', mouthStyle: 'serious', fingerTape: true, scar: 'eyebrow' },
   },
   {
     name: 'Sofia', desc: 'Nybegynner med mye energi', belt: 'white',
@@ -44,19 +51,19 @@ const AVATAR_GALLERY: { name: string; desc: string; belt: string; config: Avatar
   },
   {
     name: 'Marcus', desc: 'Old school, spiller half guard', belt: 'brown',
-    config: { ...DEFAULT_AVATAR, skinTone: '#8D5524', hairStyle: 'bald', hairColor: '#1a1a1a', outfit: 'gi_blue', beltRank: 'brown', gender: 'male', facialHair: 'full_beard', bodyType: 'heavy', faceShape: 'square', eyeColor: '#2C1810', eyebrowStyle: 'thick', mouthStyle: 'neutral', kneePads: true },
+    config: { ...DEFAULT_AVATAR, skinTone: '#8D5524', hairStyle: 'bald', hairColor: '#1a1a1a', outfit: 'gi_blue', beltRank: 'brown', beltDegrees: 1, gender: 'male', facialHair: 'full_beard', bodyType: 'heavy', faceShape: 'square', eyeColor: '#2C1810', eyebrowStyle: 'thick', mouthStyle: 'neutral', kneePads: true },
   },
   {
     name: 'Nora', desc: 'Konkurransemaskin, elsker spider guard', belt: 'blue',
-    config: { ...DEFAULT_AVATAR, skinTone: '#FADCBC', hairStyle: 'braids', hairColor: '#1a1a1a', outfit: 'gi_white', beltRank: 'blue', gender: 'female', bodyType: 'athletic', eyeColor: '#7B8B9A', eyeShape: 'round', mouthStyle: 'smile', headband: true, academyColor: '#ef4444' },
+    config: { ...DEFAULT_AVATAR, skinTone: '#FADCBC', hairStyle: 'braids', hairColor: '#1a1a1a', outfit: 'gi_white', beltRank: 'blue', beltDegrees: 1, gender: 'female', bodyType: 'athletic', eyeColor: '#7B8B9A', eyeShape: 'round', mouthStyle: 'smile', headband: true, academyColor: '#ef4444' },
   },
   {
     name: 'Kenji', desc: 'Instructor og mentor', belt: 'black',
-    config: { ...DEFAULT_AVATAR, skinTone: '#C68642', hairStyle: 'short', hairColor: '#1a1a1a', outfit: 'gi_black', beltRank: 'black', gender: 'male', facialHair: 'goatee', bodyType: 'athletic', faceShape: 'long', eyeColor: '#2C1810', eyeShape: 'narrow', eyebrowStyle: 'arched', mouthStyle: 'smile' },
+    config: { ...DEFAULT_AVATAR, skinTone: '#C68642', hairStyle: 'short', hairColor: '#1a1a1a', outfit: 'gi_black', beltRank: 'black', beltDegrees: 3, gender: 'male', facialHair: 'goatee', bodyType: 'athletic', faceShape: 'long', eyeColor: '#2C1810', eyeShape: 'narrow', eyebrowStyle: 'arched', mouthStyle: 'smile' },
   },
   {
     name: 'Lena', desc: 'Hobbyutøver, trener 3x i uka', belt: 'blue',
-    config: { ...DEFAULT_AVATAR, skinTone: '#FADCBC', hairStyle: 'medium', hairColor: '#D4A76A', outfit: 'gi_white', beltRank: 'blue', gender: 'female', bodyType: 'average', eyeColor: '#4A7CB5', eyeShape: 'almond', glasses: 'round', mouthStyle: 'smile', freckles: true },
+    config: { ...DEFAULT_AVATAR, skinTone: '#FADCBC', hairStyle: 'medium', hairColor: '#D4A76A', outfit: 'gi_white', beltRank: 'blue', beltDegrees: 2, gender: 'female', bodyType: 'average', eyeColor: '#4A7CB5', eyeShape: 'almond', glasses: 'round', mouthStyle: 'smile', freckles: true },
   },
   {
     name: 'Andre', desc: 'Ung talent, no-gi spesialist', belt: 'white',
@@ -64,7 +71,7 @@ const AVATAR_GALLERY: { name: string; desc: string; belt: string; config: Avatar
   },
   {
     name: 'Ingrid', desc: 'Comeback etter skade, sterk vilje', belt: 'purple',
-    config: { ...DEFAULT_AVATAR, skinTone: '#D4A574', hairStyle: 'bun', hairColor: '#B24513', outfit: 'gi_blue', beltRank: 'purple', gender: 'female', bodyType: 'athletic', earType: 'cauliflower', eyeColor: '#4A7C59', eyeShape: 'default', eyebrowStyle: 'arched', mouthStyle: 'serious', fingerTape: true, kneePads: true, scar: 'cheek' },
+    config: { ...DEFAULT_AVATAR, skinTone: '#D4A574', hairStyle: 'bun', hairColor: '#B24513', outfit: 'gi_blue', beltRank: 'purple', beltDegrees: 2, gender: 'female', bodyType: 'athletic', earType: 'cauliflower', eyeColor: '#4A7C59', eyeShape: 'default', eyebrowStyle: 'arched', mouthStyle: 'serious', fingerTape: true, kneePads: true, scar: 'cheek' },
   },
   {
     name: 'Thomas', desc: 'Trener for moro, elsker open mat', belt: 'white',
@@ -72,12 +79,12 @@ const AVATAR_GALLERY: { name: string; desc: string; belt: string; config: Avatar
   },
   {
     name: 'Amina', desc: 'Teknisk, fokuserer på submissions', belt: 'brown',
-    config: { ...DEFAULT_AVATAR, skinTone: '#8D5524', hairStyle: 'long', hairColor: '#1a1a1a', outfit: 'gi_black', beltRank: 'brown', gender: 'female', bodyType: 'slim', faceShape: 'oval', eyeColor: '#2C1810', eyeShape: 'almond', eyebrowStyle: 'thin', mouthStyle: 'neutral', headband: true, academyColor: '#a855f7' },
+    config: { ...DEFAULT_AVATAR, skinTone: '#8D5524', hairStyle: 'long', hairColor: '#1a1a1a', outfit: 'gi_black', beltRank: 'brown', beltDegrees: 1, gender: 'female', bodyType: 'slim', faceShape: 'oval', eyeColor: '#2C1810', eyeShape: 'almond', eyebrowStyle: 'thin', mouthStyle: 'neutral', headband: true, academyColor: '#a855f7' },
   },
 ]
 
 export default function DemoPage() {
-  const [view, setView] = useState<'profile' | 'dashboard' | 'avatars'>('avatars')
+  const [view, setView] = useState<'profile' | 'dashboard' | 'avatars' | '3d'>('avatars')
 
   return (
     <div className="min-h-screen">
@@ -85,19 +92,19 @@ export default function DemoPage() {
       <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-white/5 px-4 py-2">
         <div className="max-w-5xl mx-auto flex items-center gap-2">
           <span className="text-xs text-muted mr-2">DEMO:</span>
-          {(['avatars', 'dashboard', 'profile'] as const).map((v) => (
+          {(['avatars', '3d', 'dashboard', 'profile'] as const).map((v) => (
             <button
               key={v}
               onClick={() => setView(v)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${view === v ? 'bg-primary text-background' : 'text-muted hover:text-foreground'}`}
             >
-              {v === 'avatars' ? 'Avatarer' : v === 'dashboard' ? 'Dashboard' : 'Profil'}
+              {v === 'avatars' ? 'Avatarer' : v === '3d' ? '3D Demo' : v === 'dashboard' ? 'Dashboard' : 'Profil'}
             </button>
           ))}
         </div>
       </div>
 
-      {view === 'avatars' ? <DemoAvatarGallery /> : view === 'dashboard' ? <DemoDashboard /> : <DemoProfile />}
+      {view === 'avatars' ? <DemoAvatarGallery /> : view === '3d' ? <Demo3DAvatar /> : view === 'dashboard' ? <DemoDashboard /> : <DemoProfile />}
     </div>
   )
 }
@@ -136,6 +143,210 @@ function DemoAvatarGallery() {
           {['10 frisyrer', '6 hudtoner', '4 ansiktsformer', '4 kroppstyper', '4 øyeformer', '5 antrekk', 'Skjegg/bart', 'Briller', 'Tape/pannebånd', 'Fregner/arr'].map((tag) => (
             <span key={tag} className="px-3 py-1 bg-surface border border-white/5 rounded-full text-[11px] text-muted">{tag}</span>
           ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function Demo3DAvatar() {
+  const demoConfig: AvatarConfig = {
+    ...DEFAULT_AVATAR,
+    skinTone: '#FADCBC',
+    hairStyle: 'short',
+    hairColor: '#2C1810',
+    outfit: 'gi_white',
+    beltRank: 'blue',
+    gender: 'male',
+    bodyType: 'athletic',
+    facialHair: 'stubble',
+    eyeColor: '#4A7CB5',
+    mouthStyle: 'smile',
+    fingerTape: true,
+    earType: 'cauliflower',
+    scar: 'eyebrow',
+  }
+
+  const threeJSConfig: AvatarConfig = {
+    ...DEFAULT_AVATAR,
+    skinTone: '#D4A574',
+    hairStyle: 'mohawk',
+    hairColor: '#2C1810',
+    outfit: 'nogi_dark',
+    beltRank: 'purple',
+    gender: 'male',
+    bodyType: 'athletic',
+    facialHair: 'goatee',
+    eyeColor: '#4A7CB5',
+    glasses: 'sport',
+    kneePads: true,
+    fingerTape: true,
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold mb-2">3D Avatar — Proof of Concept</h1>
+        <p className="text-muted text-sm">Tre ulike tilnærminger til 3D-avatarer sammenlignet</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* PoC 1: CSS 3D */}
+        <div className="bg-surface rounded-2xl border border-white/5 p-6 flex flex-col">
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="px-2 py-0.5 bg-green-500/20 text-green-400 rounded text-[10px] font-bold uppercase">Enkel</span>
+              <h2 className="font-bold text-lg">CSS 3D Transform</h2>
+            </div>
+            <p className="text-xs text-muted leading-relaxed">
+              Bruker nåværende SVG-avatar med CSS perspective og rotasjon. Ingen nye avhengigheter.
+            </p>
+          </div>
+
+          <div className="flex-1 flex items-center justify-center bg-background/50 rounded-xl p-4 mb-4">
+            <Avatar3D_CSS config={demoConfig} size={180} />
+          </div>
+
+          <div className="space-y-2 text-xs">
+            <div className="flex justify-between">
+              <span className="text-muted">Kompleksitet</span>
+              <span className="text-green-400 font-medium">Lav — 1-2 timer</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted">Nye avhengigheter</span>
+              <span className="text-green-400 font-medium">Ingen</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted">Bundle-størrelse</span>
+              <span className="text-green-400 font-medium">+0 KB</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted">Kvalitet</span>
+              <span className="text-yellow-400 font-medium">Flat SVG, fake 3D</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted">Animasjon</span>
+              <span className="text-green-400 font-medium">Float + drag-roter</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted">Mobil</span>
+              <span className="text-green-400 font-medium">Perfekt ytelse</span>
+            </div>
+          </div>
+        </div>
+
+        {/* PoC 2: Three.js */}
+        <div className="bg-surface rounded-2xl border border-primary/20 p-6 flex flex-col relative overflow-hidden">
+          <div className="absolute top-3 right-3 px-2 py-0.5 bg-primary/20 text-primary rounded text-[10px] font-bold uppercase">Anbefalt</div>
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded text-[10px] font-bold uppercase">Medium</span>
+              <h2 className="font-bold text-lg">Three.js</h2>
+            </div>
+            <p className="text-xs text-muted leading-relaxed">
+              Ekte 3D med React Three Fiber. Prosedyralt generert karakter med alle tilpasninger.
+            </p>
+          </div>
+
+          <div className="flex-1 flex items-center justify-center bg-background/50 rounded-xl p-2 mb-4">
+            <Avatar3D_ThreeJS config={threeJSConfig} size={260} />
+          </div>
+
+          <div className="space-y-2 text-xs">
+            <div className="flex justify-between">
+              <span className="text-muted">Kompleksitet</span>
+              <span className="text-yellow-400 font-medium">Medium — 1-2 uker</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted">Nye avhengigheter</span>
+              <span className="text-yellow-400 font-medium">three, r3f, drei</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted">Bundle-størrelse</span>
+              <span className="text-yellow-400 font-medium">~150-200 KB (gzip)</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted">Kvalitet</span>
+              <span className="text-green-400 font-medium">Ekte 3D, lys, skygger</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted">Animasjon</span>
+              <span className="text-green-400 font-medium">Full — poser, bevegelse</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted">Mobil</span>
+              <span className="text-yellow-400 font-medium">OK med optimalisering</span>
+            </div>
+          </div>
+        </div>
+
+        {/* PoC 3: Ready Player Me */}
+        <div className="bg-surface rounded-2xl border border-white/5 p-6 flex flex-col">
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="px-2 py-0.5 bg-red-500/20 text-red-400 rounded text-[10px] font-bold uppercase">Avansert</span>
+              <h2 className="font-bold text-lg">Ready Player Me</h2>
+            </div>
+            <p className="text-xs text-muted leading-relaxed">
+              Tredjeparts-tjeneste for fotorealistiske 3D-avatarer. Krever API-nøkkel og ekstern avhengighet.
+            </p>
+          </div>
+
+          <div className="flex-1 flex items-center justify-center bg-background/50 rounded-xl p-2 mb-4">
+            <Avatar3D_RPM size={260} />
+          </div>
+
+          <div className="space-y-2 text-xs">
+            <div className="flex justify-between">
+              <span className="text-muted">Kompleksitet</span>
+              <span className="text-red-400 font-medium">Høy — ekstern integrasjon</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted">Nye avhengigheter</span>
+              <span className="text-red-400 font-medium">RPM SDK + three</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted">Bundle-størrelse</span>
+              <span className="text-red-400 font-medium">~300+ KB + modell-filer</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted">Kvalitet</span>
+              <span className="text-green-400 font-medium">Fotorealistisk</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted">Animasjon</span>
+              <span className="text-green-400 font-medium">Full — Mixamo-kompatibel</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted">Mobil</span>
+              <span className="text-red-400 font-medium">Tung, krever LOD</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Comparison summary */}
+      <div className="mt-8 bg-surface rounded-2xl border border-white/5 p-6">
+        <h3 className="font-bold text-sm uppercase tracking-wider text-muted mb-4">Oppsummering</h3>
+        <div className="grid sm:grid-cols-3 gap-4 text-sm">
+          <div className="p-4 bg-background/50 rounded-xl">
+            <div className="font-bold text-green-400 mb-1">CSS 3D — Raskt</div>
+            <p className="text-xs text-muted leading-relaxed">
+              Perfekt for en kul effekt på profilsiden. Bruk eksisterende SVG med perspektiv-rotasjon og float-animasjon. Klar i dag.
+            </p>
+          </div>
+          <div className="p-4 bg-primary/5 rounded-xl border border-primary/10">
+            <div className="font-bold text-primary mb-1">Three.js — Best valg</div>
+            <p className="text-xs text-muted leading-relaxed">
+              Full kontroll, BJJ-spesifikt. Kan bygge kampstillinger, belt-seremonier, og animasjoner. Vokser med prosjektet.
+            </p>
+          </div>
+          <div className="p-4 bg-background/50 rounded-xl">
+            <div className="font-bold text-blue-400 mb-1">RPM — Overkill?</div>
+            <p className="text-xs text-muted leading-relaxed">
+              Imponerende kvalitet, men mister BJJ-kontroll. Bedre egnet for sosiale plattformer med generiske avatarer.
+            </p>
+          </div>
         </div>
       </div>
     </div>
