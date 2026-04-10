@@ -33,8 +33,51 @@ const MOCK_AVATAR: AvatarConfig = {
   scar: 'eyebrow',
 }
 
+const AVATAR_GALLERY: { name: string; desc: string; belt: string; config: AvatarConfig }[] = [
+  {
+    name: 'Erik', desc: 'Erfaren competitor, liker no-gi', belt: 'purple',
+    config: { ...DEFAULT_AVATAR, skinTone: '#FADCBC', hairStyle: 'buzz', hairColor: '#D4A76A', outfit: 'nogi_dark', beltRank: 'purple', gender: 'male', facialHair: 'stubble', bodyType: 'athletic', earType: 'cauliflower', eyeColor: '#4A7CB5', eyeShape: 'default', mouthStyle: 'serious', fingerTape: true, scar: 'eyebrow' },
+  },
+  {
+    name: 'Sofia', desc: 'Nybegynner med mye energi', belt: 'white',
+    config: { ...DEFAULT_AVATAR, skinTone: '#D4A574', hairStyle: 'ponytail', hairColor: '#6B3A2A', outfit: 'gi_white', beltRank: 'white', gender: 'female', bodyType: 'slim', eyeColor: '#4A7C59', eyeShape: 'almond', mouthStyle: 'grin', freckles: true },
+  },
+  {
+    name: 'Marcus', desc: 'Old school, spiller half guard', belt: 'brown',
+    config: { ...DEFAULT_AVATAR, skinTone: '#8D5524', hairStyle: 'bald', hairColor: '#1a1a1a', outfit: 'gi_blue', beltRank: 'brown', gender: 'male', facialHair: 'full_beard', bodyType: 'heavy', faceShape: 'square', eyeColor: '#2C1810', eyebrowStyle: 'thick', mouthStyle: 'neutral', kneePads: true },
+  },
+  {
+    name: 'Nora', desc: 'Konkurransemaskin, elsker spider guard', belt: 'blue',
+    config: { ...DEFAULT_AVATAR, skinTone: '#FADCBC', hairStyle: 'braids', hairColor: '#1a1a1a', outfit: 'gi_white', beltRank: 'blue', gender: 'female', bodyType: 'athletic', eyeColor: '#7B8B9A', eyeShape: 'round', mouthStyle: 'smile', headband: true, academyColor: '#ef4444' },
+  },
+  {
+    name: 'Kenji', desc: 'Instructor og mentor', belt: 'black',
+    config: { ...DEFAULT_AVATAR, skinTone: '#C68642', hairStyle: 'short', hairColor: '#1a1a1a', outfit: 'gi_black', beltRank: 'black', gender: 'male', facialHair: 'goatee', bodyType: 'athletic', faceShape: 'long', eyeColor: '#2C1810', eyeShape: 'narrow', eyebrowStyle: 'arched', mouthStyle: 'smile' },
+  },
+  {
+    name: 'Lena', desc: 'Hobbyutøver, trener 3x i uka', belt: 'blue',
+    config: { ...DEFAULT_AVATAR, skinTone: '#FADCBC', hairStyle: 'medium', hairColor: '#D4A76A', outfit: 'gi_white', beltRank: 'blue', gender: 'female', bodyType: 'average', eyeColor: '#4A7CB5', eyeShape: 'almond', glasses: 'round', mouthStyle: 'smile', freckles: true },
+  },
+  {
+    name: 'Andre', desc: 'Ung talent, no-gi spesialist', belt: 'white',
+    config: { ...DEFAULT_AVATAR, skinTone: '#5C3310', hairStyle: 'curly', hairColor: '#1a1a1a', outfit: 'nogi', beltRank: 'white', gender: 'male', bodyType: 'slim', faceShape: 'round', eyeColor: '#2C1810', eyeShape: 'round', mouthStyle: 'grin', mouthguard: true },
+  },
+  {
+    name: 'Ingrid', desc: 'Comeback etter skade, sterk vilje', belt: 'purple',
+    config: { ...DEFAULT_AVATAR, skinTone: '#D4A574', hairStyle: 'bun', hairColor: '#B24513', outfit: 'gi_blue', beltRank: 'purple', gender: 'female', bodyType: 'athletic', earType: 'cauliflower', eyeColor: '#4A7C59', eyeShape: 'default', eyebrowStyle: 'arched', mouthStyle: 'serious', fingerTape: true, kneePads: true, scar: 'cheek' },
+  },
+  {
+    name: 'Thomas', desc: 'Trener for moro, elsker open mat', belt: 'white',
+    config: { ...DEFAULT_AVATAR, skinTone: '#FADCBC', hairStyle: 'mohawk', hairColor: '#2C1810', outfit: 'nogi_dark', beltRank: 'white', gender: 'male', facialHair: 'mustache', bodyType: 'heavy', faceShape: 'round', eyeColor: '#8B7355', eyeShape: 'default', glasses: 'sport', mouthStyle: 'grin' },
+  },
+  {
+    name: 'Amina', desc: 'Teknisk, fokuserer på submissions', belt: 'brown',
+    config: { ...DEFAULT_AVATAR, skinTone: '#8D5524', hairStyle: 'long', hairColor: '#1a1a1a', outfit: 'gi_black', beltRank: 'brown', gender: 'female', bodyType: 'slim', faceShape: 'oval', eyeColor: '#2C1810', eyeShape: 'almond', eyebrowStyle: 'thin', mouthStyle: 'neutral', headband: true, academyColor: '#a855f7' },
+  },
+]
+
 export default function DemoPage() {
-  const [view, setView] = useState<'profile' | 'dashboard'>('dashboard')
+  const [view, setView] = useState<'profile' | 'dashboard' | 'avatars'>('avatars')
 
   return (
     <div className="min-h-screen">
@@ -42,22 +85,59 @@ export default function DemoPage() {
       <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-white/5 px-4 py-2">
         <div className="max-w-5xl mx-auto flex items-center gap-2">
           <span className="text-xs text-muted mr-2">DEMO:</span>
-          <button
-            onClick={() => setView('dashboard')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${view === 'dashboard' ? 'bg-primary text-background' : 'text-muted hover:text-foreground'}`}
-          >
-            Dashboard
-          </button>
-          <button
-            onClick={() => setView('profile')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${view === 'profile' ? 'bg-primary text-background' : 'text-muted hover:text-foreground'}`}
-          >
-            Profil
-          </button>
+          {(['avatars', 'dashboard', 'profile'] as const).map((v) => (
+            <button
+              key={v}
+              onClick={() => setView(v)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${view === v ? 'bg-primary text-background' : 'text-muted hover:text-foreground'}`}
+            >
+              {v === 'avatars' ? 'Avatarer' : v === 'dashboard' ? 'Dashboard' : 'Profil'}
+            </button>
+          ))}
         </div>
       </div>
 
-      {view === 'dashboard' ? <DemoDashboard /> : <DemoProfile />}
+      {view === 'avatars' ? <DemoAvatarGallery /> : view === 'dashboard' ? <DemoDashboard /> : <DemoProfile />}
+    </div>
+  )
+}
+
+function DemoAvatarGallery() {
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold mb-2">Avatar-galleri</h1>
+        <p className="text-muted text-sm">10 eksempler som viser mulighetene i avatar-systemet</p>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        {AVATAR_GALLERY.map(({ name, desc, belt, config }) => (
+          <div key={name} className="group relative bg-surface rounded-2xl border border-white/5 hover:border-primary/30 p-4 text-center transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_30px_-8px_rgba(201,168,76,0.2)]">
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative">
+              <div className="flex justify-center mb-3">
+                <div className="bg-background rounded-xl p-2 border border-white/5 group-hover:border-primary/20 transition-colors">
+                  <AvatarSVG config={config} size={120} />
+                </div>
+              </div>
+              <h3 className="font-bold text-sm">{name}</h3>
+              <div className="mt-1.5 w-full">
+                <BeltDisplay rank={belt} degrees={belt === 'black' ? 3 : belt === 'brown' ? 1 : belt === 'purple' ? 2 : belt === 'blue' ? 1 : 0} size="sm" />
+              </div>
+              <p className="text-[11px] text-muted mt-2 leading-relaxed">{desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-10 text-center">
+        <p className="text-xs text-muted mb-4">Tilpass hudfarge, frisyre, ansiktsform, kroppsbygning, gi/no-gi, BJJ-utstyr og mer</p>
+        <div className="flex flex-wrap justify-center gap-2">
+          {['10 frisyrer', '6 hudtoner', '4 ansiktsformer', '4 kroppstyper', '4 øyeformer', '5 antrekk', 'Skjegg/bart', 'Briller', 'Tape/pannebånd', 'Fregner/arr'].map((tag) => (
+            <span key={tag} className="px-3 py-1 bg-surface border border-white/5 rounded-full text-[11px] text-muted">{tag}</span>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
