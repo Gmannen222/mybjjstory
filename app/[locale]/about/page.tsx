@@ -11,6 +11,17 @@ export default async function AboutPage({
     <div className="max-w-3xl mx-auto px-4 py-12">
       <h1 className="text-3xl font-bold mb-8">Om MyBJJStory</h1>
 
+      <div className="mb-8 p-5 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+        <p className="text-sm font-semibold text-amber-400 mb-1">Åpen beta</p>
+        <p className="text-sm text-muted leading-relaxed">
+          MyBJJStory er for øyeblikket i åpen betatesting. Alle er velkomne til å
+          prøve appen gratis. Vi jobber kontinuerlig med forbedringer, og setter
+          stor pris på tilbakemeldinger. Se{' '}
+          <a href={`/${locale}/terms`} className="text-primary hover:underline">vilkårene</a>
+          {' '}for informasjon om fremtidig prismodell og drift.
+        </p>
+      </div>
+
       <div className="prose prose-invert space-y-6 text-muted">
         <p className="text-lg text-foreground">
           MyBJJStory er en personlig treningsapp laget av og for utøvere innen

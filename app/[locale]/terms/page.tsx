@@ -10,7 +10,18 @@ export default async function TermsPage({
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
       <h1 className="text-3xl font-bold mb-2">Vilkår for bruk</h1>
-      <p className="text-sm text-muted mb-8">Sist oppdatert: 9. april 2026</p>
+      <p className="text-sm text-muted mb-8">Sist oppdatert: 10. april 2026</p>
+
+      {/* Beta notice */}
+      <div className="mb-10 p-5 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+        <h2 className="text-base font-bold text-amber-400 mb-2">Beta-versjon</h2>
+        <p className="text-sm text-muted leading-relaxed">
+          MyBJJStory er for tiden i åpen beta. Dette betyr at tjenesten er under aktiv
+          utvikling og kan endres betydelig. Bruk av tjenesten under betatesting er
+          gratis, men dette gir ingen garanti for fremtidig prismodell. Se punkt 3 for
+          viktig informasjon om dette.
+        </p>
+      </div>
 
       <div className="prose prose-invert space-y-6 text-muted">
         <h2 className="text-xl font-bold text-foreground">1. Aksept av vilkår</h2>
@@ -21,19 +32,35 @@ export default async function TermsPage({
 
         <h2 className="text-xl font-bold text-foreground">2. Tjenestebeskrivelse</h2>
         <p>
-          MyBJJStory er en gratis treningsapp for utøvere innen brasiliansk jiu-jitsu.
+          MyBJJStory er en treningsapp for utøvere innen brasiliansk jiu-jitsu.
           Tjenesten lar deg logge treninger, dokumentere graderinger, laste opp media
           og dele med fellesskapet.
         </p>
 
-        <h2 className="text-xl font-bold text-foreground">3. Brukerkonto</h2>
+        <h2 className="text-xl font-bold text-foreground">3. Driftsform og prismodell</h2>
+        <p>
+          MyBJJStory er under betatesting og tilbys gratis i denne perioden.
+          Vi forbeholder oss retten til å:
+        </p>
+        <ul className="list-disc list-inside space-y-2">
+          <li>Innføre betaling for deler av eller hele tjenesten</li>
+          <li>Endre funksjoner, innhold og tilgjengelighet</li>
+          <li>Stenge tjenesten midlertidig eller permanent</li>
+        </ul>
+        <p>
+          Dersom tjenesten endres til betaling eller legges ned, vil vi varsle
+          registrerte brukere via e-post med rimelig frist, og gi mulighet til å
+          laste ned egne data.
+        </p>
+
+        <h2 className="text-xl font-bold text-foreground">4. Brukerkonto</h2>
         <ul className="list-disc list-inside space-y-2">
           <li>Du logger inn via Google-konto</li>
           <li>Du er ansvarlig for aktiviteten på din konto</li>
-          <li>Du kan slette kontoen din når som helst</li>
+          <li>Du kan slette kontoen din og all tilknyttet data når som helst</li>
         </ul>
 
-        <h2 className="text-xl font-bold text-foreground">4. Brukerinnhold</h2>
+        <h2 className="text-xl font-bold text-foreground">5. Brukerinnhold</h2>
         <p>Du beholder eierskapet til alt innhold du laster opp. Ved å dele innhold gir du MyBJJStory en begrenset rett til å vise innholdet i tjenesten.</p>
         <p>Du er ansvarlig for at innhold du deler:</p>
         <ul className="list-disc list-inside space-y-2">
@@ -42,7 +69,7 @@ export default async function TermsPage({
           <li>Ikke inneholder spam eller reklame</li>
         </ul>
 
-        <h2 className="text-xl font-bold text-foreground">5. Akseptabel bruk</h2>
+        <h2 className="text-xl font-bold text-foreground">6. Akseptabel bruk</h2>
         <p>Du forplikter deg til å ikke:</p>
         <ul className="list-disc list-inside space-y-2">
           <li>Misbruke tjenesten eller andre brukere</li>
@@ -50,23 +77,33 @@ export default async function TermsPage({
           <li>Bruke tjenesten til kommersielle formål uten avtale</li>
         </ul>
 
-        <h2 className="text-xl font-bold text-foreground">6. Tilgjengelighet</h2>
+        <h2 className="text-xl font-bold text-foreground">7. Tilgjengelighet og dataintegritet</h2>
         <p>
-          Vi tilstreber høy oppetid, men garanterer ikke uavbrutt tilgang.
-          Tjenesten kan endres eller avsluttes med rimelig varsel.
+          Vi tilstreber høy oppetid og sikker lagring av dine data, men kan ikke
+          garantere dette under betatesting. Tjenesten kan oppleve nedetid, feil
+          eller tap av data. Vi anbefaler ikke å bruke tjenesten som eneste kilde
+          til lagring av viktige data i betaperioden.
         </p>
 
-        <h2 className="text-xl font-bold text-foreground">7. Ansvarsbegrensning</h2>
+        <h2 className="text-xl font-bold text-foreground">8. Ansvarsbegrensning</h2>
         <p>
-          MyBJJStory tilbys &ldquo;som den er&rdquo;. Vi er ikke ansvarlige for tap
-          av data eller skade som følge av bruk av tjenesten.
+          MyBJJStory tilbys &ldquo;som den er&rdquo; uten noen form for garanti.
+          Vi er ikke ansvarlige for tap av data, inntekter eller annen skade som
+          følge av bruk av tjenesten.
         </p>
 
-        <h2 className="text-xl font-bold text-foreground">8. Kontakt</h2>
+        <h2 className="text-xl font-bold text-foreground">9. Endringer i vilkår</h2>
+        <p>
+          Vi kan oppdatere disse vilkårene. Vesentlige endringer varsles via e-post
+          eller tydelig melding i appen. Fortsatt bruk av tjenesten etter endringer
+          innebærer aksept av de nye vilkårene.
+        </p>
+
+        <h2 className="text-xl font-bold text-foreground">10. Kontakt</h2>
         <p>
           Spørsmål om vilkårene? Kontakt oss på{' '}
-          <a href="mailto:kontakt@mybjjstory.no" className="text-primary hover:underline">
-            kontakt@mybjjstory.no
+          <a href="mailto:admin@mybjjstory.no" className="text-primary hover:underline">
+            admin@mybjjstory.no
           </a>
         </p>
       </div>
