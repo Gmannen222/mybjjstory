@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
-import type { TrainingType } from '@/lib/types/database'
+import type { TrainingSession, TrainingType } from '@/lib/types/database'
 
 const TRAINING_TYPES: TrainingType[] = [
   'gi',
@@ -14,13 +14,23 @@ const TRAINING_TYPES: TrainingType[] = [
   'competition',
 ]
 
-export default function SessionForm({ locale }: { locale: string }) {
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
-  const [type, setType] = useState<TrainingType>('gi')
-  const [durationMin, setDurationMin] = useState('')
-  const [notes, setNotes] = useState('')
-  const [techniques, setTechniques] = useState('')
+export default function SessionForm({
+  locale,
+  session: existingSession,
+  existingTechniques,
+}: {
+  locale: string
+  session?: TrainingSession
+  existingTechniques?: string[]
+}) {
+  const isEdit = !!existingSession
+  const [date, setDate] = useState(existingSession?.date ?? new Date().toISOString().split('T')[0])
+  const [type, setType] = useState<TrainingType>(existingSession?.type ?? 'gi')
+  const [durationMin, setDurationMin] = useState(existingSession?.duration_min?.toString() ?? '')
+  const [notes, setNotes] = useState(existingSession?.notes ?? '')
+  const [techniques, setTechniques] = useState(existingTechniques?.join(', ') ?? '')
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const router = useRouter()
@@ -33,41 +43,78 @@ export default function SessionForm({ locale }: { locale: string }) {
     setSaving(true)
     setError(null)
 
-    const { data: session } = await supabase.auth.getSession()
-    if (!session.session) return
+    const { data: authSession } = await supabase.auth.getSession()
+    if (!authSession.session) return
 
-    const { data: newSession, error: sessionError } = await supabase
-      .from('training_sessions')
-      .insert({
-        user_id: session.session.user.id,
-        date,
-        type,
-        duration_min: durationMin ? parseInt(durationMin) : null,
-        notes: notes || null,
-      })
-      .select('id')
-      .single()
-
-    if (sessionError || !newSession) {
-      setError(tCommon('error'))
-      setSaving(false)
-      return
+    const payload = {
+      date,
+      type,
+      duration_min: durationMin ? parseInt(durationMin) : null,
+      notes: notes || null,
     }
 
-    if (techniques.trim()) {
-      const techniqueList = techniques
-        .split(',')
-        .map((t) => t.trim())
-        .filter(Boolean)
+    if (isEdit) {
+      const { error: updateError } = await supabase
+        .from('training_sessions')
+        .update(payload)
+        .eq('id', existingSession.id)
 
-      if (techniqueList.length > 0) {
-        await supabase.from('session_techniques').insert(
-          techniqueList.map((name) => ({
-            session_id: newSession.id,
-            name,
-          }))
-        )
+      if (updateError) {
+        setError(tCommon('error'))
+        setSaving(false)
+        return
       }
+
+      // Update techniques: delete old, insert new
+      await supabase.from('session_techniques').delete().eq('session_id', existingSession.id)
+
+      if (techniques.trim()) {
+        const techniqueList = techniques.split(',').map((t) => t.trim()).filter(Boolean)
+        if (techniqueList.length > 0) {
+          await supabase.from('session_techniques').insert(
+            techniqueList.map((name) => ({ session_id: existingSession.id, name }))
+          )
+        }
+      }
+    } else {
+      const { data: newSession, error: sessionError } = await supabase
+        .from('training_sessions')
+        .insert({ ...payload, user_id: authSession.session.user.id })
+        .select('id')
+        .single()
+
+      if (sessionError || !newSession) {
+        setError(tCommon('error'))
+        setSaving(false)
+        return
+      }
+
+      if (techniques.trim()) {
+        const techniqueList = techniques.split(',').map((t) => t.trim()).filter(Boolean)
+        if (techniqueList.length > 0) {
+          await supabase.from('session_techniques').insert(
+            techniqueList.map((name) => ({ session_id: newSession.id, name }))
+          )
+        }
+      }
+    }
+
+    router.push(`/${locale}/training`)
+    router.refresh()
+  }
+
+  const handleDelete = async () => {
+    if (!existingSession || !confirm('Er du sikker på at du vil slette denne treningsøkten?')) return
+    setDeleting(true)
+
+    await supabase.from('session_techniques').delete().eq('session_id', existingSession.id)
+    await supabase.from('media').delete().eq('session_id', existingSession.id)
+    const { error: dbError } = await supabase.from('training_sessions').delete().eq('id', existingSession.id)
+
+    if (dbError) {
+      setError('Kunne ikke slette')
+      setDeleting(false)
+      return
     }
 
     router.push(`/${locale}/training`)
@@ -159,8 +206,19 @@ export default function SessionForm({ locale }: { locale: string }) {
         disabled={saving}
         className="w-full py-3 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
       >
-        {saving ? tCommon('loading') : t('save')}
+        {saving ? tCommon('loading') : isEdit ? 'Oppdater trening' : t('save')}
       </button>
+
+      {isEdit && (
+        <button
+          type="button"
+          onClick={handleDelete}
+          disabled={deleting}
+          className="w-full py-3 bg-red-500/10 text-red-400 font-semibold rounded-lg hover:bg-red-500/20 transition-colors disabled:opacity-50"
+        >
+          {deleting ? 'Sletter...' : 'Slett treningsøkt'}
+        </button>
+      )}
     </form>
   )
 }

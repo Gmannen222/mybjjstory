@@ -19,9 +19,7 @@ export default async function GradingsPage({
     data: { session },
   } = await supabase.auth.getSession()
 
-  if (!session) {
-    redirect(`/${locale}`)
-  }
+  if (!session) redirect(`/${locale}`)
 
   const { data: gradings } = await supabase
     .from('gradings')
@@ -48,9 +46,10 @@ export default async function GradingsPage({
       ) : (
         <div className="space-y-4">
           {(gradings as Grading[]).map((g) => (
-            <div
+            <Link
               key={g.id}
-              className="bg-surface rounded-xl p-5"
+              href={`/${locale}/gradings/${g.id}`}
+              className="block bg-surface rounded-xl p-5 hover:bg-surface-hover transition-colors"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -66,9 +65,9 @@ export default async function GradingsPage({
                 </div>
               )}
               {g.notes && (
-                <p className="text-sm text-muted mt-2">{g.notes}</p>
+                <p className="text-sm text-muted mt-2 line-clamp-2">{g.notes}</p>
               )}
-            </div>
+            </Link>
           ))}
         </div>
       )}

@@ -4,19 +4,27 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
-import type { BeltRank } from '@/lib/types/database'
+import type { BeltRank, Grading } from '@/lib/types/database'
 import { BELT_COLORS } from '@/components/ui/BeltBadge'
 
 const BELT_RANKS: BeltRank[] = ['white', 'blue', 'purple', 'brown', 'black']
 
-export default function GradingForm({ locale }: { locale: string }) {
-  const [beltRank, setBeltRank] = useState<BeltRank>('white')
-  const [degrees, setDegrees] = useState('0')
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
-  const [instructorName, setInstructorName] = useState('')
-  const [academyName, setAcademyName] = useState('')
-  const [notes, setNotes] = useState('')
+export default function GradingForm({
+  locale,
+  grading,
+}: {
+  locale: string
+  grading?: Grading
+}) {
+  const isEdit = !!grading
+  const [beltRank, setBeltRank] = useState<BeltRank>(grading?.belt_rank ?? 'white')
+  const [degrees, setDegrees] = useState(String(grading?.belt_degrees ?? 0))
+  const [date, setDate] = useState(grading?.date ?? new Date().toISOString().split('T')[0])
+  const [instructorName, setInstructorName] = useState(grading?.instructor_name ?? '')
+  const [academyName, setAcademyName] = useState(grading?.academy_name ?? '')
+  const [notes, setNotes] = useState(grading?.notes ?? '')
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const router = useRouter()
@@ -33,17 +41,20 @@ export default function GradingForm({ locale }: { locale: string }) {
     const { data: session } = await supabase.auth.getSession()
     if (!session.session) return
 
-    const { error: insertError } = await supabase.from('gradings').insert({
-      user_id: session.session.user.id,
+    const payload = {
       belt_rank: beltRank,
       belt_degrees: parseInt(degrees),
       date,
       instructor_name: instructorName || null,
       academy_name: academyName || null,
       notes: notes || null,
-    })
+    }
 
-    if (insertError) {
+    const { error: dbError } = isEdit
+      ? await supabase.from('gradings').update(payload).eq('id', grading.id)
+      : await supabase.from('gradings').insert({ ...payload, user_id: session.session.user.id })
+
+    if (dbError) {
       setError(tCommon('error'))
       setSaving(false)
       return
@@ -57,6 +68,22 @@ export default function GradingForm({ locale }: { locale: string }) {
         belt_degrees: parseInt(degrees),
       })
       .eq('id', session.session.user.id)
+
+    router.push(`/${locale}/gradings`)
+    router.refresh()
+  }
+
+  const handleDelete = async () => {
+    if (!grading || !confirm('Er du sikker på at du vil slette denne graderingen?')) return
+    setDeleting(true)
+
+    const { error: dbError } = await supabase.from('gradings').delete().eq('id', grading.id)
+
+    if (dbError) {
+      setError('Kunne ikke slette')
+      setDeleting(false)
+      return
+    }
 
     router.push(`/${locale}/gradings`)
     router.refresh()
@@ -163,8 +190,19 @@ export default function GradingForm({ locale }: { locale: string }) {
         disabled={saving}
         className="w-full py-3 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
       >
-        {saving ? tCommon('loading') : tCommon('save')}
+        {saving ? tCommon('loading') : isEdit ? 'Oppdater gradering' : tCommon('save')}
       </button>
+
+      {isEdit && (
+        <button
+          type="button"
+          onClick={handleDelete}
+          disabled={deleting}
+          className="w-full py-3 bg-red-500/10 text-red-400 font-semibold rounded-lg hover:bg-red-500/20 transition-colors disabled:opacity-50"
+        >
+          {deleting ? 'Sletter...' : 'Slett gradering'}
+        </button>
+      )}
     </form>
   )
 }

@@ -4,6 +4,7 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { TrainingSession, SessionTechnique } from '@/lib/types/database'
 import MediaGallery from '@/components/media/MediaGallery'
+import MediaUploadForm from '@/components/media/MediaUploadForm'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,9 +21,7 @@ export default async function TrainingDetailPage({
     data: { session },
   } = await supabase.auth.getSession()
 
-  if (!session) {
-    redirect(`/${locale}`)
-  }
+  if (!session) redirect(`/${locale}`)
 
   const { data: trainingSession } = await supabase
     .from('training_sessions')
@@ -30,32 +29,34 @@ export default async function TrainingDetailPage({
     .eq('id', id)
     .single()
 
-  if (!trainingSession) {
-    notFound()
-  }
+  if (!trainingSession) notFound()
 
   const s = trainingSession as TrainingSession
+  const isOwner = s.user_id === session.user.id
 
   const [{ data: techniques }, { data: media }] = await Promise.all([
-    supabase
-      .from('session_techniques')
-      .select('*')
-      .eq('session_id', id),
-    supabase
-      .from('media')
-      .select('*')
-      .eq('session_id', id)
-      .order('created_at', { ascending: false }),
+    supabase.from('session_techniques').select('*').eq('session_id', id),
+    supabase.from('media').select('*').eq('session_id', id).order('created_at', { ascending: false }),
   ])
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <Link
-        href={`/${locale}/training`}
-        className="text-sm text-muted hover:text-foreground transition-colors"
-      >
-        ← {tCommon('back')}
-      </Link>
+      <div className="flex items-center justify-between">
+        <Link
+          href={`/${locale}/training`}
+          className="text-sm text-muted hover:text-foreground transition-colors"
+        >
+          ← {tCommon('back')}
+        </Link>
+        {isOwner && (
+          <Link
+            href={`/${locale}/training/${id}/edit`}
+            className="px-4 py-2 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors text-sm"
+          >
+            {tCommon('edit')}
+          </Link>
+        )}
+      </div>
 
       <div className="mt-6 bg-surface rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
@@ -108,27 +109,12 @@ export default async function TrainingDetailPage({
         </div>
       )}
 
-      <div className="mt-6">
-        <MediaUploadSection sessionId={id} locale={locale} />
-      </div>
+      {isOwner && (
+        <div className="mt-6 bg-surface rounded-xl p-4">
+          <h2 className="text-sm font-medium text-muted mb-3">Legg til media</h2>
+          <MediaUploadForm sessionId={id} bucket="training-media" locale={locale} />
+        </div>
+      )}
     </div>
   )
 }
-
-async function MediaUploadSection({
-  sessionId,
-  locale,
-}: {
-  sessionId: string
-  locale: string
-}) {
-  return (
-    <div className="bg-surface rounded-xl p-4">
-      <h2 className="text-sm font-medium text-muted mb-3">Legg til media</h2>
-      <MediaUploadForm sessionId={sessionId} bucket="training-media" locale={locale} />
-    </div>
-  )
-}
-
-// Client component import for the form
-import MediaUploadForm from '@/components/media/MediaUploadForm'

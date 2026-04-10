@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { getTranslations } from 'next-intl/server'
+import Link from 'next/link'
 import ReactionButton from '@/components/feed/ReactionButton'
 import CommentSection from '@/components/feed/CommentSection'
 import CreatePostForm from '@/components/feed/CreatePostForm'
@@ -74,24 +75,32 @@ export default async function FeedPage({
             return (
               <article key={post.id} className="bg-surface rounded-xl p-5">
                 <div className="flex items-center gap-3 mb-3">
-                  {profile?.avatar_url ? (
-                    <img
-                      src={profile.avatar_url}
-                      alt=""
-                      className="w-10 h-10 rounded-full"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary">
-                      {(profile?.display_name || '?')[0].toUpperCase()}
-                    </div>
-                  )}
+                  <Link href={profile?.username ? `/${locale}/profile/${profile.username}` : '#'} className="shrink-0">
+                    {profile?.avatar_url ? (
+                      <img
+                        src={profile.avatar_url}
+                        alt=""
+                        className="w-10 h-10 rounded-full hover:ring-2 hover:ring-primary transition-all"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary hover:ring-2 hover:ring-primary transition-all">
+                        {(profile?.display_name || '?')[0].toUpperCase()}
+                      </div>
+                    )}
+                  </Link>
                   <div>
                     <div className="font-semibold text-sm">
-                      {profile?.display_name || 'Anonym'}
+                      {profile?.username ? (
+                        <Link href={`/${locale}/profile/${profile.username}`} className="hover:text-primary transition-colors">
+                          {profile?.display_name || 'Anonym'}
+                        </Link>
+                      ) : (
+                        profile?.display_name || 'Anonym'
+                      )}
                       {profile?.username && (
-                        <span className="text-muted font-normal ml-1">
+                        <Link href={`/${locale}/profile/${profile.username}`} className="text-muted font-normal ml-1 hover:text-primary transition-colors">
                           @{profile.username}
-                        </span>
+                        </Link>
                       )}
                     </div>
                     <div className="text-xs text-muted">
