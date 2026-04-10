@@ -121,7 +121,11 @@
     "instructor": "Instruktør",
     "academy": "Akademi",
     "notes": "Notater",
-    "noGradings": "Ingen graderinger registrert ennå"
+    "noGradings": "Ingen graderinger registrert ennå",
+    "gradingTypes": {
+      "belt": "Beltegradering",
+      "stripe": "Stripe"
+    }
   },
   "feed": {
     "title": "Feed",
@@ -157,6 +161,18 @@
   },
   "belts": {
     "white": "Hvitt",
+    "grey_white": "Grå/Hvit",
+    "grey": "Grå",
+    "grey_black": "Grå/Svart",
+    "yellow_white": "Gul/Hvit",
+    "yellow": "Gul",
+    "yellow_black": "Gul/Svart",
+    "orange_white": "Oransje/Hvit",
+    "orange": "Oransje",
+    "orange_black": "Oransje/Svart",
+    "green_white": "Grønn/Hvit",
+    "green": "Grønn",
+    "green_black": "Grønn/Svart",
     "blue": "Blått",
     "purple": "Lilla",
     "brown": "Brunt",

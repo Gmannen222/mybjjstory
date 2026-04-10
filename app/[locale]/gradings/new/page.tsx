@@ -21,10 +21,16 @@ export default async function NewGradingPage({
     redirect(`/${locale}`)
   }
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('show_kids_belts')
+    .eq('id', session.user.id)
+    .single()
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-8">{t('newGrading')}</h1>
-      <GradingForm locale={locale} />
+      <GradingForm locale={locale} showKidsBeltsDefault={profile?.show_kids_belts ?? false} />
     </div>
   )
 }

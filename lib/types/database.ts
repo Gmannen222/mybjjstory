@@ -1,4 +1,10 @@
-export type BeltRank = 'white' | 'blue' | 'purple' | 'brown' | 'black'
+export type BeltRank =
+  | 'white'
+  | 'grey_white' | 'grey' | 'grey_black'
+  | 'yellow_white' | 'yellow' | 'yellow_black'
+  | 'orange_white' | 'orange' | 'orange_black'
+  | 'green_white' | 'green' | 'green_black'
+  | 'blue' | 'purple' | 'brown' | 'black'
 
 export type TrainingType = 'gi' | 'nogi' | 'open_mat' | 'private' | 'competition'
 
@@ -27,6 +33,8 @@ export type Severity = 'mild' | 'moderate' | 'severe'
 
 export type TrainingImpact = 'none' | 'modified' | 'rest'
 
+export type GradingType = 'belt' | 'stripe'
+
 export interface Profile {
   id: string
   username: string | null
@@ -50,6 +58,7 @@ export interface Profile {
   show_competitions: boolean
   show_stats: boolean
   show_feed: boolean
+  show_kids_belts: boolean
   training_preference: 'gi' | 'nogi' | 'both' | null
   passion_level: number | null
   currently_training: boolean
@@ -78,11 +87,20 @@ export interface SessionTechnique {
   notes: string | null
 }
 
+export interface UserTechnique {
+  id: string
+  user_id: string
+  name: string
+  category: TechniqueCategory | null
+  created_at: string
+}
+
 export interface Grading {
   id: string
   user_id: string
   belt_rank: BeltRank
   belt_degrees: number
+  grading_type: GradingType
   date: string
   instructor_name: string | null
   academy_name: string | null

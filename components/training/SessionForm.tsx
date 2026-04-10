@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
-import type { TrainingSession, TrainingType } from '@/lib/types/database'
+import TechniquePicker from '@/components/training/TechniquePicker'
+import type { TrainingSession, TrainingType, TechniqueCategory } from '@/lib/types/database'
 
 const TRAINING_TYPES: TrainingType[] = [
   'gi',
@@ -14,6 +15,11 @@ const TRAINING_TYPES: TrainingType[] = [
   'competition',
 ]
 
+interface SelectedTechnique {
+  name: string
+  category: TechniqueCategory | null
+}
+
 export default function SessionForm({
   locale,
   session: existingSession,
@@ -21,14 +27,14 @@ export default function SessionForm({
 }: {
   locale: string
   session?: TrainingSession
-  existingTechniques?: string[]
+  existingTechniques?: SelectedTechnique[]
 }) {
   const isEdit = !!existingSession
   const [date, setDate] = useState(existingSession?.date ?? new Date().toISOString().split('T')[0])
   const [type, setType] = useState<TrainingType>(existingSession?.type ?? 'gi')
   const [durationMin, setDurationMin] = useState(existingSession?.duration_min?.toString() ?? '')
   const [notes, setNotes] = useState(existingSession?.notes ?? '')
-  const [techniques, setTechniques] = useState(existingTechniques?.join(', ') ?? '')
+  const [techniques, setTechniques] = useState<SelectedTechnique[]>(existingTechniques ?? [])
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -68,13 +74,10 @@ export default function SessionForm({
       // Update techniques: delete old, insert new
       await supabase.from('session_techniques').delete().eq('session_id', existingSession.id)
 
-      if (techniques.trim()) {
-        const techniqueList = techniques.split(',').map((t) => t.trim()).filter(Boolean)
-        if (techniqueList.length > 0) {
-          await supabase.from('session_techniques').insert(
-            techniqueList.map((name) => ({ session_id: existingSession.id, name }))
-          )
-        }
+      if (techniques.length > 0) {
+        await supabase.from('session_techniques').insert(
+          techniques.map((t) => ({ session_id: existingSession.id, name: t.name, category: t.category }))
+        )
       }
     } else {
       const { data: newSession, error: sessionError } = await supabase
@@ -89,13 +92,10 @@ export default function SessionForm({
         return
       }
 
-      if (techniques.trim()) {
-        const techniqueList = techniques.split(',').map((t) => t.trim()).filter(Boolean)
-        if (techniqueList.length > 0) {
-          await supabase.from('session_techniques').insert(
-            techniqueList.map((name) => ({ session_id: newSession.id, name }))
-          )
-        }
+      if (techniques.length > 0) {
+        await supabase.from('session_techniques').insert(
+          techniques.map((t) => ({ session_id: newSession.id, name: t.name, category: t.category }))
+        )
       }
     }
 
@@ -177,14 +177,7 @@ export default function SessionForm({
         <label className="block text-sm font-medium text-muted mb-2">
           {t('techniques')}
         </label>
-        <input
-          type="text"
-          value={techniques}
-          onChange={(e) => setTechniques(e.target.value)}
-          placeholder="armbar, triangle, sweep..."
-          className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary"
-        />
-        <p className="text-xs text-muted mt-1">Separer med komma</p>
+        <TechniquePicker selected={techniques} onChange={setTechniques} />
       </div>
 
       <div>

@@ -17,12 +17,19 @@ export default async function EditGradingPage({
 
   if (!session) redirect(`/${locale}`)
 
-  const { data } = await supabase
-    .from('gradings')
-    .select('*')
-    .eq('id', id)
-    .eq('user_id', session.user.id)
-    .single()
+  const [{ data }, { data: profile }] = await Promise.all([
+    supabase
+      .from('gradings')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', session.user.id)
+      .single(),
+    supabase
+      .from('profiles')
+      .select('show_kids_belts')
+      .eq('id', session.user.id)
+      .single(),
+  ])
 
   if (!data) notFound()
 
@@ -37,7 +44,7 @@ export default async function EditGradingPage({
           ← Tilbake
         </Link>
       </div>
-      <GradingForm locale={locale} grading={data as Grading} />
+      <GradingForm locale={locale} grading={data as Grading} showKidsBeltsDefault={profile?.show_kids_belts ?? false} />
     </div>
   )
 }

@@ -4,16 +4,9 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { BeltRank } from '@/lib/types/database'
-import { BELT_COLORS } from '@/components/ui/BeltBadge'
+import { BELT_COLORS, BELT_LABELS as ALL_BELT_LABELS, ADULT_BELTS } from '@/components/ui/BeltBadge'
 
-const BELT_RANKS: BeltRank[] = ['white', 'blue', 'purple', 'brown', 'black']
-const BELT_LABELS: Record<BeltRank, string> = {
-  white: 'Hvitt belte',
-  blue: 'Blått belte',
-  purple: 'Lilla belte',
-  brown: 'Brunt belte',
-  black: 'Svart belte',
-}
+const BELT_RANKS = ADULT_BELTS
 
 const HEARD_FROM_OPTIONS = [
   'Venner / treningspartner',
@@ -130,7 +123,7 @@ export default function OnboardingFlow({ locale }: { locale: string }) {
                     className="w-10 h-5 rounded-full"
                     style={{ backgroundColor: colors.bg }}
                   />
-                  <span className="font-medium">{BELT_LABELS[rank]}</span>
+                  <span className="font-medium">{ALL_BELT_LABELS[rank]}</span>
                   {isSelected && (
                     <span className="ml-auto text-primary font-bold">✓</span>
                   )}

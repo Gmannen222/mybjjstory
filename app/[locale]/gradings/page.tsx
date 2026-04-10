@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Grading } from '@/lib/types/database'
-import { BeltBadge } from '@/components/ui/BeltBadge'
+import { BeltDisplay, BELT_LABELS } from '@/components/ui/BeltBadge'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,7 +25,9 @@ export default async function GradingsPage({
     .from('gradings')
     .select('*')
     .eq('user_id', session.user.id)
-    .order('date', { ascending: false })
+    .order('date', { ascending: true })
+
+  const gradingList = (gradings as Grading[]) || []
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
@@ -39,36 +41,70 @@ export default async function GradingsPage({
         </Link>
       </div>
 
-      {!gradings || gradings.length === 0 ? (
+      {gradingList.length === 0 ? (
         <div className="text-center py-20 text-muted">
           <p className="text-lg">{t('noGradings')}</p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {(gradings as Grading[]).map((g) => (
-            <Link
-              key={g.id}
-              href={`/${locale}/gradings/${g.id}`}
-              className="block bg-surface rounded-xl p-5 hover:bg-surface-hover transition-colors"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <BeltBadge rank={g.belt_rank} degrees={g.belt_degrees} />
-                  <span className="text-sm text-muted">{g.date}</span>
-                </div>
-              </div>
-              {(g.instructor_name || g.academy_name) && (
-                <div className="text-sm text-muted mt-2">
-                  {g.instructor_name && <span>{g.instructor_name}</span>}
-                  {g.instructor_name && g.academy_name && <span> · </span>}
-                  {g.academy_name && <span>{g.academy_name}</span>}
-                </div>
-              )}
-              {g.notes && (
-                <p className="text-sm text-muted mt-2 line-clamp-2">{g.notes}</p>
-              )}
-            </Link>
-          ))}
+        <div className="relative">
+          {/* Timeline line */}
+          <div className="absolute left-6 top-0 bottom-0 w-px bg-white/10" />
+
+          <div className="space-y-0">
+            {gradingList.map((g, i) => {
+              const label = BELT_LABELS[g.belt_rank] ?? g.belt_rank
+              const isStripe = g.grading_type === 'stripe'
+              const isLast = i === gradingList.length - 1
+
+              return (
+                <Link
+                  key={g.id}
+                  href={`/${locale}/gradings/${g.id}`}
+                  className="relative flex gap-4 group"
+                >
+                  {/* Timeline dot */}
+                  <div className="relative z-10 flex-shrink-0 w-12 flex items-start justify-center pt-6">
+                    <div
+                      className={`rounded-full border-2 border-background transition-transform group-hover:scale-125 ${
+                        isStripe ? 'w-3 h-3 bg-primary/60' : 'w-4 h-4 bg-primary'
+                      }`}
+                    />
+                  </div>
+
+                  {/* Card */}
+                  <div className={`flex-1 bg-surface rounded-xl p-5 hover:bg-surface-hover transition-colors ${isLast ? '' : 'mb-4'}`}>
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <span className="text-sm font-semibold">
+                          {isStripe ? `Stripe ${g.belt_degrees}` : label}
+                        </span>
+                        {isStripe && (
+                          <span className="text-xs text-muted ml-2">({label})</span>
+                        )}
+                      </div>
+                      <span className="text-xs text-muted">{g.date}</span>
+                    </div>
+
+                    {/* Belt visual */}
+                    <div className="w-40 mb-3">
+                      <BeltDisplay rank={g.belt_rank} degrees={g.belt_degrees} size="md" />
+                    </div>
+
+                    {(g.instructor_name || g.academy_name) && (
+                      <div className="text-sm text-muted">
+                        {g.instructor_name && <span>{g.instructor_name}</span>}
+                        {g.instructor_name && g.academy_name && <span> · </span>}
+                        {g.academy_name && <span>{g.academy_name}</span>}
+                      </div>
+                    )}
+                    {g.notes && (
+                      <p className="text-sm text-muted mt-1 line-clamp-2">{g.notes}</p>
+                    )}
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
         </div>
       )}
     </div>

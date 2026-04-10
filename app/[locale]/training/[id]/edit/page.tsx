@@ -26,7 +26,7 @@ export default async function EditTrainingPage({
       .single(),
     supabase
       .from('session_techniques')
-      .select('name')
+      .select('name, category')
       .eq('session_id', id),
   ])
 
@@ -46,7 +46,7 @@ export default async function EditTrainingPage({
       <SessionForm
         locale={locale}
         session={trainingSession as TrainingSession}
-        existingTechniques={(techniques as SessionTechnique[] | null)?.map((t) => t.name) ?? []}
+        existingTechniques={(techniques as SessionTechnique[] | null)?.map((t) => ({ name: t.name, category: t.category })) ?? []}
       />
     </div>
   )

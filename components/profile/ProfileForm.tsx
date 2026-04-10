@@ -5,9 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
 import type { Profile, BeltRank } from '@/lib/types/database'
-import { BELT_COLORS } from '@/components/ui/BeltBadge'
-
-const BELT_RANKS: BeltRank[] = ['white', 'blue', 'purple', 'brown', 'black']
+import { BELT_COLORS, BELT_LABELS, ADULT_BELTS, KIDS_BELTS, BeltDisplay } from '@/components/ui/BeltBadge'
 
 const GUARDS = [
   'Closed Guard', 'Half Guard', 'De La Riva', 'Butterfly', 'X-Guard',
@@ -38,6 +36,7 @@ export default function ProfileForm({
   const [favoriteSubmission, setFavoriteSubmission] = useState(profile?.favorite_submission || '')
   const [trainingSinceYear, setTrainingSinceYear] = useState(String(profile?.training_since_year || ''))
   const [isPublic, setIsPublic] = useState(profile?.is_public || false)
+  const [showKidsBelts, setShowKidsBelts] = useState(profile?.show_kids_belts || false)
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -104,6 +103,7 @@ export default function ProfileForm({
         show_competitions: showCompetitions,
         show_stats: showStats,
         show_feed: showFeed,
+        show_kids_belts: showKidsBelts,
       })
       .eq('id', userId)
 
@@ -164,20 +164,31 @@ export default function ProfileForm({
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-muted mb-2">Belte</label>
+            <label className="flex items-center gap-3 cursor-pointer mb-3">
+              <input type="checkbox" checked={showKidsBelts} onChange={(e) => setShowKidsBelts(e.target.checked)}
+                className="w-4 h-4 rounded accent-primary" />
+              <span className="text-xs text-muted">Vis barnebelter (grå, gul, oransje, grønn)</span>
+            </label>
             <div className="flex flex-wrap gap-2">
-              {BELT_RANKS.map((rank) => {
+              {(showKidsBelts ? [...KIDS_BELTS, ...ADULT_BELTS.filter((b) => b !== 'white')] : ADULT_BELTS).map((rank) => {
                 const colors = BELT_COLORS[rank]
+                const label = BELT_LABELS[rank] ?? rank
                 return (
                   <button key={rank} type="button" onClick={() => setBeltRank(rank)}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                       beltRank === rank ? 'ring-2 ring-primary scale-105' : 'opacity-60 hover:opacity-100'
                     }`}
                     style={{ backgroundColor: colors.bg, color: colors.text }}>
-                    {tBelts(rank)}
+                    {label}
                   </button>
                 )
               })}
             </div>
+            {beltRank && (
+              <div className="mt-3 w-40">
+                <BeltDisplay rank={beltRank} degrees={parseInt(beltDegrees) || 0} size="md" />
+              </div>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-muted mb-2">Grader (striper)</label>
