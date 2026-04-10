@@ -52,12 +52,6 @@ async function LandingPage({ locale }: { locale: string }) {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary/5 rounded-full blur-3xl" />
 
         <div className="max-w-5xl mx-auto px-4 pt-20 pb-16 sm:pt-32 sm:pb-20 text-center relative">
-          {/* Beta badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 text-amber-400 text-sm font-medium rounded-full mb-4 border border-amber-500/20">
-            <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
-            Åpen beta — prøv gratis nå
-          </div>
-
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary text-sm font-medium rounded-full mb-8 border border-primary/20">
             <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
             {t('hero.badge')}
@@ -111,8 +105,8 @@ async function LandingPage({ locale }: { locale: string }) {
       <section className="border-y border-white/5 bg-surface/50">
         <div className="max-w-5xl mx-auto px-4 py-12 grid grid-cols-3 gap-8 text-center">
           <div>
-            <div className="text-3xl sm:text-4xl font-bold text-amber-400">BETA</div>
-            <div className="text-sm text-muted mt-1">Gratis under betatesting</div>
+            <div className="text-3xl sm:text-4xl font-bold text-primary">100%</div>
+            <div className="text-sm text-muted mt-1">{t('stats.free')}</div>
           </div>
           <div>
             <div className="text-3xl sm:text-4xl font-bold text-primary">PWA</div>
@@ -236,7 +230,7 @@ async function LandingPage({ locale }: { locale: string }) {
           >
             {t('cta.button')}
           </Link>
-          <p className="text-xs text-muted mt-4">Gratis å bruke under betatesting. Ingen kredittkort.</p>
+          <p className="text-xs text-muted mt-4">Prøv gratis. Ingen kredittkort.</p>
         </div>
       </section>
 

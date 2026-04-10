@@ -12,17 +12,6 @@ export default async function TermsPage({
       <h1 className="text-3xl font-bold mb-2">Vilkår for bruk</h1>
       <p className="text-sm text-muted mb-8">Sist oppdatert: 10. april 2026</p>
 
-      {/* Beta notice */}
-      <div className="mb-10 p-5 bg-amber-500/10 border border-amber-500/20 rounded-xl">
-        <h2 className="text-base font-bold text-amber-400 mb-2">Beta-versjon</h2>
-        <p className="text-sm text-muted leading-relaxed">
-          MyBJJStory er for tiden i åpen beta. Dette betyr at tjenesten er under aktiv
-          utvikling og kan endres betydelig. Bruk av tjenesten under betatesting er
-          gratis, men dette gir ingen garanti for fremtidig prismodell. Se punkt 3 for
-          viktig informasjon om dette.
-        </p>
-      </div>
-
       <div className="prose prose-invert space-y-6 text-muted">
         <h2 className="text-xl font-bold text-foreground">1. Aksept av vilkår</h2>
         <p>
