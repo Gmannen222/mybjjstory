@@ -8,6 +8,7 @@ import AvatarSVG, {
   HAIR_COLORS,
   EYE_COLORS,
   HAIR_STYLES,
+  EYE_SHAPES,
   FACIAL_HAIR_STYLES,
   GLASSES_OPTIONS,
   NOSE_SHAPES,
@@ -16,6 +17,7 @@ import AvatarSVG, {
   EAR_TYPES,
   EYEBROW_STYLES,
   MOUTH_STYLES,
+  SCAR_OPTIONS,
   OUTFIT_OPTIONS,
   type AvatarConfig,
 } from './AvatarSVG'
@@ -191,6 +193,14 @@ export default function AvatarEditor({
                 </div>
               </Section>
 
+              <Section title="Øyeform">
+                <div className="grid grid-cols-2 gap-2">
+                  {EYE_SHAPES.map((es) => (
+                    <OptionButton key={es.value} label={es.name} active={(config.eyeShape ?? 'default') === es.value} onClick={() => update({ eyeShape: es.value })} />
+                  ))}
+                </div>
+              </Section>
+
               <Section title="Øyenbryn">
                 <div className="grid grid-cols-2 gap-2">
                   {EYEBROW_STYLES.map((eb) => (
@@ -219,6 +229,24 @@ export default function AvatarEditor({
                 <div className="grid grid-cols-2 gap-2">
                   {GLASSES_OPTIONS.map((gl) => (
                     <OptionButton key={gl.value} label={gl.name} active={(config.glasses ?? 'none') === gl.value} onClick={() => update({ glasses: gl.value })} />
+                  ))}
+                </div>
+              </Section>
+
+              <Section title="Huddetaljer">
+                <div className="space-y-3">
+                  <label className="flex items-center gap-3 cursor-pointer p-3 bg-surface rounded-lg border border-white/5 hover:bg-surface-hover transition-colors">
+                    <input type="checkbox" checked={config.freckles ?? false} onChange={(e) => update({ freckles: e.target.checked })}
+                      className="w-5 h-5 rounded accent-primary" />
+                    <span className="text-sm">Fregner</span>
+                  </label>
+                </div>
+              </Section>
+
+              <Section title="Arr">
+                <div className="grid grid-cols-2 gap-2">
+                  {SCAR_OPTIONS.map((sc) => (
+                    <OptionButton key={sc.value} label={sc.name} active={(config.scar ?? 'none') === sc.value} onClick={() => update({ scar: sc.value })} />
                   ))}
                 </div>
               </Section>
@@ -283,6 +311,26 @@ export default function AvatarEditor({
                   onSelect={(v) => update({ academyColor: v || null })}
                   showNone
                 />
+              </Section>
+
+              <Section title="BJJ-utstyr">
+                <div className="space-y-2">
+                  {([
+                    { key: 'fingerTape' as const, label: 'Finger-tape', desc: 'Tape på fingrene' },
+                    { key: 'headband' as const, label: 'Pannebånd', desc: 'Sport-pannebånd' },
+                    { key: 'mouthguard' as const, label: 'Tannbeskytter', desc: 'Synlig tannbeskytter' },
+                    { key: 'kneePads' as const, label: 'Knebeskyttere', desc: 'Volleyball-knebeskyttere' },
+                  ] as const).map(({ key, label, desc }) => (
+                    <label key={key} className="flex items-center gap-3 cursor-pointer p-3 bg-surface rounded-lg border border-white/5 hover:bg-surface-hover transition-colors">
+                      <input type="checkbox" checked={config[key] ?? false} onChange={(e) => update({ [key]: e.target.checked })}
+                        className="w-5 h-5 rounded accent-primary" />
+                      <div>
+                        <span className="text-sm font-medium">{label}</span>
+                        <span className="text-xs text-muted ml-2">{desc}</span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
               </Section>
             </div>
           )}

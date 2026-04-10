@@ -1,5 +1,5 @@
-// SVG avatar renderer for BJJ practitioners
-// Renders a customizable character with skin, hair, facial features, gi/nogi, belt, and optional injuries
+// SVG avatar renderer for BJJ practitioners — Bitmoji-inspired cartoon style
+// Large head, expressive features, BJJ accessories, detailed clothing
 
 export interface AvatarConfig {
   skinTone: string
@@ -10,7 +10,6 @@ export interface AvatarConfig {
   academyColor?: string | null
   showInjuries?: string[]
   gender: 'male' | 'female'
-  // New customization options
   facialHair?: 'none' | 'stubble' | 'short_beard' | 'full_beard' | 'mustache' | 'goatee'
   glasses?: 'none' | 'round' | 'square' | 'sport'
   noseShape?: 'default' | 'small' | 'wide' | 'pointed'
@@ -18,8 +17,17 @@ export interface AvatarConfig {
   bodyType?: 'slim' | 'average' | 'athletic' | 'heavy'
   earType?: 'normal' | 'cauliflower'
   eyeColor?: string
+  eyeShape?: 'default' | 'round' | 'almond' | 'narrow'
   eyebrowStyle?: 'normal' | 'thick' | 'thin' | 'arched'
   mouthStyle?: 'smile' | 'neutral' | 'grin' | 'serious'
+  // BJJ accessories
+  fingerTape?: boolean
+  headband?: boolean
+  mouthguard?: boolean
+  kneePads?: boolean
+  // Skin details
+  freckles?: boolean
+  scar?: 'none' | 'eyebrow' | 'cheek' | 'chin'
 }
 
 export const DEFAULT_AVATAR: AvatarConfig = {
@@ -38,9 +46,18 @@ export const DEFAULT_AVATAR: AvatarConfig = {
   bodyType: 'average',
   earType: 'normal',
   eyeColor: '#4A3728',
+  eyeShape: 'default',
   eyebrowStyle: 'normal',
   mouthStyle: 'smile',
+  fingerTape: false,
+  headband: false,
+  mouthguard: false,
+  kneePads: false,
+  freckles: false,
+  scar: 'none',
 }
+
+// === OPTION CONSTANTS ===
 
 export const SKIN_TONES = [
   { name: 'Lys', value: '#FADCBC' },
@@ -67,7 +84,7 @@ export const EYE_COLORS = [
   { name: 'Grønn', value: '#4A7C59' },
   { name: 'Blå', value: '#4A7CB5' },
   { name: 'Grå', value: '#7B8B9A' },
-  { name: 'Hasselfarget', value: '#8B7355' },
+  { name: 'Hassel', value: '#8B7355' },
 ]
 
 export const HAIR_STYLES = [
@@ -81,6 +98,13 @@ export const HAIR_STYLES = [
   { name: 'Mohawk', value: 'mohawk' as const },
   { name: 'Hestehale', value: 'ponytail' as const },
   { name: 'Flettet', value: 'braids' as const },
+]
+
+export const EYE_SHAPES = [
+  { name: 'Standard', value: 'default' as const },
+  { name: 'Runde', value: 'round' as const },
+  { name: 'Mandelformet', value: 'almond' as const },
+  { name: 'Smale', value: 'narrow' as const },
 ]
 
 export const FACIAL_HAIR_STYLES = [
@@ -139,6 +163,13 @@ export const MOUTH_STYLES = [
   { name: 'Seriøs', value: 'serious' as const },
 ]
 
+export const SCAR_OPTIONS = [
+  { name: 'Ingen', value: 'none' as const },
+  { name: 'Øyenbryn', value: 'eyebrow' as const },
+  { name: 'Kinn', value: 'cheek' as const },
+  { name: 'Hake', value: 'chin' as const },
+]
+
 export const OUTFIT_OPTIONS = [
   { name: 'Hvit Gi', value: 'gi_white' as const },
   { name: 'Blå Gi', value: 'gi_blue' as const },
@@ -147,56 +178,47 @@ export const OUTFIT_OPTIONS = [
   { name: 'No-Gi (mørk)', value: 'nogi_dark' as const },
 ]
 
+// === INTERNAL MAPS ===
+
 const BELT_COLOR_MAP: Record<string, string> = {
-  white: '#ffffff',
-  grey_white: '#9ca3af', grey: '#9ca3af', grey_black: '#9ca3af',
+  white: '#ffffff', grey_white: '#9ca3af', grey: '#9ca3af', grey_black: '#9ca3af',
   yellow_white: '#eab308', yellow: '#eab308', yellow_black: '#eab308',
   orange_white: '#f97316', orange: '#f97316', orange_black: '#f97316',
   green_white: '#22c55e', green: '#22c55e', green_black: '#22c55e',
-  blue: '#3b82f6',
-  purple: '#9333ea',
-  brown: '#92400e',
-  black: '#1a1a1a',
+  blue: '#3b82f6', purple: '#9333ea', brown: '#92400e', black: '#1a1a1a',
 }
 
-const OUTFIT_COLORS: Record<string, { main: string; accent: string; sleeve?: string }> = {
-  gi_white: { main: '#f0f0f0', accent: '#d8d8d8', sleeve: '#e8e8e8' },
-  gi_blue: { main: '#2563eb', accent: '#1d4ed8', sleeve: '#3b82f6' },
-  gi_black: { main: '#1a1a2e', accent: '#111122', sleeve: '#252540' },
-  nogi: { main: '#374151', accent: '#4b5563', sleeve: '#4b5563' },
-  nogi_dark: { main: '#1f2937', accent: '#111827', sleeve: '#374151' },
+const OUTFIT_COLORS: Record<string, { main: string; accent: string; dark: string }> = {
+  gi_white: { main: '#f0f0f0', accent: '#d8d8d8', dark: '#c0c0c0' },
+  gi_blue: { main: '#2563eb', accent: '#1d4ed8', dark: '#1e40af' },
+  gi_black: { main: '#1a1a2e', accent: '#111122', dark: '#0a0a18' },
+  nogi: { main: '#374151', accent: '#4b5563', dark: '#1f2937' },
+  nogi_dark: { main: '#1f2937', accent: '#111827', dark: '#0f172a' },
+}
+
+const BODY_DIMS: Record<string, { torsoW: number; shoulderW: number; hipW: number }> = {
+  slim:     { torsoW: 0.85, shoulderW: 0.9,  hipW: 0.85 },
+  average:  { torsoW: 1,    shoulderW: 1,    hipW: 1 },
+  athletic: { torsoW: 1.05, shoulderW: 1.15, hipW: 0.95 },
+  heavy:    { torsoW: 1.2,  shoulderW: 1.1,  hipW: 1.15 },
+}
+
+const FACE_DIMS: Record<string, { rx: number; ry: number; jawY: number }> = {
+  oval:   { rx: 75, ry: 85, jawY: 10 },
+  round:  { rx: 80, ry: 80, jawY: 5 },
+  square: { rx: 72, ry: 80, jawY: 15 },
+  long:   { rx: 68, ry: 92, jawY: 8 },
 }
 
 const INJURY_LOCATIONS: Record<string, { x: number; y: number }> = {
-  'Kne': { x: 155, y: 520 },
-  'Skulder': { x: 100, y: 270 },
-  'Nakke': { x: 150, y: 210 },
-  'Rygg': { x: 150, y: 330 },
-  'Ankel': { x: 135, y: 600 },
-  'Håndledd': { x: 65, y: 395 },
-  'Albue': { x: 75, y: 345 },
-  'Hofte': { x: 130, y: 420 },
-  'Finger': { x: 55, y: 430 },
-  'Tå': { x: 135, y: 640 },
-  'Øre': { x: 118, y: 135 },
-  'Ribben': { x: 110, y: 320 },
+  'Kne': { x: 220, y: 670 }, 'Skulder': { x: 130, y: 360 }, 'Nakke': { x: 200, y: 280 },
+  'Rygg': { x: 200, y: 420 }, 'Ankel': { x: 185, y: 770 }, 'Håndledd': { x: 85, y: 520 },
+  'Albue': { x: 95, y: 460 }, 'Hofte': { x: 170, y: 540 }, 'Finger': { x: 70, y: 560 },
+  'Tå': { x: 185, y: 810 }, 'Øre': { x: 130, y: 155 }, 'Ribben': { x: 145, y: 410 },
 }
 
-// Body dimension multipliers per body type
-const BODY_DIMS: Record<string, { torsoW: number; armW: number; legW: number }> = {
-  slim: { torsoW: 0.85, armW: 0.8, legW: 0.85 },
-  average: { torsoW: 1, armW: 1, legW: 1 },
-  athletic: { torsoW: 1.1, armW: 1.2, legW: 1.05 },
-  heavy: { torsoW: 1.25, armW: 1.15, legW: 1.15 },
-}
-
-// Face shape dimensions
-const FACE_DIMS: Record<string, { rx: number; ry: number }> = {
-  oval: { rx: 52, ry: 62 },
-  round: { rx: 58, ry: 58 },
-  square: { rx: 50, ry: 56 },
-  long: { rx: 46, ry: 68 },
-}
+// === MAIN COMPONENT ===
+// ViewBox: 400 x 850 — large head cartoon style (head ~45% of height)
 
 export default function AvatarSVG({
   config,
@@ -213,86 +235,119 @@ export default function AvatarSVG({
   const injuries = config.showInjuries ?? []
   const body = BODY_DIMS[config.bodyType ?? 'average']
   const face = FACE_DIMS[config.faceShape ?? 'oval']
-  const skinDarker = darkenColor(config.skinTone, 15)
+  const sd = darken(config.skinTone, 15)
+  const sl = lighten(config.skinTone, 10)
 
-  // viewBox is 300x680 for more detail
+  // Center points
+  const cx = 200  // head center X
+  const hcy = 155 // head center Y
+  const bcy = 420 // body center Y
+
   return (
-    <svg
-      viewBox="0 0 300 680"
-      width={size}
-      height={size * 680 / 300}
-      className={className}
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg viewBox="0 0 400 850" width={size} height={size * 850 / 400} className={className} xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <radialGradient id="skinGrad" cx="50%" cy="40%" r="60%">
-          <stop offset="0%" stopColor={config.skinTone} />
-          <stop offset="100%" stopColor={skinDarker} />
+        <radialGradient id="sg" cx="45%" cy="35%" r="65%">
+          <stop offset="0%" stopColor={sl} />
+          <stop offset="70%" stopColor={config.skinTone} />
+          <stop offset="100%" stopColor={sd} />
         </radialGradient>
-        <linearGradient id="outfitGrad" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id="og" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={outfit.main} />
           <stop offset="100%" stopColor={outfit.accent} />
         </linearGradient>
+        <linearGradient id="og2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={outfit.accent} />
+          <stop offset="100%" stopColor={outfit.dark} />
+        </linearGradient>
       </defs>
 
-      {/* Background circle */}
-      <circle cx="150" cy="340" r="145" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
-
       {/* === LEGS === */}
-      <Legs config={config} body={body} outfit={outfit} isGi={isGi} />
+      <LegsComp isGi={isGi} outfit={outfit} body={body} skinTone={config.skinTone} kneePads={config.kneePads} />
 
       {/* === FEET === */}
-      <ellipse cx="120" cy="640" rx="22" ry="12" fill="#374151" />
-      <ellipse cx="180" cy="640" rx="22" ry="12" fill="#374151" />
+      <ellipse cx={165} cy={810} rx={28} ry={14} fill="#374151" />
+      <ellipse cx={235} cy={810} rx={28} ry={14} fill="#374151" />
+      {/* Shoe highlights */}
+      <ellipse cx={162} cy={807} rx={16} ry={6} fill="rgba(255,255,255,0.08)" />
+      <ellipse cx={232} cy={807} rx={16} ry={6} fill="rgba(255,255,255,0.08)" />
 
-      {/* === BODY / TORSO === */}
-      <Torso config={config} body={body} outfit={outfit} isGi={isGi} />
+      {/* === TORSO === */}
+      <TorsoComp isGi={isGi} outfit={outfit} body={body} academyColor={config.academyColor} />
 
       {/* === BELT === */}
-      {beltColor && isGi && <Belt beltColor={beltColor} beltRank={config.beltRank!} body={body} />}
+      {beltColor && isGi && <BeltComp beltColor={beltColor} beltRank={config.beltRank!} body={body} />}
 
-      {/* === ARMS === */}
-      <Arms config={config} body={body} outfit={outfit} isGi={isGi} />
+      {/* === ARMS + HANDS === */}
+      <ArmsComp isGi={isGi} outfit={outfit} body={body} skinTone={config.skinTone} fingerTape={config.fingerTape} />
 
       {/* === NECK === */}
-      <rect x={138} y={195} width={24} height={38} rx={10} fill="url(#skinGrad)" />
+      <rect x={185} y={262} width={30} height={48} rx={12} fill="url(#sg)" />
+      {/* Neck shadow */}
+      <rect x={185} y={290} width={30} height={18} rx={8} fill="rgba(0,0,0,0.08)" />
 
       {/* === HEAD === */}
-      <Head config={config} face={face} />
-
-      {/* === HAIR === */}
-      {config.hairStyle !== 'bald' && (
-        <HairSVG style={config.hairStyle} color={config.hairColor} face={face} />
+      <ellipse cx={cx} cy={hcy} rx={face.rx} ry={face.ry} fill="url(#sg)" />
+      {/* Jaw definition */}
+      {config.faceShape === 'square' && (
+        <path d={`M ${cx - face.rx + 10} ${hcy + 20} Q ${cx - face.rx + 5} ${hcy + face.ry - 10} ${cx - 30} ${hcy + face.ry + face.jawY} L ${cx + 30} ${hcy + face.ry + face.jawY} Q ${cx + face.rx - 5} ${hcy + face.ry - 10} ${cx + face.rx - 10} ${hcy + 20}`}
+          fill="url(#sg)" />
       )}
+      {/* Cheek blush */}
+      <ellipse cx={cx - 45} cy={hcy + 20} rx={14} ry={8} fill="#e8a090" opacity="0.15" />
+      <ellipse cx={cx + 45} cy={hcy + 20} rx={14} ry={8} fill="#e8a090" opacity="0.15" />
+      {/* Face highlight */}
+      <ellipse cx={cx - 15} cy={hcy - 35} rx={28} ry={18} fill="white" opacity="0.06" />
+
+      {/* === FRECKLES === */}
+      {config.freckles && <Freckles cx={cx} cy={hcy} />}
+
+      {/* === SCARS === */}
+      {config.scar && config.scar !== 'none' && <Scar type={config.scar} cx={cx} cy={hcy} skinTone={config.skinTone} />}
 
       {/* === EARS === */}
-      <Ears config={config} face={face} />
+      <EarsComp config={config} cx={cx} cy={hcy} face={face} />
+
+      {/* === HEADBAND === */}
+      {config.headband && (
+        <g>
+          <path d={`M ${cx - face.rx + 2} ${hcy - 35} Q ${cx} ${hcy - 48} ${cx + face.rx - 2} ${hcy - 35}`}
+            fill="none" stroke="#ef4444" strokeWidth="8" strokeLinecap="round" />
+          <path d={`M ${cx - face.rx + 2} ${hcy - 35} Q ${cx} ${hcy - 44} ${cx + face.rx - 2} ${hcy - 35}`}
+            fill="none" stroke="#dc2626" strokeWidth="3" strokeLinecap="round" />
+        </g>
+      )}
 
       {/* === EYES === */}
-      <Eyes config={config} />
+      <EyesComp config={config} cx={cx} cy={hcy} />
 
       {/* === EYEBROWS === */}
-      <Eyebrows config={config} />
+      <EyebrowsComp config={config} cx={cx} cy={hcy} />
 
       {/* === NOSE === */}
-      <Nose config={config} />
+      <NoseComp config={config} cx={cx} cy={hcy} />
 
       {/* === MOUTH === */}
-      <Mouth config={config} />
+      <MouthComp config={config} cx={cx} cy={hcy} />
+
+      {/* === MOUTHGUARD === */}
+      {config.mouthguard && (
+        <path d={`M ${cx - 18} ${hcy + 42} Q ${cx} ${hcy + 55} ${cx + 18} ${hcy + 42}`}
+          fill="#60a5fa" fillOpacity="0.6" stroke="#3b82f6" strokeWidth="1" />
+      )}
 
       {/* === FACIAL HAIR === */}
       {config.facialHair && config.facialHair !== 'none' && (
-        <FacialHairSVG style={config.facialHair} color={config.hairColor} />
+        <FacialHairComp style={config.facialHair} color={config.hairColor} cx={cx} cy={hcy} face={face} />
+      )}
+
+      {/* === HAIR === */}
+      {config.hairStyle !== 'bald' && (
+        <HairComp style={config.hairStyle} color={config.hairColor} cx={cx} cy={hcy} face={face} />
       )}
 
       {/* === GLASSES === */}
       {config.glasses && config.glasses !== 'none' && (
-        <GlassesSVG style={config.glasses} />
-      )}
-
-      {/* === ACADEMY PATCH === */}
-      {config.academyColor && (
-        <rect x={125} y={295} width={50} height={28} rx={5} fill={config.academyColor} opacity={0.85} />
+        <GlassesComp style={config.glasses} cx={cx} cy={hcy} />
       )}
 
       {/* === INJURY INDICATORS === */}
@@ -301,8 +356,8 @@ export default function AvatarSVG({
         if (!loc) return null
         return (
           <g key={part}>
-            <circle cx={loc.x} cy={loc.y} r="14" fill="rgba(239,68,68,0.25)" />
-            <text x={loc.x} y={loc.y + 5} textAnchor="middle" fontSize="14">🩹</text>
+            <circle cx={loc.x} cy={loc.y} r={16} fill="rgba(239,68,68,0.25)" />
+            <text x={loc.x} y={loc.y + 5} textAnchor="middle" fontSize="15">🩹</text>
           </g>
         )
       })}
@@ -312,306 +367,453 @@ export default function AvatarSVG({
 
 // === SUB-COMPONENTS ===
 
-function Legs({ config, body, outfit, isGi }: { config: AvatarConfig; body: typeof BODY_DIMS['average']; outfit: typeof OUTFIT_COLORS['gi_white']; isGi: boolean }) {
-  const legW = 32 * body.legW
-  const leftX = 150 - legW - 5
-  const rightX = 150 + 5
-
-  if (isGi) {
-    return (
-      <>
-        <rect x={leftX} y={430} width={legW + 4} height={195} rx={14} fill={outfit.main} stroke={outfit.accent} strokeWidth="1" />
-        <rect x={rightX} y={430} width={legW + 4} height={195} rx={14} fill={outfit.main} stroke={outfit.accent} strokeWidth="1" />
-        {/* Gi pants fold lines */}
-        <line x1={leftX + 8} y1={480} x2={leftX + 8} y2={560} stroke={outfit.accent} strokeWidth="0.8" opacity="0.5" />
-        <line x1={rightX + legW - 4} y1={480} x2={rightX + legW - 4} y2={560} stroke={outfit.accent} strokeWidth="0.8" opacity="0.5" />
-      </>
-    )
-  }
-  return (
-    <>
-      {/* Shorts */}
-      <rect x={leftX} y={430} width={legW + 4} height={80} rx={14} fill={outfit.main} stroke={outfit.accent} strokeWidth="1" />
-      <rect x={rightX} y={430} width={legW + 4} height={80} rx={14} fill={outfit.main} stroke={outfit.accent} strokeWidth="1" />
-      {/* Bare legs */}
-      <rect x={leftX + 3} y={505} width={legW - 2} height={125} rx={12} fill={config.skinTone} />
-      <rect x={rightX + 3} y={505} width={legW - 2} height={125} rx={12} fill={config.skinTone} />
-    </>
-  )
-}
-
-function Torso({ config, body, outfit, isGi }: { config: AvatarConfig; body: typeof BODY_DIMS['average']; outfit: typeof OUTFIT_COLORS['gi_white']; isGi: boolean }) {
-  const w = 120 * body.torsoW
-  const x = 150 - w / 2
-
-  return (
-    <>
-      <rect x={x} y={230} width={w} height={210} rx={24} fill="url(#outfitGrad)" stroke={outfit.accent} strokeWidth="1" />
-
-      {/* Gi details */}
-      {isGi && (
-        <>
-          {/* Lapel V */}
-          <path d={`M ${130} 230 L 150 290 L 170 230`} fill="none" stroke={outfit.accent} strokeWidth="2.5" />
-          {/* Collar fold left */}
-          <path d={`M ${126} 232 Q 135 250 130 270`} fill="none" stroke={outfit.accent} strokeWidth="1.2" />
-          {/* Collar fold right */}
-          <path d={`M ${174} 232 Q 165 250 170 270`} fill="none" stroke={outfit.accent} strokeWidth="1.2" />
-          {/* Gi overlap line */}
-          <line x1={150} y1={290} x2={150} y2={400} stroke={outfit.accent} strokeWidth="0.8" opacity="0.4" />
-        </>
-      )}
-
-      {/* Nogi rashguard details */}
-      {!isGi && (
-        <>
-          <line x1={x + 10} y1={280} x2={x + w - 10} y2={280} stroke={outfit.accent} strokeWidth="1" strokeDasharray="4,3" opacity="0.4" />
-          <line x1={x + 10} y1={310} x2={x + w - 10} y2={310} stroke={outfit.accent} strokeWidth="1" strokeDasharray="4,3" opacity="0.4" />
-          {/* Side stripe */}
-          <rect x={x + 2} y={240} width={4} height={190} rx={2} fill={outfit.sleeve} opacity="0.3" />
-          <rect x={x + w - 6} y={240} width={4} height={190} rx={2} fill={outfit.sleeve} opacity="0.3" />
-        </>
-      )}
-    </>
-  )
-}
-
-function Belt({ beltColor, beltRank, body }: { beltColor: string; beltRank: string; body: typeof BODY_DIMS['average'] }) {
-  const w = 120 * body.torsoW
-  const x = 150 - w / 2
+function LegsComp({ isGi, outfit, body, skinTone, kneePads }: { isGi: boolean; outfit: typeof OUTFIT_COLORS['gi_white']; body: typeof BODY_DIMS['average']; skinTone: string; kneePads?: boolean }) {
+  const hw = 28 * body.hipW
+  const lx = 200 - hw - 10
+  const rx = 200 + 10
 
   return (
     <g>
-      {/* Belt band */}
-      <rect x={x} y={398} width={w} height={16} rx={4} fill={beltColor} />
-      {/* Belt texture line */}
-      <line x1={x + 5} y1={406} x2={x + w - 5} y2={406} stroke="rgba(0,0,0,0.15)" strokeWidth="0.5" />
-
-      {/* Belt knot */}
-      <circle cx={150} cy={406} r={9} fill={beltColor} stroke="rgba(0,0,0,0.2)" strokeWidth="1" />
-
-      {/* Belt tails */}
-      <rect x={142} y={414} width={7} height={32} rx={3} fill={beltColor} transform="rotate(-10, 145, 414)" />
-      <rect x={151} y={414} width={7} height={38} rx={3} fill={beltColor} transform="rotate(6, 154, 414)" />
-
-      {/* Black bar (rank indicator) */}
-      {beltRank !== 'white' && (
-        <rect x={x + w - 28} y={398} width={24} height={16} rx={3} fill="#1a1a1a" />
+      {isGi ? (
+        <>
+          <rect x={lx - 2} y={545} width={hw + 8} height={250} rx={16} fill={outfit.main} stroke={outfit.accent} strokeWidth="1" />
+          <rect x={rx - 2} y={545} width={hw + 8} height={250} rx={16} fill={outfit.main} stroke={outfit.accent} strokeWidth="1" />
+          {/* Gi pant creases */}
+          <path d={`M ${lx + 8} ${620} Q ${lx + 12} ${660} ${lx + 6} ${700}`} fill="none" stroke={outfit.accent} strokeWidth="0.8" opacity="0.4" />
+          <path d={`M ${rx + hw - 4} ${620} Q ${rx + hw - 8} ${660} ${rx + hw - 2} ${700}`} fill="none" stroke={outfit.accent} strokeWidth="0.8" opacity="0.4" />
+        </>
+      ) : (
+        <>
+          {/* Shorts */}
+          <rect x={lx - 2} y={545} width={hw + 8} height={100} rx={16} fill={outfit.main} stroke={outfit.accent} strokeWidth="1" />
+          <rect x={rx - 2} y={545} width={hw + 8} height={100} rx={16} fill={outfit.main} stroke={outfit.accent} strokeWidth="1" />
+          {/* Bare legs */}
+          <rect x={lx + 2} y={640} width={hw} height={155} rx={14} fill={skinTone} />
+          <rect x={rx + 2} y={640} width={hw} height={155} rx={14} fill={skinTone} />
+          {/* Leg muscle definition */}
+          <path d={`M ${lx + 8} ${670} Q ${lx + hw / 2} ${690} ${lx + hw - 4} ${670}`} fill="none" stroke={darken(skinTone, 12)} strokeWidth="0.8" opacity="0.3" />
+          <path d={`M ${rx + 8} ${670} Q ${rx + hw / 2} ${690} ${rx + hw - 4} ${670}`} fill="none" stroke={darken(skinTone, 12)} strokeWidth="0.8" opacity="0.3" />
+        </>
       )}
-      {beltRank === 'white' && (
-        <rect x={x + w - 28} y={398} width={24} height={16} rx={3} fill="#1a1a1a" />
+      {/* Knee pads */}
+      {kneePads && (
+        <>
+          <ellipse cx={lx + hw / 2 + 2} cy={isGi ? 650 : 638} rx={18} ry={22} fill="rgba(30,30,30,0.7)" stroke="rgba(60,60,60,0.5)" strokeWidth="1" />
+          <ellipse cx={rx + hw / 2 + 2} cy={isGi ? 650 : 638} rx={18} ry={22} fill="rgba(30,30,30,0.7)" stroke="rgba(60,60,60,0.5)" strokeWidth="1" />
+        </>
       )}
     </g>
   )
 }
 
-function Arms({ config, body, outfit, isGi }: { config: AvatarConfig; body: typeof BODY_DIMS['average']; outfit: typeof OUTFIT_COLORS['gi_white']; isGi: boolean }) {
-  const armW = 38 * body.armW
+function TorsoComp({ isGi, outfit, body, academyColor }: { isGi: boolean; outfit: typeof OUTFIT_COLORS['gi_white']; body: typeof BODY_DIMS['average']; academyColor?: string | null }) {
+  const sw = 75 * body.shoulderW
+  const hw = 60 * body.hipW
+  const tw = 65 * body.torsoW
 
   return (
-    <>
-      {/* Upper arms */}
-      <rect x={48} y={238} width={armW} height={120} rx={16}
-        fill={isGi ? outfit.main : outfit.main}
-        stroke={isGi ? outfit.accent : 'none'} strokeWidth="1"
-      />
-      <rect x={300 - 48 - armW} y={238} width={armW} height={120} rx={16}
-        fill={isGi ? outfit.main : outfit.main}
-        stroke={isGi ? outfit.accent : 'none'} strokeWidth="1"
-      />
+    <g>
+      {/* Torso - tapered shape using path */}
+      <path d={`M ${200 - sw} 310 Q ${200 - sw - 5} 380 ${200 - hw} 550 L ${200 + hw} 550 Q ${200 + sw + 5} 380 ${200 + sw} 310 Z`}
+        fill="url(#og)" stroke={outfit.accent} strokeWidth="1" />
 
-      {/* Forearms (skin) */}
-      <rect x={52} y={348} width={armW - 6} height={72} rx={12} fill={config.skinTone} />
-      <rect x={300 - 48 - armW + 4} y={348} width={armW - 6} height={72} rx={12} fill={config.skinTone} />
+      {/* Shoulder roundness */}
+      <ellipse cx={200 - sw + 5} cy={315} rx={20} ry={12} fill={outfit.main} />
+      <ellipse cx={200 + sw - 5} cy={315} rx={20} ry={12} fill={outfit.main} />
 
-      {/* Hands */}
-      <ellipse cx={52 + (armW - 6) / 2} cy={425} rx={14} ry={12} fill={config.skinTone} />
-      <ellipse cx={300 - 48 - armW + 4 + (armW - 6) / 2} cy={425} rx={14} ry={12} fill={config.skinTone} />
+      {isGi ? (
+        <>
+          {/* Gi lapel V-shape */}
+          <path d="M 175 310 L 200 380 L 225 310" fill="none" stroke={outfit.accent} strokeWidth="3" />
+          {/* Collar lines */}
+          <path d="M 172 312 Q 180 340 176 365" fill="none" stroke={outfit.accent} strokeWidth="1.5" opacity="0.6" />
+          <path d="M 228 312 Q 220 340 224 365" fill="none" stroke={outfit.accent} strokeWidth="1.5" opacity="0.6" />
+          {/* Center seam */}
+          <line x1={200} y1={380} x2={200} y2={530} stroke={outfit.accent} strokeWidth="0.8" opacity="0.3" />
+          {/* Gi texture */}
+          <line x1={200 - tw} y1={400} x2={200 + tw} y2={400} stroke={outfit.accent} strokeWidth="0.5" opacity="0.15" />
+          <line x1={200 - tw + 5} y1={440} x2={200 + tw - 5} y2={440} stroke={outfit.accent} strokeWidth="0.5" opacity="0.15" />
+        </>
+      ) : (
+        <>
+          {/* Rashguard neckline */}
+          <path d="M 175 310 Q 200 325 225 310" fill="none" stroke={outfit.accent} strokeWidth="2" />
+          {/* Side stripes */}
+          <path d={`M ${200 - sw + 3} 315 L ${200 - hw + 3} 545`} fill="none" stroke={outfit.dark} strokeWidth="5" opacity="0.3" />
+          <path d={`M ${200 + sw - 3} 315 L ${200 + hw - 3} 545`} fill="none" stroke={outfit.dark} strokeWidth="5" opacity="0.3" />
+          {/* Pattern lines */}
+          <line x1={200 - tw + 10} y1={380} x2={200 + tw - 10} y2={380} stroke={outfit.dark} strokeWidth="1" strokeDasharray="5,4" opacity="0.25" />
+          <line x1={200 - tw + 10} y1={420} x2={200 + tw - 10} y2={420} stroke={outfit.dark} strokeWidth="1" strokeDasharray="5,4" opacity="0.25" />
+        </>
+      )}
+
+      {/* Academy patch */}
+      {academyColor && (
+        <g>
+          <rect x={175} y={390} width={50} height={30} rx={5} fill={academyColor} opacity="0.85" />
+          {/* Patch border */}
+          <rect x={175} y={390} width={50} height={30} rx={5} fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="0.8" />
+        </g>
+      )}
+    </g>
+  )
+}
+
+function BeltComp({ beltColor, beltRank, body }: { beltColor: string; beltRank: string; body: typeof BODY_DIMS['average'] }) {
+  const hw = 60 * body.hipW
+  const w = hw * 2 + 10
+
+  return (
+    <g>
+      {/* Belt band */}
+      <rect x={200 - hw - 5} y={520} width={w} height={18} rx={5} fill={beltColor} />
+      {/* Belt sheen */}
+      <rect x={200 - hw - 5} y={520} width={w} height={8} rx={5} fill="rgba(255,255,255,0.12)" />
+
+      {/* Knot */}
+      <ellipse cx={200} cy={529} rx={11} ry={9} fill={beltColor} stroke="rgba(0,0,0,0.15)" strokeWidth="1" />
+      {/* Knot highlight */}
+      <ellipse cx={198} cy={527} rx={5} ry={3} fill="rgba(255,255,255,0.15)" />
+
+      {/* Tails */}
+      <path d="M 195 538 Q 190 560 192 575" fill="none" stroke={beltColor} strokeWidth="8" strokeLinecap="round" />
+      <path d="M 205 538 Q 212 565 208 582" fill="none" stroke={beltColor} strokeWidth="8" strokeLinecap="round" />
+      {/* Tail tips */}
+      <rect x={189} y={570} width={8} height={4} rx={2} fill={beltColor} transform="rotate(-5, 193, 572)" />
+      <rect x={204} y={578} width={8} height={4} rx={2} fill={beltColor} transform="rotate(4, 208, 580)" />
+
+      {/* Black bar */}
+      <rect x={200 + hw - 22} y={520} width={26} height={18} rx={4}
+        fill={beltRank === 'black' ? '#8b0000' : '#1a1a1a'} />
+      {/* Bar sheen */}
+      <rect x={200 + hw - 22} y={520} width={26} height={8} rx={4} fill="rgba(255,255,255,0.1)" />
+    </g>
+  )
+}
+
+function ArmsComp({ isGi, outfit, body, skinTone, fingerTape }: { isGi: boolean; outfit: typeof OUTFIT_COLORS['gi_white']; body: typeof BODY_DIMS['average']; skinTone: string; fingerTape?: boolean }) {
+  const sw = 75 * body.shoulderW
+  const armW = 32 * (body.shoulderW * 0.5 + 0.5)
+
+  return (
+    <g>
+      {/* Upper arms (sleeve) */}
+      <rect x={200 - sw - armW + 5} y={310} width={armW} height={130} rx={16}
+        fill={isGi ? outfit.main : outfit.main} stroke={isGi ? outfit.accent : 'none'} strokeWidth="1" />
+      <rect x={200 + sw - 5} y={310} width={armW} height={130} rx={16}
+        fill={isGi ? outfit.main : outfit.main} stroke={isGi ? outfit.accent : 'none'} strokeWidth="1" />
 
       {/* Gi sleeve cuff */}
       {isGi && (
         <>
-          <rect x={50} y={342} width={armW - 2} height={10} rx={4} fill={outfit.accent} opacity="0.5" />
-          <rect x={300 - 48 - armW + 2} y={342} width={armW - 2} height={10} rx={4} fill={outfit.accent} opacity="0.5" />
+          <rect x={200 - sw - armW + 4} y={430} width={armW + 2} height={12} rx={5} fill={outfit.accent} opacity="0.5" />
+          <rect x={200 + sw - 6} y={430} width={armW + 2} height={12} rx={5} fill={outfit.accent} opacity="0.5" />
         </>
       )}
-    </>
+
+      {/* Forearms (skin) */}
+      <rect x={200 - sw - armW + 9} y={435} width={armW - 8} height={80} rx={12} fill={skinTone} />
+      <rect x={200 + sw - 1} y={435} width={armW - 8} height={80} rx={12} fill={skinTone} />
+      {/* Forearm muscle */}
+      <ellipse cx={200 - sw - armW / 2 + 9} cy={460} rx={8} ry={14} fill="rgba(255,255,255,0.04)" />
+      <ellipse cx={200 + sw + armW / 2 - 5} cy={460} rx={8} ry={14} fill="rgba(255,255,255,0.04)" />
+
+      {/* Hands */}
+      <HandComp x={200 - sw - armW / 2 + 8} y={518} skinTone={skinTone} fingerTape={fingerTape} mirror={false} />
+      <HandComp x={200 + sw + armW / 2 - 8} y={518} skinTone={skinTone} fingerTape={fingerTape} mirror={true} />
+    </g>
   )
 }
 
-function Head({ config, face }: { config: AvatarConfig; face: typeof FACE_DIMS['oval'] }) {
+function HandComp({ x, y, skinTone, fingerTape, mirror }: { x: number; y: number; skinTone: string; fingerTape?: boolean; mirror: boolean }) {
+  const dir = mirror ? -1 : 1
+
   return (
-    <ellipse cx={150} cy={130} rx={face.rx} ry={face.ry} fill="url(#skinGrad)" />
+    <g>
+      {/* Palm */}
+      <ellipse cx={x} cy={y} rx={16} ry={14} fill={skinTone} />
+      {/* Thumb */}
+      <ellipse cx={x + dir * 14} cy={y - 6} rx={6} ry={5} fill={skinTone} />
+      {/* Fingers hint */}
+      <ellipse cx={x - dir * 4} cy={y + 12} rx={12} ry={5} fill={skinTone} />
+
+      {/* Finger tape */}
+      {fingerTape && (
+        <>
+          <rect x={x - dir * 10 - 3} y={y + 8} width={7} height={8} rx={2} fill="white" opacity="0.85" />
+          <rect x={x - dir * 2 - 3} y={y + 9} width={7} height={7} rx={2} fill="white" opacity="0.85" />
+          {/* Tape texture */}
+          <line x1={x - dir * 10 - 1} y1={y + 12} x2={x - dir * 10 + 4} y2={y + 12} stroke="#d4d4d4" strokeWidth="0.5" />
+          <line x1={x - dir * 2 - 1} y1={y + 12} x2={x - dir * 2 + 4} y2={y + 12} stroke="#d4d4d4" strokeWidth="0.5" />
+        </>
+      )}
+    </g>
   )
 }
 
-function Ears({ config, face }: { config: AvatarConfig; face: typeof FACE_DIMS['oval'] }) {
-  const earX = face.rx
+function EarsComp({ config, cx, cy, face }: { config: AvatarConfig; cx: number; cy: number; face: typeof FACE_DIMS['oval'] }) {
+  const ex = face.rx - 2
   const isCauli = config.earType === 'cauliflower'
 
   return (
-    <>
-      {/* Left ear */}
-      <ellipse cx={150 - earX} cy={135} rx={isCauli ? 11 : 9} ry={isCauli ? 14 : 13} fill={config.skinTone} />
-      {isCauli && (
+    <g>
+      {/* Left */}
+      <ellipse cx={cx - ex} cy={cy + 5} rx={isCauli ? 14 : 11} ry={isCauli ? 18 : 16} fill={config.skinTone} />
+      {isCauli ? (
         <>
-          <ellipse cx={150 - earX - 2} cy={132} rx={5} ry={6} fill={darkenColor(config.skinTone, 20)} opacity="0.5" />
-          <ellipse cx={150 - earX + 1} cy={138} rx={4} ry={5} fill={darkenColor(config.skinTone, 15)} opacity="0.4" />
+          <ellipse cx={cx - ex - 3} cy={cy + 1} rx={6} ry={8} fill={darken(config.skinTone, 22)} opacity="0.45" />
+          <ellipse cx={cx - ex + 1} cy={cy + 9} rx={5} ry={7} fill={darken(config.skinTone, 18)} opacity="0.35" />
+          <ellipse cx={cx - ex - 1} cy={cy + 5} rx={3} ry={4} fill={darken(config.skinTone, 30)} opacity="0.25" />
         </>
+      ) : (
+        <ellipse cx={cx - ex + 3} cy={cy + 5} rx={5} ry={10} fill={darken(config.skinTone, 10)} opacity="0.25" />
       )}
-      {!isCauli && (
-        <ellipse cx={150 - earX + 2} cy={135} rx={4} ry={8} fill={darkenColor(config.skinTone, 10)} opacity="0.3" />
-      )}
-
-      {/* Right ear */}
-      <ellipse cx={150 + earX} cy={135} rx={isCauli ? 11 : 9} ry={isCauli ? 14 : 13} fill={config.skinTone} />
-      {isCauli && (
+      {/* Right */}
+      <ellipse cx={cx + ex} cy={cy + 5} rx={isCauli ? 14 : 11} ry={isCauli ? 18 : 16} fill={config.skinTone} />
+      {isCauli ? (
         <>
-          <ellipse cx={150 + earX + 2} cy={132} rx={5} ry={6} fill={darkenColor(config.skinTone, 20)} opacity="0.5" />
-          <ellipse cx={150 + earX - 1} cy={138} rx={4} ry={5} fill={darkenColor(config.skinTone, 15)} opacity="0.4" />
+          <ellipse cx={cx + ex + 3} cy={cy + 1} rx={6} ry={8} fill={darken(config.skinTone, 22)} opacity="0.45" />
+          <ellipse cx={cx + ex - 1} cy={cy + 9} rx={5} ry={7} fill={darken(config.skinTone, 18)} opacity="0.35" />
+          <ellipse cx={cx + ex + 1} cy={cy + 5} rx={3} ry={4} fill={darken(config.skinTone, 30)} opacity="0.25" />
         </>
+      ) : (
+        <ellipse cx={cx + ex - 3} cy={cy + 5} rx={5} ry={10} fill={darken(config.skinTone, 10)} opacity="0.25" />
       )}
-      {!isCauli && (
-        <ellipse cx={150 + earX - 2} cy={135} rx={4} ry={8} fill={darkenColor(config.skinTone, 10)} opacity="0.3" />
-      )}
-    </>
+    </g>
   )
 }
 
-function Eyes({ config }: { config: AvatarConfig }) {
+function EyesComp({ config, cx, cy }: { config: AvatarConfig; cx: number; cy: number }) {
   const eyeColor = config.eyeColor ?? '#4A3728'
+  const shape = config.eyeShape ?? 'default'
+
+  // Eye dimensions per shape
+  const dims = {
+    default: { rx: 13, ry: 10, irisR: 8 },
+    round:   { rx: 13, ry: 12, irisR: 9 },
+    almond:  { rx: 15, ry: 8,  irisR: 7 },
+    narrow:  { rx: 14, ry: 6,  irisR: 6 },
+  }[shape]
+
+  const ex = 30 // eye distance from center
+  const ey = cy - 5
 
   return (
-    <>
-      {/* Eye whites */}
-      <ellipse cx={130} cy={128} rx={10} ry={7} fill="white" />
-      <ellipse cx={170} cy={128} rx={10} ry={7} fill="white" />
-      {/* Iris */}
-      <ellipse cx={130} cy={128} rx={6} ry={6.5} fill={eyeColor} />
-      <ellipse cx={170} cy={128} rx={6} ry={6.5} fill={eyeColor} />
-      {/* Pupil */}
-      <circle cx={130} cy={128} r={3} fill="#111" />
-      <circle cx={170} cy={128} r={3} fill="#111" />
-      {/* Highlight */}
-      <circle cx={133} cy={126} r={2} fill="white" opacity="0.7" />
-      <circle cx={173} cy={126} r={2} fill="white" opacity="0.7" />
-      {/* Eyelid line */}
-      <path d="M 120 123 Q 130 119 140 123" fill="none" stroke={darkenColor(config.skinTone, 25)} strokeWidth="1" />
-      <path d="M 160 123 Q 170 119 180 123" fill="none" stroke={darkenColor(config.skinTone, 25)} strokeWidth="1" />
-    </>
+    <g>
+      {[cx - ex, cx + ex].map((eyeX, i) => (
+        <g key={i}>
+          {/* Eye white */}
+          <ellipse cx={eyeX} cy={ey} rx={dims.rx} ry={dims.ry} fill="white" />
+          {/* Eye shadow (upper) */}
+          <path d={`M ${eyeX - dims.rx} ${ey} Q ${eyeX} ${ey - dims.ry - 2} ${eyeX + dims.rx} ${ey}`}
+            fill="none" stroke={darken(config.skinTone, 30)} strokeWidth="1.5" />
+          {/* Iris */}
+          <circle cx={eyeX} cy={ey + 1} r={dims.irisR} fill={eyeColor} />
+          {/* Iris detail ring */}
+          <circle cx={eyeX} cy={ey + 1} r={dims.irisR} fill="none" stroke={darken(eyeColor, 20)} strokeWidth="1" />
+          {/* Iris radial lines */}
+          {[0, 45, 90, 135, 180, 225, 270, 315].map(angle => {
+            const rad = angle * Math.PI / 180
+            const ir = dims.irisR * 0.4
+            const or = dims.irisR * 0.9
+            return (
+              <line key={angle}
+                x1={eyeX + Math.cos(rad) * ir} y1={ey + 1 + Math.sin(rad) * ir}
+                x2={eyeX + Math.cos(rad) * or} y2={ey + 1 + Math.sin(rad) * or}
+                stroke={lighten(eyeColor, 15)} strokeWidth="0.5" opacity="0.4"
+              />
+            )
+          })}
+          {/* Pupil */}
+          <circle cx={eyeX} cy={ey + 1} r={dims.irisR * 0.4} fill="#111" />
+          {/* Big highlight */}
+          <circle cx={eyeX + 3} cy={ey - 2} r={3} fill="white" opacity="0.85" />
+          {/* Small highlight */}
+          <circle cx={eyeX - 2} cy={ey + 3} r={1.5} fill="white" opacity="0.5" />
+          {/* Lower eyelid hint */}
+          <path d={`M ${eyeX - dims.rx + 3} ${ey + dims.ry - 2} Q ${eyeX} ${ey + dims.ry + 1} ${eyeX + dims.rx - 3} ${ey + dims.ry - 2}`}
+            fill="none" stroke={darken(config.skinTone, 12)} strokeWidth="0.8" opacity="0.4" />
+          {/* Eyelashes (female) */}
+          {config.gender === 'female' && (
+            <>
+              <line x1={eyeX - dims.rx + 1} y1={ey - dims.ry + 3} x2={eyeX - dims.rx - 2} y2={ey - dims.ry} stroke="#1a1a1a" strokeWidth="1.2" strokeLinecap="round" />
+              <line x1={eyeX - dims.rx + 6} y1={ey - dims.ry + 1} x2={eyeX - dims.rx + 4} y2={ey - dims.ry - 3} stroke="#1a1a1a" strokeWidth="1.2" strokeLinecap="round" />
+              <line x1={eyeX + dims.rx - 1} y1={ey - dims.ry + 3} x2={eyeX + dims.rx + 2} y2={ey - dims.ry} stroke="#1a1a1a" strokeWidth="1.2" strokeLinecap="round" />
+            </>
+          )}
+        </g>
+      ))}
+    </g>
   )
 }
 
-function Eyebrows({ config }: { config: AvatarConfig }) {
+function EyebrowsComp({ config, cx, cy }: { config: AvatarConfig; cx: number; cy: number }) {
   const style = config.eyebrowStyle ?? 'normal'
-  const w = style === 'thick' ? 3 : style === 'thin' ? 1.2 : 2
+  const w = style === 'thick' ? 3.5 : style === 'thin' ? 1.5 : 2.5
+  const ey = cy - 25
+  const ex = 30
 
   if (style === 'arched') {
     return (
-      <>
-        <path d="M 120 113 Q 130 106 140 112" fill="none" stroke={config.hairColor} strokeWidth={w} strokeLinecap="round" />
-        <path d="M 160 112 Q 170 106 180 113" fill="none" stroke={config.hairColor} strokeWidth={w} strokeLinecap="round" />
-      </>
+      <g>
+        <path d={`M ${cx - ex - 14} ${ey + 3} Q ${cx - ex} ${ey - 8} ${cx - ex + 14} ${ey + 1}`} fill="none" stroke={config.hairColor} strokeWidth={w} strokeLinecap="round" />
+        <path d={`M ${cx + ex - 14} ${ey + 1} Q ${cx + ex} ${ey - 8} ${cx + ex + 14} ${ey + 3}`} fill="none" stroke={config.hairColor} strokeWidth={w} strokeLinecap="round" />
+      </g>
     )
   }
 
   return (
-    <>
-      <line x1={120} y1={114} x2={140} y2={112} stroke={config.hairColor} strokeWidth={w} strokeLinecap="round" />
-      <line x1={160} y1={112} x2={180} y2={114} stroke={config.hairColor} strokeWidth={w} strokeLinecap="round" />
-    </>
+    <g>
+      <line x1={cx - ex - 14} y1={ey + 2} x2={cx - ex + 14} y2={ey - 1} stroke={config.hairColor} strokeWidth={w} strokeLinecap="round" />
+      <line x1={cx + ex - 14} y1={ey - 1} x2={cx + ex + 14} y2={ey + 2} stroke={config.hairColor} strokeWidth={w} strokeLinecap="round" />
+    </g>
   )
 }
 
-function Nose({ config }: { config: AvatarConfig }) {
-  const shape = config.noseShape ?? 'default'
+function NoseComp({ config, cx, cy }: { config: AvatarConfig; cx: number; cy: number }) {
+  const ny = cy + 15
+  const sd = darken(config.skinTone, 18)
+  const sl = darken(config.skinTone, 8)
 
-  switch (shape) {
+  switch (config.noseShape ?? 'default') {
     case 'small':
-      return <path d="M 148 140 Q 150 148 152 140" fill="none" stroke={darkenColor(config.skinTone, 20)} strokeWidth="1.5" strokeLinecap="round" />
+      return <path d={`M ${cx - 3} ${ny - 5} Q ${cx} ${ny + 5} ${cx + 3} ${ny - 5}`} fill="none" stroke={sd} strokeWidth="1.8" strokeLinecap="round" />
     case 'wide':
       return (
         <g>
-          <path d="M 145 138 Q 150 152 155 138" fill="none" stroke={darkenColor(config.skinTone, 20)} strokeWidth="1.5" strokeLinecap="round" />
-          <circle cx={143} cy={148} r={3} fill={darkenColor(config.skinTone, 8)} />
-          <circle cx={157} cy={148} r={3} fill={darkenColor(config.skinTone, 8)} />
+          <path d={`M ${cx - 6} ${ny - 8} Q ${cx} ${ny + 6} ${cx + 6} ${ny - 8}`} fill="none" stroke={sd} strokeWidth="1.8" strokeLinecap="round" />
+          <ellipse cx={cx - 8} cy={ny + 1} rx={5} ry={4} fill={sl} />
+          <ellipse cx={cx + 8} cy={ny + 1} rx={5} ry={4} fill={sl} />
         </g>
       )
     case 'pointed':
-      return <path d="M 150 132 L 146 150 Q 150 153 154 150 Z" fill={darkenColor(config.skinTone, 6)} stroke={darkenColor(config.skinTone, 15)} strokeWidth="0.8" />
+      return <path d={`M ${cx} ${ny - 12} L ${cx - 5} ${ny + 4} Q ${cx} ${ny + 7} ${cx + 5} ${ny + 4} Z`} fill={sl} stroke={sd} strokeWidth="0.8" />
     default:
       return (
         <g>
-          <path d="M 147 135 Q 150 152 153 135" fill="none" stroke={darkenColor(config.skinTone, 18)} strokeWidth="1.5" strokeLinecap="round" />
-          <circle cx={145} cy={148} r={2.5} fill={darkenColor(config.skinTone, 6)} />
-          <circle cx={155} cy={148} r={2.5} fill={darkenColor(config.skinTone, 6)} />
+          <path d={`M ${cx - 4} ${ny - 10} Q ${cx} ${ny + 4} ${cx + 4} ${ny - 10}`} fill="none" stroke={sd} strokeWidth="1.8" strokeLinecap="round" />
+          <ellipse cx={cx - 6} cy={ny} rx={4} ry={3} fill={sl} />
+          <ellipse cx={cx + 6} cy={ny} rx={4} ry={3} fill={sl} />
         </g>
       )
   }
 }
 
-function Mouth({ config }: { config: AvatarConfig }) {
-  const style = config.mouthStyle ?? 'smile'
+function MouthComp({ config, cx, cy }: { config: AvatarConfig; cx: number; cy: number }) {
+  const my = cy + 40
 
-  switch (style) {
+  switch (config.mouthStyle ?? 'smile') {
     case 'neutral':
-      return <line x1={138} y1={164} x2={162} y2={164} stroke="#8B4513" strokeWidth="2" strokeLinecap="round" />
+      return <line x1={cx - 16} y1={my} x2={cx + 16} y2={my} stroke="#9e6b5a" strokeWidth="2.5" strokeLinecap="round" />
     case 'grin':
       return (
         <g>
-          <path d="M 132 160 Q 150 178 168 160" fill="none" stroke="#8B4513" strokeWidth="2" strokeLinecap="round" />
+          <path d={`M ${cx - 22} ${my - 4} Q ${cx} ${my + 18} ${cx + 22} ${my - 4}`} fill="#8B4513" opacity="0.3" stroke="#8B4513" strokeWidth="2" strokeLinecap="round" />
           {/* Teeth */}
-          <path d="M 138 162 Q 150 170 162 162" fill="white" opacity="0.8" />
+          <path d={`M ${cx - 16} ${my - 1} Q ${cx} ${my + 6} ${cx + 16} ${my - 1}`} fill="white" opacity="0.9" />
+          <line x1={cx} y1={my - 1} x2={cx} y2={my + 4} stroke="rgba(0,0,0,0.1)" strokeWidth="0.5" />
         </g>
       )
     case 'serious':
-      return <path d="M 136 166 Q 150 162 164 166" fill="none" stroke="#8B4513" strokeWidth="2" strokeLinecap="round" />
+      return <path d={`M ${cx - 16} ${my + 2} Q ${cx} ${my - 3} ${cx + 16} ${my + 2}`} fill="none" stroke="#9e6b5a" strokeWidth="2.5" strokeLinecap="round" />
     default: // smile
-      return <path d="M 136 160 Q 150 174 164 160" fill="none" stroke="#8B4513" strokeWidth="2" strokeLinecap="round" />
+      return (
+        <g>
+          <path d={`M ${cx - 18} ${my - 2} Q ${cx} ${my + 14} ${cx + 18} ${my - 2}`} fill="none" stroke="#8B4513" strokeWidth="2.5" strokeLinecap="round" />
+          {/* Lip color hint */}
+          <path d={`M ${cx - 14} ${my} Q ${cx} ${my + 10} ${cx + 14} ${my}`} fill="#c27a68" opacity="0.2" />
+        </g>
+      )
   }
 }
 
-function FacialHairSVG({ style, color }: { style: string; color: string }) {
-  const c = darkenColor(color, 10)
+function Freckles({ cx, cy }: { cx: number; cy: number }) {
+  const spots = [
+    { dx: -35, dy: 12 }, { dx: -28, dy: 18 }, { dx: -40, dy: 22 },
+    { dx: -32, dy: 26 }, { dx: -25, dy: 14 },
+    { dx: 35, dy: 12 }, { dx: 28, dy: 18 }, { dx: 40, dy: 22 },
+    { dx: 32, dy: 26 }, { dx: 25, dy: 14 },
+    { dx: -5, dy: 22 }, { dx: 5, dy: 24 },
+  ]
+  return (
+    <g>
+      {spots.map((s, i) => (
+        <circle key={i} cx={cx + s.dx} cy={cy + s.dy} r={1.5} fill="#8B6B4F" opacity="0.35" />
+      ))}
+    </g>
+  )
+}
+
+function Scar({ type, cx, cy, skinTone }: { type: string; cx: number; cy: number; skinTone: string }) {
+  const sc = darken(skinTone, 25)
+  switch (type) {
+    case 'eyebrow':
+      return (
+        <g>
+          <line x1={cx - 35} y1={cy - 28} x2={cx - 25} y2={cy - 18} stroke={sc} strokeWidth="2" strokeLinecap="round" opacity="0.6" />
+          <line x1={cx - 34} y1={cy - 26} x2={cx - 26} y2={cy - 19} stroke={lighten(skinTone, 5)} strokeWidth="1" strokeLinecap="round" opacity="0.4" />
+        </g>
+      )
+    case 'cheek':
+      return (
+        <g>
+          <line x1={cx + 30} y1={cy + 10} x2={cx + 45} y2={cy + 22} stroke={sc} strokeWidth="1.8" strokeLinecap="round" opacity="0.5" />
+          <line x1={cx + 31} y1={cy + 12} x2={cx + 44} y2={cy + 21} stroke={lighten(skinTone, 5)} strokeWidth="0.8" strokeLinecap="round" opacity="0.3" />
+        </g>
+      )
+    case 'chin':
+      return (
+        <g>
+          <line x1={cx - 8} y1={cy + 55} x2={cx + 8} y2={cy + 58} stroke={sc} strokeWidth="1.8" strokeLinecap="round" opacity="0.5" />
+          <line x1={cx - 6} y1={cy + 56} x2={cx + 6} y2={cy + 58} stroke={lighten(skinTone, 5)} strokeWidth="0.8" strokeLinecap="round" opacity="0.3" />
+        </g>
+      )
+    default:
+      return null
+  }
+}
+
+function FacialHairComp({ style, color, cx, cy, face }: { style: string; color: string; cx: number; cy: number; face: typeof FACE_DIMS['oval'] }) {
+  const c = darken(color, 10)
+  const my = cy + 40
 
   switch (style) {
     case 'stubble':
       return (
-        <g opacity="0.35">
-          {Array.from({ length: 30 }).map((_, i) => {
-            const x = 130 + (i % 6) * 7 + Math.sin(i) * 3
-            const y = 158 + Math.floor(i / 6) * 6 + Math.cos(i) * 2
-            return <circle key={i} cx={x} cy={y} r={0.8} fill={c} />
+        <g opacity="0.3">
+          {Array.from({ length: 45 }).map((_, i) => {
+            const x = cx - 30 + (i % 8) * 8 + Math.sin(i * 7) * 3
+            const y = my - 10 + Math.floor(i / 8) * 7 + Math.cos(i * 5) * 2
+            return <circle key={i} cx={x} cy={y} r={0.9} fill={c} />
           })}
         </g>
       )
     case 'short_beard':
       return (
-        <path d="M 118 155 Q 115 175 125 185 Q 140 195 150 196 Q 160 195 175 185 Q 185 175 182 155"
-          fill={c} opacity="0.6" />
+        <path d={`M ${cx - 40} ${my - 8} Q ${cx - 45} ${my + 15} ${cx - 25} ${my + 30} Q ${cx} ${my + 38} ${cx + 25} ${my + 30} Q ${cx + 45} ${my + 15} ${cx + 40} ${my - 8}`}
+          fill={c} opacity="0.55" />
       )
     case 'full_beard':
       return (
         <g>
-          <path d="M 115 148 Q 110 175 120 200 Q 135 218 150 220 Q 165 218 180 200 Q 190 175 185 148"
-            fill={c} opacity="0.7" />
-          {/* Beard texture */}
-          <path d="M 130 170 Q 140 178 150 170" fill="none" stroke={color} strokeWidth="0.5" opacity="0.3" />
-          <path d="M 140 185 Q 150 192 160 185" fill="none" stroke={color} strokeWidth="0.5" opacity="0.3" />
+          <path d={`M ${cx - 50} ${my - 15} Q ${cx - 55} ${my + 20} ${cx - 25} ${my + 50} Q ${cx} ${my + 60} ${cx + 25} ${my + 50} Q ${cx + 55} ${my + 20} ${cx + 50} ${my - 15}`}
+            fill={c} opacity="0.65" />
+          <path d={`M ${cx - 20} ${my + 10} Q ${cx} ${my + 20} ${cx + 20} ${my + 10}`} fill="none" stroke={color} strokeWidth="0.6" opacity="0.2" />
+          <path d={`M ${cx - 15} ${my + 25} Q ${cx} ${my + 34} ${cx + 15} ${my + 25}`} fill="none" stroke={color} strokeWidth="0.6" opacity="0.2" />
         </g>
       )
     case 'mustache':
       return (
-        <path d="M 135 155 Q 140 150 150 153 Q 160 150 165 155 Q 160 160 150 158 Q 140 160 135 155 Z"
-          fill={c} opacity="0.75" />
+        <path d={`M ${cx - 20} ${my - 10} Q ${cx - 10} ${my - 15} ${cx} ${my - 12} Q ${cx + 10} ${my - 15} ${cx + 20} ${my - 10} Q ${cx + 10} ${my - 3} ${cx} ${my - 5} Q ${cx - 10} ${my - 3} ${cx - 20} ${my - 10} Z`}
+          fill={c} opacity="0.7" />
       )
     case 'goatee':
       return (
         <g>
-          <path d="M 138 155 Q 142 152 150 154 Q 158 152 162 155 Q 158 160 150 158 Q 142 160 138 155 Z"
-            fill={c} opacity="0.7" />
-          <path d="M 142 168 Q 140 188 150 195 Q 160 188 158 168"
-            fill={c} opacity="0.6" />
+          <path d={`M ${cx - 18} ${my - 10} Q ${cx - 8} ${my - 14} ${cx} ${my - 12} Q ${cx + 8} ${my - 14} ${cx + 18} ${my - 10} Q ${cx + 8} ${my - 4} ${cx} ${my - 6} Q ${cx - 8} ${my - 4} ${cx - 18} ${my - 10} Z`}
+            fill={c} opacity="0.65" />
+          <path d={`M ${cx - 12} ${my + 8} Q ${cx - 15} ${my + 30} ${cx} ${my + 38} Q ${cx + 15} ${my + 30} ${cx + 12} ${my + 8}`}
+            fill={c} opacity="0.55" />
         </g>
       )
     default:
@@ -619,41 +821,42 @@ function FacialHairSVG({ style, color }: { style: string; color: string }) {
   }
 }
 
-function GlassesSVG({ style }: { style: string }) {
-  const frameColor = '#333'
+function GlassesComp({ style, cx, cy }: { style: string; cx: number; cy: number }) {
+  const ey = cy - 5
+  const ex = 30
+  const fc = '#2a2a2a'
 
   switch (style) {
     case 'round':
       return (
         <g>
-          <circle cx={130} cy={128} r={16} fill="none" stroke={frameColor} strokeWidth="2.5" />
-          <circle cx={170} cy={128} r={16} fill="none" stroke={frameColor} strokeWidth="2.5" />
-          <line x1={146} y1={128} x2={154} y2={128} stroke={frameColor} strokeWidth="2" />
-          <line x1={114} y1={126} x2={105} y2={122} stroke={frameColor} strokeWidth="2" />
-          <line x1={186} y1={126} x2={195} y2={122} stroke={frameColor} strokeWidth="2" />
-          {/* Lens reflection */}
-          <ellipse cx={124} cy={124} rx={6} ry={4} fill="rgba(150,200,255,0.1)" />
-          <ellipse cx={164} cy={124} rx={6} ry={4} fill="rgba(150,200,255,0.1)" />
+          <circle cx={cx - ex} cy={ey} r={20} fill="none" stroke={fc} strokeWidth="3" />
+          <circle cx={cx + ex} cy={ey} r={20} fill="none" stroke={fc} strokeWidth="3" />
+          <line x1={cx - ex + 20} y1={ey} x2={cx + ex - 20} y2={ey} stroke={fc} strokeWidth="2.5" />
+          <line x1={cx - ex - 20} y1={ey - 2} x2={cx - ex - 30} y2={ey - 6} stroke={fc} strokeWidth="2.5" strokeLinecap="round" />
+          <line x1={cx + ex + 20} y1={ey - 2} x2={cx + ex + 30} y2={ey - 6} stroke={fc} strokeWidth="2.5" strokeLinecap="round" />
+          <ellipse cx={cx - ex - 5} cy={ey - 5} rx={8} ry={5} fill="rgba(150,200,255,0.08)" />
+          <ellipse cx={cx + ex - 5} cy={ey - 5} rx={8} ry={5} fill="rgba(150,200,255,0.08)" />
         </g>
       )
     case 'square':
       return (
         <g>
-          <rect x={114} y={116} width={32} height={24} rx={4} fill="none" stroke={frameColor} strokeWidth="2.5" />
-          <rect x={154} y={116} width={32} height={24} rx={4} fill="none" stroke={frameColor} strokeWidth="2.5" />
-          <line x1={146} y1={128} x2={154} y2={128} stroke={frameColor} strokeWidth="2" />
-          <line x1={114} y1={126} x2={105} y2={122} stroke={frameColor} strokeWidth="2" />
-          <line x1={186} y1={126} x2={195} y2={122} stroke={frameColor} strokeWidth="2" />
+          <rect x={cx - ex - 20} y={ey - 16} width={40} height={30} rx={5} fill="none" stroke={fc} strokeWidth="3" />
+          <rect x={cx + ex - 20} y={ey - 16} width={40} height={30} rx={5} fill="none" stroke={fc} strokeWidth="3" />
+          <line x1={cx - ex + 20} y1={ey} x2={cx + ex - 20} y2={ey} stroke={fc} strokeWidth="2.5" />
+          <line x1={cx - ex - 20} y1={ey - 4} x2={cx - ex - 30} y2={ey - 8} stroke={fc} strokeWidth="2.5" strokeLinecap="round" />
+          <line x1={cx + ex + 20} y1={ey - 4} x2={cx + ex + 30} y2={ey - 8} stroke={fc} strokeWidth="2.5" strokeLinecap="round" />
         </g>
       )
     case 'sport':
       return (
         <g>
-          <path d="M 108 124 Q 108 112 130 112 Q 146 112 148 124 Q 146 136 130 136 Q 108 136 108 124 Z"
-            fill="rgba(150,200,255,0.15)" stroke={frameColor} strokeWidth="2" />
-          <path d="M 192 124 Q 192 112 170 112 Q 154 112 152 124 Q 154 136 170 136 Q 192 136 192 124 Z"
-            fill="rgba(150,200,255,0.15)" stroke={frameColor} strokeWidth="2" />
-          <line x1={148} y1={124} x2={152} y2={124} stroke={frameColor} strokeWidth="2.5" />
+          <path d={`M ${cx - ex - 24} ${ey} Q ${cx - ex - 24} ${ey - 16} ${cx - ex} ${ey - 16} Q ${cx - 5} ${ey - 16} ${cx - 5} ${ey} Q ${cx - 5} ${ey + 14} ${cx - ex} ${ey + 14} Q ${cx - ex - 24} ${ey + 14} ${cx - ex - 24} ${ey} Z`}
+            fill="rgba(150,200,255,0.12)" stroke={fc} strokeWidth="2.5" />
+          <path d={`M ${cx + ex + 24} ${ey} Q ${cx + ex + 24} ${ey - 16} ${cx + ex} ${ey - 16} Q ${cx + 5} ${ey - 16} ${cx + 5} ${ey} Q ${cx + 5} ${ey + 14} ${cx + ex} ${ey + 14} Q ${cx + ex + 24} ${ey + 14} ${cx + ex + 24} ${ey} Z`}
+            fill="rgba(150,200,255,0.12)" stroke={fc} strokeWidth="2.5" />
+          <line x1={cx - 5} y1={ey} x2={cx + 5} y2={ey} stroke={fc} strokeWidth="3" />
         </g>
       )
     default:
@@ -661,93 +864,94 @@ function GlassesSVG({ style }: { style: string }) {
   }
 }
 
-function HairSVG({ style, color, face }: { style: string; color: string; face: typeof FACE_DIMS['oval'] }) {
-  const lighter = lightenColor(color, 15)
+function HairComp({ style, color, cx, cy, face }: { style: string; color: string; cx: number; cy: number; face: typeof FACE_DIMS['oval'] }) {
+  const lt = lighten(color, 15)
+  const topY = cy - face.ry
 
   switch (style) {
     case 'short':
       return (
         <g>
-          <path d={`M ${150 - face.rx - 2} 125 Q ${150 - face.rx - 4} 72 150 ${130 - face.ry - 4} Q ${150 + face.rx + 4} 72 ${150 + face.rx + 2} 125 Q ${150 + face.rx - 5} 88 150 82 Q ${150 - face.rx + 5} 88 ${150 - face.rx - 2} 125 Z`}
+          <path d={`M ${cx - face.rx - 3} ${cy - 10} Q ${cx - face.rx - 6} ${topY - 15} ${cx} ${topY - 20} Q ${cx + face.rx + 6} ${topY - 15} ${cx + face.rx + 3} ${cy - 10} Q ${cx + face.rx - 10} ${topY + 10} ${cx} ${topY + 5} Q ${cx - face.rx + 10} ${topY + 10} ${cx - face.rx - 3} ${cy - 10} Z`}
             fill={color} />
-          <path d={`M ${150 - face.rx + 10} 90 Q 150 78 ${150 + face.rx - 10} 90`} fill="none" stroke={lighter} strokeWidth="0.8" opacity="0.3" />
+          {/* Hair volume highlight */}
+          <ellipse cx={cx - 10} cy={topY - 5} rx={25} ry={10} fill={lt} opacity="0.12" />
         </g>
       )
     case 'buzz':
       return (
-        <path d={`M ${150 - face.rx} 130 Q ${150 - face.rx - 2} 75 150 ${130 - face.ry - 2} Q ${150 + face.rx + 2} 75 ${150 + face.rx} 130 Q ${150 + face.rx - 8} 95 150 90 Q ${150 - face.rx + 8} 95 ${150 - face.rx} 130 Z`}
-          fill={color} opacity="0.65" />
+        <path d={`M ${cx - face.rx} ${cy - 5} Q ${cx - face.rx - 3} ${topY - 8} ${cx} ${topY - 12} Q ${cx + face.rx + 3} ${topY - 8} ${cx + face.rx} ${cy - 5} Q ${cx + face.rx - 12} ${topY + 8} ${cx} ${topY + 5} Q ${cx - face.rx + 12} ${topY + 8} ${cx - face.rx} ${cy - 5} Z`}
+          fill={color} opacity="0.6" />
       )
     case 'medium':
       return (
         <g>
-          <path d={`M ${150 - face.rx - 6} 130 Q ${150 - face.rx - 8} 65 150 ${130 - face.ry - 8} Q ${150 + face.rx + 8} 65 ${150 + face.rx + 6} 130 Q ${150 + face.rx - 2} 80 150 75 Q ${150 - face.rx + 2} 80 ${150 - face.rx - 6} 130 Z`}
+          <path d={`M ${cx - face.rx - 8} ${cy} Q ${cx - face.rx - 12} ${topY - 20} ${cx} ${topY - 25} Q ${cx + face.rx + 12} ${topY - 20} ${cx + face.rx + 8} ${cy} Q ${cx + face.rx - 5} ${topY + 5} ${cx} ${topY} Q ${cx - face.rx + 5} ${topY + 5} ${cx - face.rx - 8} ${cy} Z`}
             fill={color} />
-          {/* Side hair flowing down */}
-          <path d={`M ${150 - face.rx - 4} 130 Q ${150 - face.rx - 12} 140 ${150 - face.rx - 8} 165 Q ${150 - face.rx - 2} 155 ${150 - face.rx} 138`} fill={color} />
-          <path d={`M ${150 + face.rx + 4} 130 Q ${150 + face.rx + 12} 140 ${150 + face.rx + 8} 165 Q ${150 + face.rx + 2} 155 ${150 + face.rx} 138`} fill={color} />
+          {/* Side hair */}
+          <path d={`M ${cx - face.rx - 6} ${cy} Q ${cx - face.rx - 18} ${cy + 15} ${cx - face.rx - 12} ${cy + 50}`} fill="none" stroke={color} strokeWidth="14" strokeLinecap="round" />
+          <path d={`M ${cx + face.rx + 6} ${cy} Q ${cx + face.rx + 18} ${cy + 15} ${cx + face.rx + 12} ${cy + 50}`} fill="none" stroke={color} strokeWidth="14" strokeLinecap="round" />
+          <ellipse cx={cx - 8} cy={topY - 8} rx={30} ry={12} fill={lt} opacity="0.1" />
         </g>
       )
     case 'long':
       return (
         <g>
-          <path d={`M ${150 - face.rx - 8} 135 Q ${150 - face.rx - 10} 60 150 ${130 - face.ry - 10} Q ${150 + face.rx + 10} 60 ${150 + face.rx + 8} 135 Q ${150 + face.rx} 75 150 70 Q ${150 - face.rx} 75 ${150 - face.rx - 8} 135 Z`}
+          <path d={`M ${cx - face.rx - 10} ${cy + 10} Q ${cx - face.rx - 15} ${topY - 25} ${cx} ${topY - 30} Q ${cx + face.rx + 15} ${topY - 25} ${cx + face.rx + 10} ${cy + 10} Q ${cx + face.rx} ${topY} ${cx} ${topY - 5} Q ${cx - face.rx} ${topY} ${cx - face.rx - 10} ${cy + 10} Z`}
             fill={color} />
-          <path d={`M ${150 - face.rx - 6} 135 Q ${150 - face.rx - 16} 160 ${150 - face.rx - 10} 210 Q ${150 - face.rx - 4} 200 ${150 - face.rx + 2} 150`} fill={color} />
-          <path d={`M ${150 + face.rx + 6} 135 Q ${150 + face.rx + 16} 160 ${150 + face.rx + 10} 210 Q ${150 + face.rx + 4} 200 ${150 + face.rx - 2} 150`} fill={color} />
+          <path d={`M ${cx - face.rx - 8} ${cy + 10} Q ${cx - face.rx - 22} ${cy + 40} ${cx - face.rx - 14} ${cy + 100}`} fill="none" stroke={color} strokeWidth="16" strokeLinecap="round" />
+          <path d={`M ${cx + face.rx + 8} ${cy + 10} Q ${cx + face.rx + 22} ${cy + 40} ${cx + face.rx + 14} ${cy + 100}`} fill="none" stroke={color} strokeWidth="16" strokeLinecap="round" />
         </g>
       )
     case 'bun':
       return (
         <g>
-          <path d={`M ${150 - face.rx - 2} 125 Q ${150 - face.rx - 4} 72 150 ${130 - face.ry - 4} Q ${150 + face.rx + 4} 72 ${150 + face.rx + 2} 125 Q ${150 + face.rx - 5} 88 150 82 Q ${150 - face.rx + 5} 88 ${150 - face.rx - 2} 125 Z`}
+          <path d={`M ${cx - face.rx - 3} ${cy - 10} Q ${cx - face.rx - 6} ${topY - 15} ${cx} ${topY - 20} Q ${cx + face.rx + 6} ${topY - 15} ${cx + face.rx + 3} ${cy - 10} Q ${cx + face.rx - 10} ${topY + 10} ${cx} ${topY + 5} Q ${cx - face.rx + 10} ${topY + 10} ${cx - face.rx - 3} ${cy - 10} Z`}
             fill={color} />
-          <ellipse cx={150} cy={60} rx={22} ry={18} fill={color} />
-          <ellipse cx={150} cy={58} rx={12} ry={8} fill={lighter} opacity="0.15" />
+          <ellipse cx={cx} cy={topY - 18} rx={28} ry={22} fill={color} />
+          <ellipse cx={cx - 5} cy={topY - 22} rx={14} ry={10} fill={lt} opacity="0.1" />
         </g>
       )
     case 'curly':
       return (
         <g>
-          <path d={`M ${150 - face.rx - 6} 135 Q ${150 - face.rx - 10} 60 150 ${130 - face.ry - 8} Q ${150 + face.rx + 10} 60 ${150 + face.rx + 6} 135 Q ${150 + face.rx} 80 150 74 Q ${150 - face.rx} 80 ${150 - face.rx - 6} 135 Z`}
+          <path d={`M ${cx - face.rx - 10} ${cy + 5} Q ${cx - face.rx - 14} ${topY - 20} ${cx} ${topY - 25} Q ${cx + face.rx + 14} ${topY - 20} ${cx + face.rx + 10} ${cy + 5} Q ${cx + face.rx} ${topY + 5} ${cx} ${topY} Q ${cx - face.rx} ${topY + 5} ${cx - face.rx - 10} ${cy + 5} Z`}
             fill={color} />
-          {/* Curly texture */}
-          {Array.from({ length: 12 }).map((_, i) => {
-            const angle = (i / 12) * Math.PI * 2
-            const cx = 150 + Math.cos(angle) * (face.rx - 8)
-            const cy = 95 + Math.sin(angle) * 25
-            return <circle key={i} cx={cx} cy={cy} r={8} fill={color} />
+          {/* Curly volume puffs */}
+          {Array.from({ length: 16 }).map((_, i) => {
+            const angle = (i / 16) * Math.PI * 2
+            const puffCx = cx + Math.cos(angle) * (face.rx - 5)
+            const puffCy = cy - 30 + Math.sin(angle) * 40
+            return <circle key={i} cx={puffCx} cy={puffCy} r={12} fill={color} />
           })}
         </g>
       )
     case 'mohawk':
       return (
-        <path d={`M 140 ${130 - face.ry + 10} Q 142 50 150 40 Q 158 50 160 ${130 - face.ry + 10} Q 158 55 150 48 Q 142 55 140 ${130 - face.ry + 10} Z`}
+        <path d={`M ${cx - 15} ${topY + 15} Q ${cx - 18} ${topY - 40} ${cx} ${topY - 55} Q ${cx + 18} ${topY - 40} ${cx + 15} ${topY + 15} Q ${cx + 10} ${topY - 20} ${cx} ${topY - 25} Q ${cx - 10} ${topY - 20} ${cx - 15} ${topY + 15} Z`}
           fill={color} />
       )
     case 'ponytail':
       return (
         <g>
-          <path d={`M ${150 - face.rx - 2} 125 Q ${150 - face.rx - 4} 72 150 ${130 - face.ry - 4} Q ${150 + face.rx + 4} 72 ${150 + face.rx + 2} 125 Q ${150 + face.rx - 5} 88 150 82 Q ${150 - face.rx + 5} 88 ${150 - face.rx - 2} 125 Z`}
+          <path d={`M ${cx - face.rx - 3} ${cy - 10} Q ${cx - face.rx - 6} ${topY - 15} ${cx} ${topY - 20} Q ${cx + face.rx + 6} ${topY - 15} ${cx + face.rx + 3} ${cy - 10} Q ${cx + face.rx - 10} ${topY + 10} ${cx} ${topY + 5} Q ${cx - face.rx + 10} ${topY + 10} ${cx - face.rx - 3} ${cy - 10} Z`}
             fill={color} />
-          {/* Ponytail going back */}
-          <ellipse cx={150} cy={82} rx={14} ry={10} fill={color} />
-          <path d="M 150 92 Q 155 120 152 160 Q 150 165 148 160 Q 145 120 150 92" fill={color} />
+          <ellipse cx={cx} cy={topY + 5} rx={16} ry={12} fill={color} />
+          <path d={`M ${cx} ${topY + 17} Q ${cx + 5} ${cy + 20} ${cx + 3} ${cy + 60}`} fill="none" stroke={color} strokeWidth="12" strokeLinecap="round" />
         </g>
       )
     case 'braids':
       return (
         <g>
-          <path d={`M ${150 - face.rx - 4} 130 Q ${150 - face.rx - 6} 68 150 ${130 - face.ry - 6} Q ${150 + face.rx + 6} 68 ${150 + face.rx + 4} 130 Q ${150 + face.rx - 3} 85 150 78 Q ${150 - face.rx + 3} 85 ${150 - face.rx - 4} 130 Z`}
+          <path d={`M ${cx - face.rx - 5} ${cy} Q ${cx - face.rx - 8} ${topY - 18} ${cx} ${topY - 22} Q ${cx + face.rx + 8} ${topY - 18} ${cx + face.rx + 5} ${cy} Q ${cx + face.rx - 5} ${topY + 5} ${cx} ${topY} Q ${cx - face.rx + 5} ${topY + 5} ${cx - face.rx - 5} ${cy} Z`}
             fill={color} />
-          {/* Braids */}
-          <path d={`M ${150 - face.rx} 130 Q ${150 - face.rx - 8} 160 ${150 - face.rx - 4} 210`} fill="none" stroke={color} strokeWidth="8" strokeLinecap="round" />
-          <path d={`M ${150 + face.rx} 130 Q ${150 + face.rx + 8} 160 ${150 + face.rx + 4} 210`} fill="none" stroke={color} strokeWidth="8" strokeLinecap="round" />
-          {/* Braid texture */}
-          {[0, 1, 2, 3].map(i => (
+          <path d={`M ${cx - face.rx + 2} ${cy + 5} Q ${cx - face.rx - 12} ${cy + 35} ${cx - face.rx - 6} ${cy + 85}`} fill="none" stroke={color} strokeWidth="10" strokeLinecap="round" />
+          <path d={`M ${cx + face.rx - 2} ${cy + 5} Q ${cx + face.rx + 12} ${cy + 35} ${cx + face.rx + 6} ${cy + 85}`} fill="none" stroke={color} strokeWidth="10" strokeLinecap="round" />
+          {/* Braid lines */}
+          {[0, 1, 2, 3, 4].map(i => (
             <g key={i}>
-              <line x1={150 - face.rx - 4 - 4} y1={145 + i * 16} x2={150 - face.rx - 4 + 4} y2={145 + i * 16} stroke={lighter} strokeWidth="1" opacity="0.3" />
-              <line x1={150 + face.rx + 4 - 4} y1={145 + i * 16} x2={150 + face.rx + 4 + 4} y2={145 + i * 16} stroke={lighter} strokeWidth="1" opacity="0.3" />
+              <line x1={cx - face.rx - 10} y1={cy + 15 + i * 16} x2={cx - face.rx} y2={cy + 15 + i * 16} stroke={lt} strokeWidth="1" opacity="0.25" />
+              <line x1={cx + face.rx} y1={cy + 15 + i * 16} x2={cx + face.rx + 10} y2={cy + 15 + i * 16} stroke={lt} strokeWidth="1" opacity="0.25" />
             </g>
           ))}
         </g>
@@ -757,8 +961,9 @@ function HairSVG({ style, color, face }: { style: string; color: string; face: t
   }
 }
 
-// Color utility functions
-function darkenColor(hex: string, amount: number): string {
+// === COLOR UTILS ===
+
+function darken(hex: string, amount: number): string {
   const num = parseInt(hex.replace('#', ''), 16)
   const r = Math.max(0, (num >> 16) - amount)
   const g = Math.max(0, ((num >> 8) & 0xff) - amount)
@@ -766,7 +971,7 @@ function darkenColor(hex: string, amount: number): string {
   return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, '0')}`
 }
 
-function lightenColor(hex: string, amount: number): string {
+function lighten(hex: string, amount: number): string {
   const num = parseInt(hex.replace('#', ''), 16)
   const r = Math.min(255, (num >> 16) + amount)
   const g = Math.min(255, ((num >> 8) & 0xff) + amount)

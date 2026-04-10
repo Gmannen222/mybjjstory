@@ -22,8 +22,15 @@ const MOCK_AVATAR: AvatarConfig = {
   bodyType: 'athletic',
   earType: 'cauliflower',
   eyeColor: '#4A7CB5',
+  eyeShape: 'default',
   eyebrowStyle: 'normal',
   mouthStyle: 'smile',
+  fingerTape: true,
+  headband: false,
+  mouthguard: false,
+  kneePads: false,
+  freckles: false,
+  scar: 'eyebrow',
 }
 
 export default function DemoPage() {
