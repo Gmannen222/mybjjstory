@@ -3,7 +3,8 @@ import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Profile } from '@/lib/types/database'
-import { BeltBadge } from '@/components/ui/BeltBadge'
+import { BeltBadge, BeltDisplay } from '@/components/ui/BeltBadge'
+import AvatarSVG, { DEFAULT_AVATAR, type AvatarConfig } from '@/components/avatar/AvatarSVG'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,17 +54,19 @@ export default async function ProfilePage({
 
       <div className="bg-surface rounded-xl p-6">
         <div className="flex items-center gap-4">
-          {session.user.user_metadata?.avatar_url ? (
-            <img
-              src={session.user.user_metadata.avatar_url}
-              alt=""
-              className="w-16 h-16 rounded-full"
-            />
-          ) : (
-            <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-2xl font-bold text-primary">
-              {(p?.display_name || session.user.email || '?')[0].toUpperCase()}
+          {/* BJJ Avatar */}
+          <Link href={`/${locale}/profile/avatar`} className="group flex-shrink-0">
+            <div className="bg-background rounded-xl p-2 border border-white/5 group-hover:border-primary/30 transition-colors">
+              <AvatarSVG
+                config={{
+                  ...DEFAULT_AVATAR,
+                  ...(p?.avatar_config as AvatarConfig ?? {}),
+                  beltRank: p?.belt_rank,
+                }}
+                size={60}
+              />
             </div>
-          )}
+          </Link>
 
           <div>
             <h2 className="text-xl font-bold">

@@ -4,14 +4,37 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
-import { BeltBadge } from '@/components/ui/BeltBadge'
+import { BeltBadge, BeltDisplay } from '@/components/ui/BeltBadge'
+import AvatarSVG, { DEFAULT_AVATAR, type AvatarConfig } from '@/components/avatar/AvatarSVG'
+import DashboardSettings from './DashboardSettings'
+import type { DashboardConfig } from '@/lib/types/database'
+
+const DEFAULT_DASHBOARD: DashboardConfig = {
+  showTrainingStats: true,
+  showCompetitionStats: false,
+  showActiveInjuries: true,
+  showRecentTraining: true,
+  showQuickActions: true,
+  showFavoriteSub: false,
+  showFavoriteGuard: false,
+  showBelt: true,
+  showAvatar: true,
+}
+
+interface ProfileData {
+  belt_rank: string | null
+  belt_degrees: number
+  display_name: string | null
+  avatar_config: AvatarConfig | null
+  dashboard_config: DashboardConfig | null
+  favorite_guard: string | null
+  favorite_submission: string | null
+}
 
 interface Stats {
   weekCount: number
   monthCount: number
   totalCount: number
-  currentBelt: string | null
-  displayName: string | null
   competitionCount: number
   goldCount: number
   activeInjuries: number
@@ -45,8 +68,11 @@ export default function Dashboard({
   locale: string
   userId: string
 }) {
+  const [profile, setProfile] = useState<ProfileData | null>(null)
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showSettings, setShowSettings] = useState(false)
+  const [dashConfig, setDashConfig] = useState<DashboardConfig>(DEFAULT_DASHBOARD)
   const supabase = createClient()
   const t = useTranslations('home')
   const tTraining = useTranslations('training')
@@ -74,7 +100,7 @@ export default function Dashboard({
           .eq('user_id', userId),
         supabase
           .from('profiles')
-          .select('belt_rank, display_name')
+          .select('belt_rank, belt_degrees, display_name, avatar_config, dashboard_config, favorite_guard, favorite_submission')
           .eq('id', userId)
           .single(),
         supabase
@@ -93,12 +119,14 @@ export default function Dashboard({
           .is('date_recovered', null),
       ])
 
+      const profileData = profileRes.data as ProfileData | null
+      setProfile(profileData)
+      setDashConfig({ ...DEFAULT_DASHBOARD, ...(profileData?.dashboard_config ?? {}) })
+
       setStats({
         weekCount: weekRes.count ?? 0,
         monthCount: monthRes.count ?? 0,
         totalCount: totalRes.count ?? 0,
-        currentBelt: profileRes.data?.belt_rank ?? null,
-        displayName: profileRes.data?.display_name ?? null,
         competitionCount: compRes.count ?? 0,
         goldCount: goldRes.count ?? 0,
         activeInjuries: injuryRes.count ?? 0,
@@ -123,46 +151,115 @@ export default function Dashboard({
     )
   }
 
+  const avatarConfig: AvatarConfig = {
+    ...DEFAULT_AVATAR,
+    ...(profile?.avatar_config ?? {}),
+    beltRank: profile?.belt_rank,
+  }
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-10">
-      {/* Welcome */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">
-            {t('welcome')}, {stats?.displayName || 'utøver'}!
-          </h1>
-          {stats?.currentBelt && (
-            <div className="mt-2">
-              <BeltBadge rank={stats.currentBelt} />
+      {/* Header with avatar */}
+      <div className="flex items-start justify-between mb-8">
+        <div className="flex items-center gap-5">
+          {/* Avatar */}
+          {dashConfig.showAvatar && (
+            <Link href={`/${locale}/profile/avatar`} className="group flex-shrink-0">
+              <div className="bg-surface rounded-2xl p-3 border border-white/5 group-hover:border-primary/30 transition-colors">
+                <AvatarSVG config={avatarConfig} size={70} />
+              </div>
+            </Link>
+          )}
+
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold">
+              {t('welcome')}, {profile?.display_name || 'utøver'}!
+            </h1>
+            {dashConfig.showBelt && profile?.belt_rank && (
+              <div className="mt-2 flex items-center gap-3">
+                <div className="w-32">
+                  <BeltDisplay rank={profile.belt_rank} degrees={profile.belt_degrees} size="sm" />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowSettings(!showSettings)}
+            className="px-3 py-2 border border-white/10 rounded-lg text-sm text-muted hover:text-foreground hover:bg-surface transition-colors"
+            title="Tilpass forside"
+          >
+            ⚙
+          </button>
+          <Link
+            href={`/${locale}/training/new`}
+            className="px-5 py-2.5 bg-primary text-background font-bold rounded-xl hover:bg-primary-hover transition-colors text-sm"
+          >
+            + {tTraining('newSession')}
+          </Link>
+        </div>
+      </div>
+
+      {/* Settings drawer */}
+      {showSettings && (
+        <div className="mb-8 bg-surface rounded-xl border border-white/5 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-bold">Tilpass forsiden</h2>
+            <button
+              type="button"
+              onClick={() => setShowSettings(false)}
+              className="text-sm text-muted hover:text-foreground"
+            >
+              Lukk
+            </button>
+          </div>
+          <DashboardSettings config={dashConfig} onUpdate={setDashConfig} />
+        </div>
+      )}
+
+      {/* Favorites row */}
+      {(dashConfig.showFavoriteSub || dashConfig.showFavoriteGuard) && (
+        <div className="flex gap-4 mb-6">
+          {dashConfig.showFavoriteGuard && profile?.favorite_guard && (
+            <div className="bg-surface rounded-xl px-4 py-3 flex items-center gap-2">
+              <span className="text-xs text-muted">Favorittguard:</span>
+              <span className="text-sm font-semibold text-blue-400">{profile.favorite_guard}</span>
+            </div>
+          )}
+          {dashConfig.showFavoriteSub && profile?.favorite_submission && (
+            <div className="bg-surface rounded-xl px-4 py-3 flex items-center gap-2">
+              <span className="text-xs text-muted">Favoritt-sub:</span>
+              <span className="text-sm font-semibold text-red-400">{profile.favorite_submission}</span>
             </div>
           )}
         </div>
-        <Link
-          href={`/${locale}/training/new`}
-          className="px-6 py-3 bg-primary text-background font-bold rounded-xl hover:bg-primary-hover transition-colors"
-        >
-          + {tTraining('newSession')}
-        </Link>
-      </div>
+      )}
 
       {/* Stats */}
-      <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-10">
-        {[
-          { label: tTraining('stats.thisWeek'), value: stats?.weekCount ?? 0 },
-          { label: tTraining('stats.thisMonth'), value: stats?.monthCount ?? 0 },
-          { label: tTraining('stats.total'), value: stats?.totalCount ?? 0 },
-          { label: 'Konkurranser', value: stats?.competitionCount ?? 0 },
-          { label: 'Gull', value: stats?.goldCount ?? 0 },
-        ].map(({ label, value }) => (
-          <div key={label} className="bg-surface rounded-xl p-4 text-center">
-            <div className="text-2xl sm:text-3xl font-bold text-primary">{value}</div>
-            <div className="text-xs sm:text-sm text-muted mt-1">{label}</div>
-          </div>
-        ))}
-      </div>
+      {dashConfig.showTrainingStats && (
+        <div className={`grid ${dashConfig.showCompetitionStats ? 'grid-cols-3 sm:grid-cols-5' : 'grid-cols-3'} gap-3 mb-8`}>
+          {[
+            { label: tTraining('stats.thisWeek'), value: stats?.weekCount ?? 0 },
+            { label: tTraining('stats.thisMonth'), value: stats?.monthCount ?? 0 },
+            { label: tTraining('stats.total'), value: stats?.totalCount ?? 0 },
+            ...(dashConfig.showCompetitionStats ? [
+              { label: 'Konkurranser', value: stats?.competitionCount ?? 0 },
+              { label: 'Gull', value: stats?.goldCount ?? 0 },
+            ] : []),
+          ].map(({ label, value }) => (
+            <div key={label} className="bg-surface rounded-xl p-4 text-center">
+              <div className="text-2xl sm:text-3xl font-bold text-primary">{value}</div>
+              <div className="text-xs sm:text-sm text-muted mt-1">{label}</div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Active injuries alert */}
-      {(stats?.activeInjuries ?? 0) > 0 && (
+      {dashConfig.showActiveInjuries && (stats?.activeInjuries ?? 0) > 0 && (
         <Link
           href={`/${locale}/injuries`}
           className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-8 hover:bg-red-500/15 transition-colors"
@@ -178,32 +275,40 @@ export default function Dashboard({
       )}
 
       {/* Quick actions */}
-      <h2 className="text-lg font-bold mb-4">Hurtigvalg</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-10">
-        {[
-          { href: `/${locale}/training/new`, icon: '🥋', label: tTraining('newSession') },
-          { href: `/${locale}/training`, icon: '📋', label: tTraining('title') },
-          { href: `/${locale}/competitions`, icon: '🏆', label: 'Konkurranser' },
-          { href: `/${locale}/feed`, icon: '📰', label: 'Feed' },
-          { href: `/${locale}/gradings`, icon: '🏅', label: 'Graderinger' },
-          { href: `/${locale}/injuries`, icon: '🩹', label: 'Skader' },
-        ].map(({ href, icon, label }) => (
-          <Link
-            key={href}
-            href={href}
-            className="bg-surface hover:bg-surface-hover rounded-xl p-4 text-center transition-colors"
-          >
-            <div className="text-2xl sm:text-3xl mb-2">{icon}</div>
-            <div className="text-sm font-medium">{label}</div>
-          </Link>
-        ))}
-      </div>
+      {dashConfig.showQuickActions && (
+        <>
+          <h2 className="text-lg font-bold mb-4">Hurtigvalg</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-10">
+            {[
+              { href: `/${locale}/training/new`, icon: '🥋', label: tTraining('newSession') },
+              { href: `/${locale}/training`, icon: '📋', label: tTraining('title') },
+              { href: `/${locale}/competitions`, icon: '🏆', label: 'Konkurranser' },
+              { href: `/${locale}/feed`, icon: '📰', label: 'Feed' },
+              { href: `/${locale}/gradings`, icon: '🏅', label: 'Graderinger' },
+              { href: `/${locale}/injuries`, icon: '🩹', label: 'Skader' },
+            ].map(({ href, icon, label }) => (
+              <Link
+                key={href}
+                href={href}
+                className="bg-surface hover:bg-surface-hover rounded-xl p-4 text-center transition-colors"
+              >
+                <div className="text-2xl sm:text-3xl mb-2">{icon}</div>
+                <div className="text-sm font-medium">{label}</div>
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
 
       {/* Recent training */}
-      <RecentTraining userId={userId} locale={locale} />
+      {dashConfig.showRecentTraining && (
+        <RecentTraining userId={userId} locale={locale} />
+      )}
 
       {/* Active injuries detail */}
-      <ActiveInjuriesList userId={userId} locale={locale} />
+      {dashConfig.showActiveInjuries && (
+        <ActiveInjuriesList userId={userId} locale={locale} />
+      )}
     </div>
   )
 }

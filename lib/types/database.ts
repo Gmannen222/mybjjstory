@@ -35,6 +35,31 @@ export type TrainingImpact = 'none' | 'modified' | 'rest'
 
 export type GradingType = 'belt' | 'stripe'
 
+export type ProfileVisibility = 'private' | 'public' | 'followers' | 'academy' | 'custom'
+
+export interface AvatarConfigData {
+  skinTone: string
+  hairStyle: string
+  hairColor: string
+  outfit: string
+  beltRank?: string | null
+  academyColor?: string | null
+  showInjuries?: string[]
+  gender: string
+}
+
+export interface DashboardConfig {
+  showTrainingStats: boolean
+  showCompetitionStats: boolean
+  showActiveInjuries: boolean
+  showRecentTraining: boolean
+  showQuickActions: boolean
+  showFavoriteSub: boolean
+  showFavoriteGuard: boolean
+  showBelt: boolean
+  showAvatar: boolean
+}
+
 export interface Profile {
   id: string
   username: string | null
@@ -59,6 +84,10 @@ export interface Profile {
   show_stats: boolean
   show_feed: boolean
   show_kids_belts: boolean
+  avatar_config: AvatarConfigData | null
+  dashboard_config: DashboardConfig
+  profile_visibility: ProfileVisibility
+  public_display_name: string | null
   training_preference: 'gi' | 'nogi' | 'both' | null
   passion_level: number | null
   currently_training: boolean

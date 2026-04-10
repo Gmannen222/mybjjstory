@@ -4,8 +4,15 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
-import type { Profile, BeltRank } from '@/lib/types/database'
+import type { Profile, BeltRank, ProfileVisibility } from '@/lib/types/database'
 import { BELT_COLORS, BELT_LABELS, ADULT_BELTS, KIDS_BELTS, BeltDisplay } from '@/components/ui/BeltBadge'
+
+const VISIBILITY_OPTIONS: { value: ProfileVisibility; label: string; desc: string }[] = [
+  { value: 'private', label: 'Privat', desc: 'Kun synlig for deg' },
+  { value: 'followers', label: 'Følgere', desc: 'Kun de som følger deg' },
+  { value: 'academy', label: 'Akademi', desc: 'Kun ditt akademi' },
+  { value: 'public', label: 'Alle', desc: 'Synlig for alle' },
+]
 
 const GUARDS = [
   'Closed Guard', 'Half Guard', 'De La Riva', 'Butterfly', 'X-Guard',
@@ -51,6 +58,8 @@ export default function ProfileForm({
   const [showCompetitions, setShowCompetitions] = useState(profile?.show_competitions ?? true)
   const [showStats, setShowStats] = useState(profile?.show_stats ?? false)
   const [showFeed, setShowFeed] = useState(profile?.show_feed ?? true)
+  const [profileVisibility, setProfileVisibility] = useState<ProfileVisibility>(profile?.profile_visibility ?? 'private')
+  const [publicDisplayName, setPublicDisplayName] = useState(profile?.public_display_name ?? '')
 
   const router = useRouter()
   const supabase = createClient()
@@ -104,6 +113,8 @@ export default function ProfileForm({
         show_stats: showStats,
         show_feed: showFeed,
         show_kids_belts: showKidsBelts,
+        profile_visibility: profileVisibility,
+        public_display_name: publicDisplayName || null,
       })
       .eq('id', userId)
 
@@ -232,19 +243,53 @@ export default function ProfileForm({
         </div>
       </section>
 
-      {/* Visibility */}
+      {/* Sharing & Visibility */}
       <section>
-        <h2 className="text-lg font-bold mb-4">Synlighet</h2>
-        <p className="text-sm text-muted mb-4">Velg hva andre kan se på profilen din.</p>
-        <div className="space-y-3">
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)}
-              className="w-5 h-5 rounded accent-primary" />
-            <span className="text-sm font-medium">Offentlig profil</span>
-          </label>
+        <h2 className="text-lg font-bold mb-4">Deling og synlighet</h2>
+        <p className="text-sm text-muted mb-4">Velg hvem som kan se profilen din, og hva de ser.</p>
 
-          {isPublic && (
-            <div className="ml-8 space-y-2 border-l-2 border-primary/20 pl-4">
+        {/* Profile visibility */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-muted mb-2">Hvem kan se profilen din?</label>
+          <div className="grid grid-cols-2 gap-2">
+            {VISIBILITY_OPTIONS.map((opt) => (
+              <button key={opt.value} type="button"
+                onClick={() => {
+                  setProfileVisibility(opt.value)
+                  setIsPublic(opt.value === 'public')
+                }}
+                className={`p-3 rounded-lg text-left transition-colors border ${
+                  profileVisibility === opt.value
+                    ? 'border-primary bg-primary/10'
+                    : 'border-white/5 bg-surface hover:bg-surface-hover'
+                }`}
+              >
+                <div className="text-sm font-medium">{opt.label}</div>
+                <div className="text-xs text-muted">{opt.desc}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Public display name */}
+        {profileVisibility !== 'private' && (
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-muted mb-2">
+              Visningsnavn for andre
+              <span className="text-xs text-muted ml-1">(valgfritt — bruker visningsnavnet ditt hvis tomt)</span>
+            </label>
+            <input type="text" value={publicDisplayName}
+              onChange={(e) => setPublicDisplayName(e.target.value)}
+              placeholder={displayName || 'Ditt visningsnavn'}
+              className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
+          </div>
+        )}
+
+        {/* What to share */}
+        {profileVisibility !== 'private' && (
+          <div>
+            <label className="block text-sm font-medium text-muted mb-3">Hva kan andre se?</label>
+            <div className="space-y-2 border-l-2 border-primary/20 pl-4">
               {[
                 { label: 'Belte', checked: showBelt, set: setShowBelt },
                 { label: 'Akademi', checked: showAcademy, set: setShowAcademy },
@@ -263,8 +308,8 @@ export default function ProfileForm({
                 </label>
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </section>
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
