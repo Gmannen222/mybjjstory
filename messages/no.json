@@ -6,7 +6,8 @@
     "gradings": "Graderinger",
     "injuries": "Skader",
     "profile": "Profil",
-    "settings": "Innstillinger"
+    "settings": "Innstillinger",
+    "feedback": "Tilbakemelding"
   },
   "home": {
     "title": "MyBJJStory",
@@ -111,6 +112,10 @@
       "thisMonth": "Denne måneden",
       "total": "Totalt",
       "sessions": "treninger"
+    },
+    "view": {
+      "list": "Liste",
+      "calendar": "Kalender"
     }
   },
   "gradings": {
@@ -265,5 +270,29 @@
   "pwa": {
     "install": "Installer appen",
     "offline": "Du er offline. Endringer lagres lokalt."
+  },
+  "feedback": {
+    "title": "Tilbakemelding",
+    "subtitle": "Hjelp oss å gjøre MyBJJStory bedre! Del dine forslag, ønsker eller rapporter feil.",
+    "type": "Type",
+    "typeSuggestion": "Forslag",
+    "typeWish": "Ønske",
+    "typeBug": "Feilrapport",
+    "typeOther": "Annet",
+    "message": "Din tilbakemelding",
+    "messagePlaceholder": "Beskriv forslaget, ønsket eller feilen...",
+    "email": "E-post (valgfritt)",
+    "emailPlaceholder": "Hvis du ønsker svar",
+    "submit": "Send tilbakemelding",
+    "sending": "Sender...",
+    "success": "Takk for tilbakemeldingen!",
+    "successDescription": "Vi setter stor pris på at du tar deg tid til å hjelpe oss bli bedre.",
+    "error": "Noe gikk galt. Prøv igjen.",
+    "sendAnother": "Send en ny tilbakemelding",
+    "previous": "Dine tilbakemeldinger",
+    "noPrevious": "Du har ikke sendt noen tilbakemeldinger ennå.",
+    "statusNew": "Ny",
+    "statusRead": "Lest",
+    "statusResolved": "Løst"
   }
 }

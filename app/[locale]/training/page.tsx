@@ -5,6 +5,8 @@ import Link from 'next/link'
 import type { TrainingSession } from '@/lib/types/database'
 import ShareButton from '@/components/training/ShareButton'
 import TrainingFilter from '@/components/training/TrainingFilter'
+import TrainingCalendar from '@/components/training/TrainingCalendar'
+import TrainingViewToggle from '@/components/training/TrainingViewToggle'
 
 export const dynamic = 'force-dynamic'
 
@@ -47,6 +49,76 @@ export default async function TrainingPage({
 
   const allSessions = (sessions || []) as TrainingSession[]
 
+  const listView = (
+    <>
+      {allSessions.length === 0 ? (
+        <div className="text-center py-20 text-muted">
+          <p className="text-lg">{filters.type || filters.month ? 'Ingen treninger med dette filteret' : t('noSessions')}</p>
+          {!filters.type && !filters.month && (
+            <Link
+              href={`/${locale}/training/new`}
+              className="inline-block mt-4 px-6 py-3 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors"
+            >
+              {t('newSession')}
+            </Link>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {allSessions.map((s) => (
+            <Link
+              key={s.id}
+              href={`/${locale}/training/${s.id}`}
+              className="block bg-surface hover:bg-surface-hover rounded-xl p-4 transition-colors"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-semibold">
+                    {new Date(s.date + 'T00:00:00').toLocaleDateString('no-NO', {
+                      weekday: 'short',
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                  </div>
+                  <div className="text-sm text-muted mt-0.5">
+                    {t(`types.${s.type}`)}
+                    {s.duration_min && ` · ${s.duration_min} ${t('durationMin')}`}
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <ShareButton
+                    sessionId={s.id}
+                    sessionDate={s.date}
+                    sessionType={s.type}
+                  />
+                  <span className="text-muted text-sm">→</span>
+                </div>
+              </div>
+              {s.notes && (
+                <p className="text-sm text-muted mt-2 line-clamp-2">
+                  {s.notes}
+                </p>
+              )}
+            </Link>
+          ))}
+        </div>
+      )}
+    </>
+  )
+
+  const calendarView = (
+    <TrainingCalendar
+      sessions={allSessions.map((s) => ({
+        id: s.id,
+        date: s.date,
+        type: s.type,
+        duration_min: s.duration_min,
+      }))}
+      locale={locale}
+    />
+  )
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
@@ -79,52 +151,10 @@ export default async function TrainingPage({
         </div>
       )}
 
-      {allSessions.length === 0 ? (
-        <div className="text-center py-20 text-muted">
-          <p className="text-lg">{filters.type || filters.month ? 'Ingen treninger med dette filteret' : t('noSessions')}</p>
-          {!filters.type && !filters.month && (
-            <Link
-              href={`/${locale}/training/new`}
-              className="inline-block mt-4 px-6 py-3 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors"
-            >
-              {t('newSession')}
-            </Link>
-          )}
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {allSessions.map((s) => (
-            <Link
-              key={s.id}
-              href={`/${locale}/training/${s.id}`}
-              className="block bg-surface hover:bg-surface-hover rounded-xl p-4 transition-colors"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-semibold">{s.date}</div>
-                  <div className="text-sm text-muted mt-0.5">
-                    {t(`types.${s.type}`)}
-                    {s.duration_min && ` · ${s.duration_min} ${t('durationMin')}`}
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <ShareButton
-                    sessionId={s.id}
-                    sessionDate={s.date}
-                    sessionType={s.type}
-                  />
-                  <span className="text-muted text-sm">→</span>
-                </div>
-              </div>
-              {s.notes && (
-                <p className="text-sm text-muted mt-2 line-clamp-2">
-                  {s.notes}
-                </p>
-              )}
-            </Link>
-          ))}
-        </div>
-      )}
+      <TrainingViewToggle
+        listView={listView}
+        calendarView={calendarView}
+      />
     </div>
   )
 }

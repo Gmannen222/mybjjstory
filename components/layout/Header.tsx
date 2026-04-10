@@ -36,6 +36,9 @@ export default function Header() {
           <Link href={`/${locale}/profile`} className="hover:text-foreground transition-colors">
             Profil
           </Link>
+          <Link href={`/${locale}/feedback`} className="hover:text-foreground transition-colors">
+            Tilbakemelding
+          </Link>
           <Link href={`/${locale}/settings`} className="hover:text-foreground transition-colors">
             ⚙
           </Link>
