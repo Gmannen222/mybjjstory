@@ -10,11 +10,11 @@ CREATE POLICY "Users and admin can read feedback"
   ON feedback FOR SELECT TO authenticated
   USING (
     auth.uid() = user_id
-    OR (auth.jwt() ->> 'email') = 'glenn@mybjjstory.no'
+    OR (auth.jwt() ->> 'email') = 'gmannen@gmail.com'
   );
 
 -- Admin can update any feedback (status, admin_note)
 CREATE POLICY "Admin can update all feedback"
   ON feedback FOR UPDATE TO authenticated
-  USING ((auth.jwt() ->> 'email') = 'glenn@mybjjstory.no')
-  WITH CHECK ((auth.jwt() ->> 'email') = 'glenn@mybjjstory.no');
+  USING ((auth.jwt() ->> 'email') = 'gmannen@gmail.com')
+  WITH CHECK ((auth.jwt() ->> 'email') = 'gmannen@gmail.com');
