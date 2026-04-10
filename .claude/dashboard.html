@@ -364,7 +364,7 @@
     <h1>My<span>BJJ</span>Story</h1>
     <div class="header-meta">
       <span><span class="dot"></span> Live — mybjjstory.no</span>
-      <span>Siste commit: b9eabb1</span>
+      <span>Siste commit: d9cb1d1</span>
       <span>10. april 2026</span>
     </div>
   </div>
@@ -377,9 +377,9 @@
       <div class="stat-delta up">+1 denne sesjonen</div>
     </div>
     <div class="stat-card">
-      <div class="stat-value" style="color:var(--green);">35</div>
+      <div class="stat-value" style="color:var(--green);">38</div>
       <div class="stat-label">Komponenter</div>
-      <div class="stat-delta up">+4 denne sesjonen</div>
+      <div class="stat-delta up">+3 denne sesjonen</div>
     </div>
     <div class="stat-card">
       <div class="stat-value" style="color:var(--blue);">13</div>
@@ -387,9 +387,9 @@
       <div class="stat-delta neutral">uendret</div>
     </div>
     <div class="stat-card">
-      <div class="stat-value" style="color:var(--purple);">15</div>
+      <div class="stat-value" style="color:var(--purple);">16</div>
       <div class="stat-label">Commits</div>
-      <div class="stat-delta up">+1 i dag</div>
+      <div class="stat-delta up">+2 i dag</div>
     </div>
     <div class="stat-card">
       <div class="stat-value" style="color:var(--amber);">6</div>
@@ -405,16 +405,15 @@
 
   <div class="update-bar">
     <div class="top-row">
-      <span><span class="label">Sist oppdatert:</span> <span class="date">2026-04-10 kl 22:00</span></span>
-      <span>Sesjon #6</span>
+      <span><span class="label">Sist oppdatert:</span> <span class="date">2026-04-10 kl 23:30</span></span>
+      <span>Sesjon #7</span>
     </div>
     <div class="changelog">
-      <span class="tag">Chibi avatar overhaul</span>
-      <span class="tag">Anime-øyne</span>
-      <span class="tag">Belt degree-striper</span>
-      <span class="tag">3D PoC (Three.js)</span>
-      <span class="tag">CSS 3D + RPM PoC</span>
-      <span class="tag">Gradient ID-fix</span>
+      <span class="tag">Treningskalender</span>
+      <span class="tag">Liste/kalender-toggle</span>
+      <span class="tag">Datoformatering fikset</span>
+      <span class="tag">Feedback-side</span>
+      <span class="tag">Treningslogg evaluert</span>
     </div>
   </div>
 
@@ -429,36 +428,36 @@
       <div class="current-item">
         <div class="status-dot done"></div>
         <div>
-          <div class="current-label">Chibi proporsjoner overhaul</div>
-          <div class="current-sub">Hodet 35-40% større, kropp komprimert, bein 40% kortere, hals redusert</div>
+          <div class="current-label">Treningskalender-komponent</div>
+          <div class="current-sub">Månedsgrid, fargekodede prikker per type, heatmap-intensitet, dag-klikk detaljer, månedsnavigering</div>
         </div>
       </div>
       <div class="current-item">
         <div class="status-dot done"></div>
         <div>
-          <div class="current-label">Anime-øyne og chibi-detaljer</div>
-          <div class="current-sub">Øyne dobbelt størrelse med sparkle-highlights, chibi-never, forenklede føtter</div>
+          <div class="current-label">Liste/kalender-toggle</div>
+          <div class="current-sub">TrainingViewToggle: bytt mellom listevisning og kalendervisning på treningssiden</div>
         </div>
       </div>
       <div class="current-item">
         <div class="status-dot done"></div>
         <div>
-          <div class="current-label">Belte-oppdatering og gi-detaljer</div>
-          <div class="current-sub">50% tykkere belte med degree-striper (beltDegrees-felt), diagonalt patch-stripe på gi</div>
+          <div class="current-label">Datoformatering fikset</div>
+          <div class="current-sub">Fra rå ISO (2026-04-10) til formatert norsk (tor. 10. april 2026) i treningslisten</div>
         </div>
       </div>
       <div class="current-item">
         <div class="status-dot done"></div>
         <div>
-          <div class="current-label">3D Avatar PoC-er (tre varianter)</div>
-          <div class="current-sub">CSS 3D Transform, Three.js/R3F low-poly, Ready Player Me — vist i /demo</div>
+          <div class="current-label">Feedback-side</div>
+          <div class="current-sub">Ny /feedback-rute med skjema (forslag/ønske/feil/annet), header-link, i18n-tekster</div>
         </div>
       </div>
       <div class="current-item">
         <div class="status-dot done"></div>
         <div>
-          <div class="current-label">Gradient ID-kollisjon fikset</div>
-          <div class="current-sub">Bruker useId() for unike gradient-IDer, fjernet micro-teksturer</div>
+          <div class="current-label">Treningslogg evaluert</div>
+          <div class="current-sub">Full gjennomgang av CRUD, filter, stats, teknikker — identifisert forbedringsområder</div>
         </div>
       </div>
     </div>
@@ -471,7 +470,7 @@
       </div>
       <div class="step">
         <div class="step-num">1</div>
-        <div class="step-text">Treningslogg: fullfør core-flow (logg, se historikk, rediger)</div>
+        <div class="step-text">Test Google OAuth end-to-end</div>
       </div>
       <div class="step">
         <div class="step-num">2</div>
@@ -483,11 +482,11 @@
       </div>
       <div class="step">
         <div class="step-num">4</div>
-        <div class="step-text">Treningskalender-visning</div>
+        <div class="step-text">Følg-funksjonalitet i feed</div>
       </div>
       <div class="step">
         <div class="step-num">5</div>
-        <div class="step-text">Test Google OAuth end-to-end</div>
+        <div class="step-text">PWA-ikoner (faktiske bildefiler)</div>
       </div>
       <div class="step">
         <div class="step-num">6</div>
@@ -602,11 +601,11 @@
       </div>
 
       <div class="progress-bar">
-        <div class="progress-fill" style="width: 44%"></div>
+        <div class="progress-fill" style="width: 47%"></div>
       </div>
       <div class="progress-label">
         <span>MVP</span>
-        <span>~44% av full visjon</span>
+        <span>~47% av full visjon</span>
       </div>
     </div>
 
@@ -638,6 +637,10 @@
       <div class="card-title">
         <span class="icon" style="background:rgba(255,255,255,0.06);color:var(--muted);">●</span>
         Siste commits
+      </div>
+      <div class="commit">
+        <span class="commit-hash">d9cb1d1</span>
+        <span class="commit-msg">Add training calendar view, feedback page, and date formatting fix</span>
       </div>
       <div class="commit">
         <span class="commit-hash">b9eabb1</span>
