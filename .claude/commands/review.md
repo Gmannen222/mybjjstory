@@ -1,0 +1,1 @@
+Run the code-reviewer agent on the files changed in this session. Check TypeScript, React patterns, Supabase usage, security, and code style. Report findings with specific line numbers and suggestions.

@@ -95,43 +95,63 @@ export function BeltDisplay({
 }: {
   rank: string
   degrees?: number
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg' | 'xl'
 }) {
   const colors = BELT_COLORS[rank] ?? { bg: '#6b7280', text: '#ffffff' }
   const hasMiddleStripe = colors.stripe !== undefined
 
-  const heights = { sm: 'h-5', md: 'h-8', lg: 'h-12' }
-  const stripeW = { sm: 'w-0.5', md: 'w-1', lg: 'w-1.5' }
-  const stripeH = { sm: 'h-5', md: 'h-8', lg: 'h-12' }
-  const barW = { sm: 'w-6', md: 'w-10', lg: 'w-14' }
+  const heights = { sm: 'h-5', md: 'h-8', lg: 'h-12', xl: 'h-16' }
+  const barW = { sm: 'w-6', md: 'w-10', lg: 'w-16', xl: 'w-20' }
+  const stripePx = { sm: 2, md: 3, lg: 4, xl: 5 }
+  const stripeGap = { sm: 1, md: 2, lg: 3, xl: 3 }
+  const middleStripeW = { sm: 3, md: 4, lg: 5, xl: 6 }
+
+  const numStripes = Math.min(degrees, 4)
 
   return (
-    <div className={`flex items-center rounded-sm overflow-hidden ${heights[size]}`}>
+    <div className={`flex items-center rounded-sm overflow-hidden ${heights[size]} shadow-md`}>
       {/* Belt body */}
       <div
         className={`flex-1 ${heights[size]} min-w-16 relative`}
         style={{ backgroundColor: colors.bg }}
       >
+        {/* Belt texture - subtle horizontal line */}
+        <div className="absolute inset-0 opacity-[0.08]"
+          style={{ background: `repeating-linear-gradient(0deg, transparent, transparent 40%, rgba(0,0,0,0.3) 40%, rgba(0,0,0,0.3) 42%, transparent 42%)` }}
+        />
+        {/* Subtle sheen */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-black/10" />
+
         {/* Middle stripe for combo belts (kids) */}
         {hasMiddleStripe && (
           <div
-            className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-[3px]"
-            style={{ backgroundColor: colors.stripe }}
+            className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2"
+            style={{ backgroundColor: colors.stripe, width: `${middleStripeW[size]}px` }}
           />
         )}
       </div>
 
       {/* Black bar / rank bar */}
       <div
-        className={`${barW[size]} ${heights[size]} flex items-center justify-end gap-px pr-1`}
-        style={{ backgroundColor: rank === 'white' ? '#1a1a1a' : rank === 'black' ? '#8b0000' : '#1a1a1a' }}
+        className={`${barW[size]} ${heights[size]} flex items-center justify-end pr-1.5 relative`}
+        style={{
+          backgroundColor: rank === 'white' ? '#1a1a1a' : rank === 'black' ? '#8b0000' : '#1a1a1a',
+          gap: `${stripeGap[size]}px`,
+        }}
       >
-        {/* Degree stripes */}
-        {Array.from({ length: Math.min(degrees, 4) }).map((_, i) => (
+        {/* Bar sheen */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent" />
+
+        {/* Degree stripes - clearly visible */}
+        {Array.from({ length: numStripes }).map((_, i) => (
           <div
             key={i}
-            className={`${stripeW[size]} ${stripeH[size]}`}
-            style={{ backgroundColor: rank === 'black' ? '#ffffff' : '#ffffff' }}
+            className={`${heights[size]} relative z-10`}
+            style={{
+              width: `${stripePx[size]}px`,
+              backgroundColor: '#ffffff',
+              boxShadow: '0 0 2px rgba(255,255,255,0.5)',
+            }}
           />
         ))}
       </div>
