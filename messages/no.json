@@ -7,7 +7,8 @@
     "injuries": "Skader",
     "profile": "Profil",
     "settings": "Innstillinger",
-    "feedback": "Tilbakemelding"
+    "feedback": "Tilbakemelding",
+    "academies": "Akademier"
   },
   "home": {
     "title": "MyBJJStory",
@@ -294,5 +295,70 @@
     "statusNew": "Ny",
     "statusRead": "Lest",
     "statusResolved": "Løst"
+  },
+  "academies": {
+    "title": "Akademier",
+    "description": "Finn et BJJ-akademi i nærheten av deg",
+    "search": {
+      "placeholder": "Søk etter akademi eller by..."
+    },
+    "filters": {
+      "region": "Region",
+      "regionAll": "Alle regioner",
+      "affiliation": "Tilknytning",
+      "affiliationAll": "Alle tilknytninger"
+    },
+    "empty": {
+      "noResults": "Ingen akademier matcher søket ditt — prøv et annet søkeord",
+      "noAcademies": "Ingen akademier registrert ennå"
+    },
+    "card": {
+      "address": "Adresse",
+      "website": "Nettsted",
+      "affiliation": "Tilknytning",
+      "visitWebsite": "Besøk nettsted",
+      "openInMaps": "Åpne i kart"
+    },
+    "detail": {
+      "about": "Om akademiet",
+      "location": "Lokasjon",
+      "contact": "Kontakt",
+      "members": "Medlemmer på MyBJJStory",
+      "noMembers": "Ingen har koblet seg til dette akademiet ennå",
+      "backToList": "Tilbake til akademier"
+    },
+    "count": "{count} akademier"
+  },
+  "admin": {
+    "title": "Admin",
+    "dashboard": "Dashboard",
+    "notAuthorized": "Du har ikke tilgang til denne siden.",
+    "stats": {
+      "users": "Brukere",
+      "trainingSessions": "Treningsøkter",
+      "posts": "Innlegg",
+      "gradings": "Graderinger",
+      "newUsersWeek": "Nye siste 7 dager",
+      "newUsersMonth": "Nye siste 30 dager",
+      "activeUsers": "Aktive (trent siste 7d)",
+      "beltDistribution": "Beltefordeling"
+    },
+    "feedback": {
+      "title": "Tilbakemeldinger",
+      "all": "Alle",
+      "new": "Nye",
+      "read": "Leste",
+      "resolved": "Løste",
+      "markRead": "Marker som lest",
+      "markResolved": "Marker som løst",
+      "markNew": "Tilbake til ny",
+      "noFeedback": "Ingen tilbakemeldinger ennå.",
+      "from": "Fra",
+      "anonymous": "Anonym",
+      "contactEmail": "Kontakt-e-post",
+      "adminNote": "Admin-notat",
+      "adminNotePlaceholder": "Skriv et internt notat...",
+      "saveNote": "Lagre notat"
+    }
   }
 }

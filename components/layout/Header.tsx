@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useLocale } from 'next-intl'
 import AuthButton from '@/components/auth/AuthButton'
+import AdminLink from '@/components/admin/AdminLink'
 
 export default function Header() {
   const locale = useLocale()
@@ -27,6 +28,9 @@ export default function Header() {
           <Link href={`/${locale}/feed`} className="hover:text-foreground transition-colors">
             Feed
           </Link>
+          <Link href={`/${locale}/academies`} className="hover:text-foreground transition-colors">
+            Akademier
+          </Link>
           <Link href={`/${locale}/gradings`} className="hover:text-foreground transition-colors">
             Graderinger
           </Link>
@@ -42,6 +46,7 @@ export default function Header() {
           <Link href={`/${locale}/settings`} className="hover:text-foreground transition-colors">
             ⚙
           </Link>
+          <AdminLink />
         </nav>
 
         <AuthButton compact />

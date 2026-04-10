@@ -69,6 +69,7 @@ export interface Profile {
   belt_rank: BeltRank | null
   belt_degrees: number
   academy_name: string | null
+  academy_id: string | null
   role: UserRole
   is_public: boolean
   favorite_guard: string | null
@@ -88,6 +89,7 @@ export interface Profile {
   dashboard_config: DashboardConfig
   profile_visibility: ProfileVisibility
   public_display_name: string | null
+  weight_class: string | null
   training_preference: 'gi' | 'nogi' | 'both' | null
   passion_level: number | null
   currently_training: boolean
@@ -219,6 +221,33 @@ export interface Follow {
   created_at: string
 }
 
+export interface TrainingChecklistItem {
+  id: string
+  user_id: string
+  label: string
+  sort_order: number
+  created_at: string
+}
+
+export type AchievementCategory = 'training' | 'streak' | 'belt' | 'social' | 'competition'
+
+export interface Achievement {
+  id: string
+  name: string
+  description: string
+  icon: string
+  category: AchievementCategory
+  threshold: number
+  sort_order: number
+}
+
+export interface UserAchievement {
+  id: string
+  user_id: string
+  achievement_id: string
+  earned_at: string
+}
+
 export type FeedbackType = 'suggestion' | 'wish' | 'bug' | 'other'
 
 export interface Feedback {
@@ -229,4 +258,22 @@ export interface Feedback {
   contact_email: string | null
   status: 'new' | 'read' | 'resolved'
   created_at: string
+}
+
+export interface Academy {
+  id: string
+  name: string
+  city: string | null
+  region: string | null
+  country: string
+  country_code: string
+  website_url: string | null
+  address: string | null
+  affiliation: string | null
+  is_active: boolean
+  lat: number | null
+  lng: number | null
+  logo_url: string | null
+  created_at: string
+  updated_at: string
 }

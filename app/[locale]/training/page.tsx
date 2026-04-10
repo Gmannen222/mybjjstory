@@ -7,6 +7,7 @@ import ShareButton from '@/components/training/ShareButton'
 import TrainingFilter from '@/components/training/TrainingFilter'
 import TrainingCalendar from '@/components/training/TrainingCalendar'
 import TrainingViewToggle from '@/components/training/TrainingViewToggle'
+import TrainingChecklist from '@/components/training/TrainingChecklist'
 
 export const dynamic = 'force-dynamic'
 
@@ -150,6 +151,10 @@ export default async function TrainingPage({
           )}
         </div>
       )}
+
+      <div className="mb-6">
+        <TrainingChecklist />
+      </div>
 
       <TrainingViewToggle
         listView={listView}

@@ -20,6 +20,12 @@ const GUARDS = [
   'Deep Half', 'Reverse De La Riva', 'Worm Guard', 'Annet',
 ]
 
+const WEIGHT_CLASSES = [
+  'Rooster (57.5 kg)', 'Light Feather (64 kg)', 'Feather (70 kg)',
+  'Light (76 kg)', 'Middle (82.3 kg)', 'Medium Heavy (88.3 kg)',
+  'Heavy (94.3 kg)', 'Super Heavy (100.5 kg)', 'Ultra Heavy (100.5+ kg)',
+]
+
 const SUBMISSIONS = [
   'Armbar', 'Triangle', 'Guillotine', 'RNC', 'Kimura', 'Americana',
   'Omoplata', 'Leg Lock', 'Heel Hook', 'Knee Bar', 'Ezekiel',
@@ -41,6 +47,7 @@ export default function ProfileForm({
   const [academyName, setAcademyName] = useState(profile?.academy_name || '')
   const [favoriteGuard, setFavoriteGuard] = useState(profile?.favorite_guard || '')
   const [favoriteSubmission, setFavoriteSubmission] = useState(profile?.favorite_submission || '')
+  const [weightClass, setWeightClass] = useState(profile?.weight_class || '')
   const [trainingSinceYear, setTrainingSinceYear] = useState(String(profile?.training_since_year || ''))
   const [isPublic, setIsPublic] = useState(profile?.is_public || false)
   const [showKidsBelts, setShowKidsBelts] = useState(profile?.show_kids_belts || false)
@@ -99,6 +106,7 @@ export default function ProfileForm({
         belt_degrees: parseInt(beltDegrees),
         academy_name: academyName || null,
         avatar_url: avatarUrl,
+        weight_class: weightClass || null,
         favorite_guard: favoriteGuard || null,
         favorite_submission: favoriteSubmission || null,
         training_since_year: trainingSinceYear ? parseInt(trainingSinceYear) : null,
@@ -211,6 +219,14 @@ export default function ProfileForm({
             <label className="block text-sm font-medium text-muted mb-2">Akademi / klubb</label>
             <input type="text" value={academyName} onChange={(e) => setAcademyName(e.target.value)}
               className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-muted mb-2">Vektklasse</label>
+            <select value={weightClass} onChange={(e) => setWeightClass(e.target.value)}
+              className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary">
+              <option value="">Velg...</option>
+              {WEIGHT_CLASSES.map((w) => <option key={w} value={w}>{w}</option>)}
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-muted mb-2">

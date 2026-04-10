@@ -99,6 +99,11 @@ export default function SessionForm({
       }
     }
 
+    // Check achievements after saving
+    import('@/lib/achievements').then(({ checkAchievements }) => {
+      checkAchievements(supabase, authSession.session!.user.id)
+    })
+
     router.push(`/${locale}/training`)
     router.refresh()
   }

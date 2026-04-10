@@ -7,6 +7,8 @@ import { useTranslations } from 'next-intl'
 import { BeltDisplay, BELT_LABELS } from '@/components/ui/BeltBadge'
 import AvatarSVG, { DEFAULT_AVATAR, type AvatarConfig } from '@/components/avatar/AvatarSVG'
 import DashboardSettings from './DashboardSettings'
+import TrainingChart from './TrainingChart'
+import AchievementsList from '@/components/achievements/AchievementsList'
 import type { DashboardConfig } from '@/lib/types/database'
 
 const DEFAULT_DASHBOARD: DashboardConfig = {
@@ -345,6 +347,13 @@ export default function Dashboard({
         </div>
       )}
 
+      {/* Training chart */}
+      {dashConfig.showTrainingStats && (
+        <div className="mb-6">
+          <TrainingChart userId={userId} />
+        </div>
+      )}
+
       {/* Competition stats */}
       {dashConfig.showCompetitionStats && (
         <div className="grid grid-cols-2 gap-3 mb-6">
@@ -407,6 +416,7 @@ export default function Dashboard({
               { href: `/${locale}/feed`, icon: '📰', label: 'Feed', accent: 'hover:border-purple-500/30' },
               { href: `/${locale}/gradings`, icon: '🏅', label: 'Graderinger', accent: 'hover:border-orange-500/30' },
               { href: `/${locale}/injuries`, icon: '🩹', label: 'Skader', accent: 'hover:border-red-500/30' },
+              { href: `/${locale}/achievements`, icon: '🏅', label: 'Achievements', accent: 'hover:border-amber-500/30' },
             ].map(({ href, icon, label, accent }) => (
               <Link
                 key={href}
@@ -420,6 +430,11 @@ export default function Dashboard({
           </div>
         </div>
       )}
+
+      {/* Achievements */}
+      <div className="mb-8">
+        <AchievementsList compact />
+      </div>
 
       {/* Recent training */}
       {dashConfig.showRecentTraining && (

@@ -8,7 +8,7 @@ const NAV_ITEMS = [
   { key: 'training', path: '/training', icon: '🥋' },
   { key: 'competitions', path: '/competitions', icon: '🏆' },
   { key: 'feed', path: '/feed', icon: '📰' },
-  { key: 'gradings', path: '/gradings', icon: '🏅' },
+  { key: 'academies', path: '/academies', icon: '🏫' },
   { key: 'profile', path: '/profile', icon: '👤' },
 ] as const
 

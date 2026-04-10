@@ -365,26 +365,26 @@
     <div class="header-meta">
       <span><span class="dot"></span> Live — mybjjstory.no</span>
       <span>Siste commit: d9cb1d1</span>
-      <span>10. april 2026</span>
+      <span>10. april 2026 — Sesjon #9</span>
     </div>
   </div>
 
   <!-- Top stats -->
   <div class="stats-row">
     <div class="stat-card">
-      <div class="stat-value" style="color:var(--primary);">28</div>
+      <div class="stat-value" style="color:var(--primary);">29</div>
       <div class="stat-label">Ruter (pages)</div>
       <div class="stat-delta up">+1 denne sesjonen</div>
     </div>
     <div class="stat-card">
-      <div class="stat-value" style="color:var(--green);">38</div>
+      <div class="stat-value" style="color:var(--green);">43</div>
       <div class="stat-label">Komponenter</div>
-      <div class="stat-delta up">+3 denne sesjonen</div>
+      <div class="stat-delta up">+5 denne sesjonen</div>
     </div>
     <div class="stat-card">
-      <div class="stat-value" style="color:var(--blue);">13</div>
+      <div class="stat-value" style="color:var(--blue);">16</div>
       <div class="stat-label">DB-tabeller</div>
-      <div class="stat-delta neutral">uendret</div>
+      <div class="stat-delta up">+3 denne sesjonen</div>
     </div>
     <div class="stat-card">
       <div class="stat-value" style="color:var(--purple);">16</div>
@@ -392,9 +392,9 @@
       <div class="stat-delta up">+2 i dag</div>
     </div>
     <div class="stat-card">
-      <div class="stat-value" style="color:var(--amber);">6</div>
+      <div class="stat-value" style="color:var(--amber);">7</div>
       <div class="stat-label">Migrasjoner</div>
-      <div class="stat-delta neutral">uendret</div>
+      <div class="stat-delta up">+1 denne sesjonen</div>
     </div>
     <div class="stat-card">
       <div class="stat-value" style="color:var(--cyan);">9</div>
@@ -405,15 +405,14 @@
 
   <div class="update-bar">
     <div class="top-row">
-      <span><span class="label">Sist oppdatert:</span> <span class="date">2026-04-10 kl 23:30</span></span>
-      <span>Sesjon #7</span>
+      <span><span class="label">Sist oppdatert:</span> <span class="date">2026-04-10 kl 23:55</span></span>
+      <span>Sesjon #9</span>
     </div>
     <div class="changelog">
-      <span class="tag">Treningskalender</span>
-      <span class="tag">Liste/kalender-toggle</span>
-      <span class="tag">Datoformatering fikset</span>
-      <span class="tag">Feedback-side</span>
-      <span class="tag">Treningslogg evaluert</span>
+      <span class="tag">Vektklasse profil</span>
+      <span class="tag">Treningssjekkliste</span>
+      <span class="tag">Dashboard med graf</span>
+      <span class="tag">Achievements/badges</span>
     </div>
   </div>
 
@@ -428,36 +427,29 @@
       <div class="current-item">
         <div class="status-dot done"></div>
         <div>
-          <div class="current-label">Treningskalender-komponent</div>
-          <div class="current-sub">Månedsgrid, fargekodede prikker per type, heatmap-intensitet, dag-klikk detaljer, månedsnavigering</div>
+          <div class="current-label">Vektklasse på profil</div>
+          <div class="current-sub">DB-migrasjon + ProfileForm-dropdown med alle IBJJF-vektklasser (Rooster til Ultra Heavy)</div>
         </div>
       </div>
       <div class="current-item">
         <div class="status-dot done"></div>
         <div>
-          <div class="current-label">Liste/kalender-toggle</div>
-          <div class="current-sub">TrainingViewToggle: bytt mellom listevisning og kalendervisning på treningssiden</div>
+          <div class="current-label">Treningssjekkliste</div>
+          <div class="current-sub">Pakkeliste med 8 standardvarer + egendefinerte, localStorage-avhuking, progressbar, nullstill</div>
         </div>
       </div>
       <div class="current-item">
         <div class="status-dot done"></div>
         <div>
-          <div class="current-label">Datoformatering fikset</div>
-          <div class="current-sub">Fra rå ISO (2026-04-10) til formatert norsk (tor. 10. april 2026) i treningslisten</div>
+          <div class="current-label">Dashboard med treningsgraf</div>
+          <div class="current-sub">SVG-stolpediagram over treningsfrekvens siste 12 uker med antall/minutter-toggle og snitt</div>
         </div>
       </div>
       <div class="current-item">
         <div class="status-dot done"></div>
         <div>
-          <div class="current-label">Feedback-side</div>
-          <div class="current-sub">Ny /feedback-rute med skjema (forslag/ønske/feil/annet), header-link, i18n-tekster</div>
-        </div>
-      </div>
-      <div class="current-item">
-        <div class="status-dot done"></div>
-        <div>
-          <div class="current-label">Treningslogg evaluert</div>
-          <div class="current-sub">Full gjennomgang av CRUD, filter, stats, teknikker — identifisert forbedringsområder</div>
+          <div class="current-label">Achievements/badges-system</div>
+          <div class="current-sub">23 achievements i 5 kategorier, auto-tildeling, egen side + kompaktvisning i dashboard</div>
         </div>
       </div>
     </div>
@@ -470,27 +462,27 @@
       </div>
       <div class="step">
         <div class="step-num">1</div>
-        <div class="step-text">Test Google OAuth end-to-end</div>
+        <div class="step-text">Push DB-migrasjon: npx supabase db push</div>
       </div>
       <div class="step">
         <div class="step-num">2</div>
-        <div class="step-text">Treningstyper: legg til "Class" og "Other"</div>
+        <div class="step-text">Test Google OAuth end-to-end</div>
       </div>
       <div class="step">
         <div class="step-num">3</div>
-        <div class="step-text">Effort/intensitet-gradering per treningsøkt</div>
+        <div class="step-text">Treningstyper: legg til "Class" og "Other"</div>
       </div>
       <div class="step">
         <div class="step-num">4</div>
-        <div class="step-text">Følg-funksjonalitet i feed</div>
+        <div class="step-text">Effort/intensitet-gradering per treningsøkt</div>
       </div>
       <div class="step">
         <div class="step-num">5</div>
-        <div class="step-text">PWA-ikoner (faktiske bildefiler)</div>
+        <div class="step-text">Følg-funksjonalitet i feed</div>
       </div>
       <div class="step">
         <div class="step-num">6</div>
-        <div class="step-text">Flere reaksjons-emojis i feed</div>
+        <div class="step-text">Push-varsler og akademi-timeplan</div>
       </div>
     </div>
 
@@ -589,7 +581,7 @@
       </div>
       <div class="info-row">
         <span class="info-label">Ruter</span>
-        <span class="info-value">28+</span>
+        <span class="info-value">29+</span>
       </div>
       <div class="info-row">
         <span class="info-label">Språk</span>
@@ -601,11 +593,11 @@
       </div>
 
       <div class="progress-bar">
-        <div class="progress-fill" style="width: 47%"></div>
+        <div class="progress-fill" style="width: 54%"></div>
       </div>
       <div class="progress-label">
         <span>MVP</span>
-        <span>~47% av full visjon</span>
+        <span>~54% av full visjon</span>
       </div>
     </div>
 
@@ -613,7 +605,7 @@
     <div class="card">
       <div class="card-title">
         <span class="icon" style="background:rgba(239,68,68,0.15);color:var(--red);">◉</span>
-        Database (13 tabeller)
+        Database (16 tabeller)
       </div>
       <div>
         <span class="table-tag">profiles</span>
@@ -629,6 +621,9 @@
         <span class="table-tag">competitions</span>
         <span class="table-tag">injuries</span>
         <span class="table-tag">feedback</span>
+        <span class="table-tag">training_checklists</span>
+        <span class="table-tag">achievements</span>
+        <span class="table-tag">user_achievements</span>
       </div>
     </div>
 
