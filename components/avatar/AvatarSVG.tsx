@@ -865,95 +865,225 @@ function GlassesComp({ style, cx, cy }: { style: string; cx: number; cy: number 
 }
 
 function HairComp({ style, color, cx, cy, face }: { style: string; color: string; cx: number; cy: number; face: typeof FACE_DIMS['oval'] }) {
-  const lt = lighten(color, 15)
+  const lt = lighten(color, 25)
+  const lt2 = lighten(color, 40)
+  const dk = darken(color, 20)
   const topY = cy - face.ry
+  const rx = face.rx
+  // Strand helper — draws a thin hair strand as a curved line
+  const strand = (x1: number, y1: number, cpx: number, cpy: number, x2: number, y2: number, w = 1.5, o = 0.15) =>
+    <path d={`M ${x1} ${y1} Q ${cpx} ${cpy} ${x2} ${y2}`} fill="none" stroke={lt2} strokeWidth={w} opacity={o} />
 
   switch (style) {
     case 'short':
       return (
         <g>
-          <path d={`M ${cx - face.rx - 3} ${cy - 10} Q ${cx - face.rx - 6} ${topY - 15} ${cx} ${topY - 20} Q ${cx + face.rx + 6} ${topY - 15} ${cx + face.rx + 3} ${cy - 10} Q ${cx + face.rx - 10} ${topY + 10} ${cx} ${topY + 5} Q ${cx - face.rx + 10} ${topY + 10} ${cx - face.rx - 3} ${cy - 10} Z`}
+          {/* Base shape — combed to one side */}
+          <path d={`M ${cx - rx - 4} ${cy - 10} Q ${cx - rx - 8} ${topY - 18} ${cx - 10} ${topY - 24} Q ${cx + 15} ${topY - 28} ${cx + rx + 6} ${topY - 12} Q ${cx + rx + 4} ${topY + 5} ${cx + rx + 2} ${cy - 12} Q ${cx + rx - 15} ${topY + 12} ${cx} ${topY + 8} Q ${cx - rx + 15} ${topY + 12} ${cx - rx - 4} ${cy - 10} Z`}
             fill={color} />
-          {/* Hair volume highlight */}
-          <ellipse cx={cx - 10} cy={topY - 5} rx={25} ry={10} fill={lt} opacity="0.12" />
+          {/* Volume layer */}
+          <path d={`M ${cx - rx + 10} ${topY + 5} Q ${cx - 5} ${topY - 18} ${cx + rx - 10} ${topY - 5}`}
+            fill="none" stroke={dk} strokeWidth="8" opacity="0.15" strokeLinecap="round" />
+          {/* Highlight sheen */}
+          <ellipse cx={cx + 8} cy={topY - 8} rx={28} ry={10} fill={lt2} opacity="0.12" />
+          {/* Strand texture */}
+          {strand(cx - 30, topY + 2, cx - 10, topY - 12, cx + 25, topY - 2)}
+          {strand(cx - 20, topY + 6, cx, topY - 8, cx + 35, topY + 2, 1, 0.1)}
+          {strand(cx - 35, topY + 10, cx - 15, topY - 4, cx + 15, topY + 8, 1, 0.08)}
         </g>
       )
     case 'buzz':
       return (
-        <path d={`M ${cx - face.rx} ${cy - 5} Q ${cx - face.rx - 3} ${topY - 8} ${cx} ${topY - 12} Q ${cx + face.rx + 3} ${topY - 8} ${cx + face.rx} ${cy - 5} Q ${cx + face.rx - 12} ${topY + 8} ${cx} ${topY + 5} Q ${cx - face.rx + 12} ${topY + 8} ${cx - face.rx} ${cy - 5} Z`}
-          fill={color} opacity="0.6" />
+        <g>
+          {/* Buzz base — thin, close to head */}
+          <path d={`M ${cx - rx} ${cy - 5} Q ${cx - rx - 3} ${topY - 10} ${cx} ${topY - 14} Q ${cx + rx + 3} ${topY - 10} ${cx + rx} ${cy - 5} Q ${cx + rx - 12} ${topY + 8} ${cx} ${topY + 5} Q ${cx - rx + 12} ${topY + 8} ${cx - rx} ${cy - 5} Z`}
+            fill={color} opacity="0.5" />
+          {/* Stubble texture dots */}
+          {Array.from({ length: 24 }).map((_, i) => {
+            const a = (i / 24) * Math.PI
+            const pr = rx - 15 + (i % 3) * 5
+            const px = cx + Math.cos(a) * pr * 0.7
+            const py = topY + 10 - Math.sin(a) * (face.ry * 0.5 + (i % 4) * 3)
+            return <circle key={i} cx={px} cy={py} r={1.2} fill={color} opacity={0.3 + (i % 3) * 0.1} />
+          })}
+          {/* Hairline edge */}
+          <path d={`M ${cx - rx + 15} ${topY + 8} Q ${cx} ${topY - 6} ${cx + rx - 15} ${topY + 8}`}
+            fill="none" stroke={dk} strokeWidth="1.5" opacity="0.2" />
+        </g>
       )
     case 'medium':
       return (
         <g>
-          <path d={`M ${cx - face.rx - 8} ${cy} Q ${cx - face.rx - 12} ${topY - 20} ${cx} ${topY - 25} Q ${cx + face.rx + 12} ${topY - 20} ${cx + face.rx + 8} ${cy} Q ${cx + face.rx - 5} ${topY + 5} ${cx} ${topY} Q ${cx - face.rx + 5} ${topY + 5} ${cx - face.rx - 8} ${cy} Z`}
+          {/* Back volume */}
+          <path d={`M ${cx - rx - 10} ${cy + 5} Q ${cx - rx - 14} ${topY - 22} ${cx} ${topY - 28} Q ${cx + rx + 14} ${topY - 22} ${cx + rx + 10} ${cy + 5}`}
+            fill={dk} />
+          {/* Main shape */}
+          <path d={`M ${cx - rx - 8} ${cy} Q ${cx - rx - 12} ${topY - 20} ${cx} ${topY - 25} Q ${cx + rx + 12} ${topY - 20} ${cx + rx + 8} ${cy} Q ${cx + rx - 5} ${topY + 5} ${cx} ${topY} Q ${cx - face.rx + 5} ${topY + 5} ${cx - rx - 8} ${cy} Z`}
             fill={color} />
-          {/* Side hair */}
-          <path d={`M ${cx - face.rx - 6} ${cy} Q ${cx - face.rx - 18} ${cy + 15} ${cx - face.rx - 12} ${cy + 50}`} fill="none" stroke={color} strokeWidth="14" strokeLinecap="round" />
-          <path d={`M ${cx + face.rx + 6} ${cy} Q ${cx + face.rx + 18} ${cy + 15} ${cx + face.rx + 12} ${cy + 50}`} fill="none" stroke={color} strokeWidth="14" strokeLinecap="round" />
-          <ellipse cx={cx - 8} cy={topY - 8} rx={30} ry={12} fill={lt} opacity="0.1" />
+          {/* Side hair that frames face */}
+          <path d={`M ${cx - rx - 6} ${cy - 5} Q ${cx - rx - 20} ${cy + 12} ${cx - rx - 14} ${cy + 55}`} fill="none" stroke={color} strokeWidth="16" strokeLinecap="round" />
+          <path d={`M ${cx + rx + 6} ${cy - 5} Q ${cx + rx + 20} ${cy + 12} ${cx + rx + 14} ${cy + 55}`} fill="none" stroke={color} strokeWidth="16" strokeLinecap="round" />
+          {/* Side hair inner edge */}
+          <path d={`M ${cx - rx - 6} ${cy - 5} Q ${cx - rx - 16} ${cy + 10} ${cx - rx - 10} ${cy + 50}`} fill="none" stroke={dk} strokeWidth="6" strokeLinecap="round" opacity="0.2" />
+          <path d={`M ${cx + rx + 6} ${cy - 5} Q ${cx + rx + 16} ${cy + 10} ${cx + rx + 10} ${cy + 50}`} fill="none" stroke={dk} strokeWidth="6" strokeLinecap="round" opacity="0.2" />
+          {/* Highlight */}
+          <ellipse cx={cx - 8} cy={topY - 8} rx={30} ry={12} fill={lt2} opacity="0.12" />
+          {/* Strand texture across top */}
+          {strand(cx - 40, topY + 5, cx - 10, topY - 15, cx + 30, topY, 2, 0.1)}
+          {strand(cx - 30, topY + 10, cx, topY - 10, cx + 40, topY + 5, 1.5, 0.08)}
         </g>
       )
     case 'long':
       return (
         <g>
-          <path d={`M ${cx - face.rx - 10} ${cy + 10} Q ${cx - face.rx - 15} ${topY - 25} ${cx} ${topY - 30} Q ${cx + face.rx + 15} ${topY - 25} ${cx + face.rx + 10} ${cy + 10} Q ${cx + face.rx} ${topY} ${cx} ${topY - 5} Q ${cx - face.rx} ${topY} ${cx - face.rx - 10} ${cy + 10} Z`}
+          {/* Back volume behind head */}
+          <path d={`M ${cx - rx - 14} ${cy + 15} Q ${cx - rx - 18} ${topY - 30} ${cx} ${topY - 38} Q ${cx + rx + 18} ${topY - 30} ${cx + rx + 14} ${cy + 15}`}
+            fill={dk} />
+          {/* Main top shape */}
+          <path d={`M ${cx - rx - 10} ${cy + 10} Q ${cx - rx - 15} ${topY - 25} ${cx} ${topY - 30} Q ${cx + rx + 15} ${topY - 25} ${cx + rx + 10} ${cy + 10} Q ${cx + rx} ${topY} ${cx} ${topY - 5} Q ${cx - rx} ${topY} ${cx - rx - 10} ${cy + 10} Z`}
             fill={color} />
-          <path d={`M ${cx - face.rx - 8} ${cy + 10} Q ${cx - face.rx - 22} ${cy + 40} ${cx - face.rx - 14} ${cy + 100}`} fill="none" stroke={color} strokeWidth="16" strokeLinecap="round" />
-          <path d={`M ${cx + face.rx + 8} ${cy + 10} Q ${cx + face.rx + 22} ${cy + 40} ${cx + face.rx + 14} ${cy + 100}`} fill="none" stroke={color} strokeWidth="16" strokeLinecap="round" />
+          {/* Flowing side hair — left */}
+          <path d={`M ${cx - rx - 8} ${cy + 10} Q ${cx - rx - 24} ${cy + 45} ${cx - rx - 16} ${cy + 110}`} fill="none" stroke={color} strokeWidth="18" strokeLinecap="round" />
+          <path d={`M ${cx - rx - 5} ${cy + 15} Q ${cx - rx - 18} ${cy + 40} ${cx - rx - 10} ${cy + 105}`} fill="none" stroke={dk} strokeWidth="6" strokeLinecap="round" opacity="0.2" />
+          {/* Flowing side hair — right */}
+          <path d={`M ${cx + rx + 8} ${cy + 10} Q ${cx + rx + 24} ${cy + 45} ${cx + rx + 16} ${cy + 110}`} fill="none" stroke={color} strokeWidth="18" strokeLinecap="round" />
+          <path d={`M ${cx + rx + 5} ${cy + 15} Q ${cx + rx + 18} ${cy + 40} ${cx + rx + 10} ${cy + 105}`} fill="none" stroke={dk} strokeWidth="6" strokeLinecap="round" opacity="0.2" />
+          {/* Highlight sheen */}
+          <ellipse cx={cx + 5} cy={topY - 10} rx={35} ry={12} fill={lt2} opacity="0.1" />
+          {/* Strand lines */}
+          {strand(cx - 45, topY + 8, cx - 15, topY - 18, cx + 35, topY + 3, 2, 0.08)}
+          {strand(cx - rx - 10, cy + 25, cx - rx - 20, cy + 60, cx - rx - 14, cy + 95, 1.5, 0.1)}
+          {strand(cx + rx + 10, cy + 25, cx + rx + 20, cy + 60, cx + rx + 14, cy + 95, 1.5, 0.1)}
         </g>
       )
     case 'bun':
       return (
         <g>
-          <path d={`M ${cx - face.rx - 3} ${cy - 10} Q ${cx - face.rx - 6} ${topY - 15} ${cx} ${topY - 20} Q ${cx + face.rx + 6} ${topY - 15} ${cx + face.rx + 3} ${cy - 10} Q ${cx + face.rx - 10} ${topY + 10} ${cx} ${topY + 5} Q ${cx - face.rx + 10} ${topY + 10} ${cx - face.rx - 3} ${cy - 10} Z`}
+          {/* Hair pulled back across head */}
+          <path d={`M ${cx - rx - 3} ${cy - 10} Q ${cx - rx - 6} ${topY - 15} ${cx} ${topY - 20} Q ${cx + rx + 6} ${topY - 15} ${cx + rx + 3} ${cy - 10} Q ${cx + rx - 10} ${topY + 10} ${cx} ${topY + 5} Q ${cx - rx + 10} ${topY + 10} ${cx - rx - 3} ${cy - 10} Z`}
             fill={color} />
-          <ellipse cx={cx} cy={topY - 18} rx={28} ry={22} fill={color} />
-          <ellipse cx={cx - 5} cy={topY - 22} rx={14} ry={10} fill={lt} opacity="0.1" />
+          {/* Bun shape */}
+          <ellipse cx={cx} cy={topY - 20} rx={30} ry={24} fill={dk} />
+          <ellipse cx={cx} cy={topY - 20} rx={28} ry={22} fill={color} />
+          {/* Bun spiral detail */}
+          <path d={`M ${cx - 8} ${topY - 28} Q ${cx + 5} ${topY - 35} ${cx + 12} ${topY - 22} Q ${cx + 8} ${topY - 12} ${cx - 5} ${topY - 15} Q ${cx - 12} ${topY - 22} ${cx - 8} ${topY - 28}`}
+            fill="none" stroke={dk} strokeWidth="1.5" opacity="0.25" />
+          {/* Bun highlight */}
+          <ellipse cx={cx - 5} cy={topY - 26} rx={12} ry={8} fill={lt2} opacity="0.12" />
+          {/* Hair band */}
+          <ellipse cx={cx} cy={topY - 4} rx={18} ry={5} fill={dk} opacity="0.4" />
+          {/* Pull-back texture lines */}
+          {strand(cx - 30, topY + 10, cx - 15, topY - 5, cx, topY - 2, 1, 0.12)}
+          {strand(cx + 30, topY + 10, cx + 15, topY - 5, cx, topY - 2, 1, 0.12)}
         </g>
       )
     case 'curly':
       return (
         <g>
-          <path d={`M ${cx - face.rx - 10} ${cy + 5} Q ${cx - face.rx - 14} ${topY - 20} ${cx} ${topY - 25} Q ${cx + face.rx + 14} ${topY - 20} ${cx + face.rx + 10} ${cy + 5} Q ${cx + face.rx} ${topY + 5} ${cx} ${topY} Q ${cx - face.rx} ${topY + 5} ${cx - face.rx - 10} ${cy + 5} Z`}
+          {/* Large voluminous base shape */}
+          <path d={`M ${cx - rx - 16} ${cy + 10} Q ${cx - rx - 20} ${topY - 28} ${cx} ${topY - 35} Q ${cx + rx + 20} ${topY - 28} ${cx + rx + 16} ${cy + 10} Q ${cx + rx + 5} ${topY} ${cx} ${topY + 5} Q ${cx - rx - 5} ${topY} ${cx - rx - 16} ${cy + 10} Z`}
             fill={color} />
-          {/* Curly volume puffs */}
-          {Array.from({ length: 16 }).map((_, i) => {
-            const angle = (i / 16) * Math.PI * 2
-            const puffCx = cx + Math.cos(angle) * (face.rx - 5)
-            const puffCy = cy - 30 + Math.sin(angle) * 40
-            return <circle key={i} cx={puffCx} cy={puffCy} r={12} fill={color} />
+          {/* Curly puffs — outer ring for volume */}
+          {Array.from({ length: 20 }).map((_, i) => {
+            const angle = (i / 20) * Math.PI * 2
+            const radius = rx + 6 + (i % 2) * 6
+            const puffCx = cx + Math.cos(angle) * radius * 0.85
+            const puffCy = cy - 25 + Math.sin(angle) * 48
+            const r = 11 + (i % 3) * 3
+            return <circle key={`o${i}`} cx={puffCx} cy={puffCy} r={r} fill={color} />
           })}
+          {/* Inner curls for texture */}
+          {Array.from({ length: 12 }).map((_, i) => {
+            const angle = (i / 12) * Math.PI * 2
+            const puffCx = cx + Math.cos(angle) * (rx - 20)
+            const puffCy = cy - 30 + Math.sin(angle) * 35
+            return <circle key={`i${i}`} cx={puffCx} cy={puffCy} r={8} fill={dk} opacity="0.15" />
+          })}
+          {/* Highlight */}
+          <ellipse cx={cx - 10} cy={topY - 10} rx={20} ry={14} fill={lt2} opacity="0.1" />
+          {/* Curl spirals detail */}
+          {[[-25, -15], [20, -10], [-10, 5], [30, 0], [-35, 10]].map(([dx, dy], i) => (
+            <circle key={`s${i}`} cx={cx + dx} cy={topY + dy} r={4} fill="none" stroke={lt} strokeWidth="1" opacity="0.15" />
+          ))}
         </g>
       )
     case 'mohawk':
       return (
-        <path d={`M ${cx - 15} ${topY + 15} Q ${cx - 18} ${topY - 40} ${cx} ${topY - 55} Q ${cx + 18} ${topY - 40} ${cx + 15} ${topY + 15} Q ${cx + 10} ${topY - 20} ${cx} ${topY - 25} Q ${cx - 10} ${topY - 20} ${cx - 15} ${topY + 15} Z`}
-          fill={color} />
+        <g>
+          {/* Shaved sides — subtle shadow */}
+          <path d={`M ${cx - rx} ${cy - 5} Q ${cx - rx - 2} ${topY} ${cx - 20} ${topY + 5} L ${cx + 20} ${topY + 5} Q ${cx + rx + 2} ${topY} ${cx + rx} ${cy - 5}`}
+            fill={color} opacity="0.15" />
+          {/* Mohawk body — tall center ridge */}
+          <path d={`M ${cx - 18} ${topY + 10} Q ${cx - 22} ${topY - 45} ${cx} ${topY - 60} Q ${cx + 22} ${topY - 45} ${cx + 18} ${topY + 10} Z`}
+            fill={color} />
+          {/* Depth layer */}
+          <path d={`M ${cx - 12} ${topY + 8} Q ${cx - 15} ${topY - 38} ${cx} ${topY - 50} Q ${cx + 15} ${topY - 38} ${cx + 12} ${topY + 8}`}
+            fill={dk} opacity="0.2" />
+          {/* Highlight on ridge */}
+          <path d={`M ${cx - 4} ${topY - 45} Q ${cx} ${topY - 55} ${cx + 4} ${topY - 45}`}
+            fill="none" stroke={lt2} strokeWidth="3" opacity="0.2" strokeLinecap="round" />
+          {/* Texture spikes */}
+          {[-8, -3, 2, 7].map((dx, i) => (
+            <line key={i} x1={cx + dx} y1={topY + 5} x2={cx + dx + 1} y2={topY - 40 - i * 4} stroke={lt} strokeWidth="1" opacity="0.12" />
+          ))}
+        </g>
       )
     case 'ponytail':
       return (
         <g>
-          <path d={`M ${cx - face.rx - 3} ${cy - 10} Q ${cx - face.rx - 6} ${topY - 15} ${cx} ${topY - 20} Q ${cx + face.rx + 6} ${topY - 15} ${cx + face.rx + 3} ${cy - 10} Q ${cx + face.rx - 10} ${topY + 10} ${cx} ${topY + 5} Q ${cx - face.rx + 10} ${topY + 10} ${cx - face.rx - 3} ${cy - 10} Z`}
+          {/* Hair pulled back across head */}
+          <path d={`M ${cx - rx - 3} ${cy - 10} Q ${cx - rx - 6} ${topY - 15} ${cx} ${topY - 20} Q ${cx + rx + 6} ${topY - 15} ${cx + rx + 3} ${cy - 10} Q ${cx + rx - 10} ${topY + 10} ${cx} ${topY + 5} Q ${cx - rx + 10} ${topY + 10} ${cx - rx - 3} ${cy - 10} Z`}
             fill={color} />
-          <ellipse cx={cx} cy={topY + 5} rx={16} ry={12} fill={color} />
-          <path d={`M ${cx} ${topY + 17} Q ${cx + 5} ${cy + 20} ${cx + 3} ${cy + 60}`} fill="none" stroke={color} strokeWidth="12" strokeLinecap="round" />
+          {/* Gathering point */}
+          <ellipse cx={cx} cy={topY + 8} rx={18} ry={14} fill={color} />
+          {/* Hair band */}
+          <ellipse cx={cx} cy={topY + 18} rx={10} ry={4} fill={dk} opacity="0.5" />
+          {/* Ponytail flowing down */}
+          <path d={`M ${cx - 8} ${topY + 22} Q ${cx + 10} ${cy + 10} ${cx + 8} ${cy + 55} Q ${cx + 3} ${cy + 70} ${cx + 5} ${cy + 65}`}
+            fill="none" stroke={color} strokeWidth="14" strokeLinecap="round" />
+          {/* Ponytail inner shadow */}
+          <path d={`M ${cx - 4} ${topY + 24} Q ${cx + 6} ${cy + 12} ${cx + 4} ${cy + 52}`}
+            fill="none" stroke={dk} strokeWidth="4" opacity="0.15" strokeLinecap="round" />
+          {/* Highlight */}
+          <ellipse cx={cx + 5} cy={topY - 5} rx={22} ry={8} fill={lt2} opacity="0.1" />
+          {/* Pull-back texture */}
+          {strand(cx - 35, topY + 10, cx - 15, topY, cx, topY + 10, 1, 0.1)}
+          {strand(cx + 35, topY + 10, cx + 15, topY, cx, topY + 10, 1, 0.1)}
         </g>
       )
     case 'braids':
       return (
         <g>
-          <path d={`M ${cx - face.rx - 5} ${cy} Q ${cx - face.rx - 8} ${topY - 18} ${cx} ${topY - 22} Q ${cx + face.rx + 8} ${topY - 18} ${cx + face.rx + 5} ${cy} Q ${cx + face.rx - 5} ${topY + 5} ${cx} ${topY} Q ${cx - face.rx + 5} ${topY + 5} ${cx - face.rx - 5} ${cy} Z`}
+          {/* Top hair shape */}
+          <path d={`M ${cx - rx - 5} ${cy} Q ${cx - rx - 8} ${topY - 18} ${cx} ${topY - 22} Q ${cx + rx + 8} ${topY - 18} ${cx + rx + 5} ${cy} Q ${cx + rx - 5} ${topY + 5} ${cx} ${topY} Q ${cx - rx + 5} ${topY + 5} ${cx - rx - 5} ${cy} Z`}
             fill={color} />
-          <path d={`M ${cx - face.rx + 2} ${cy + 5} Q ${cx - face.rx - 12} ${cy + 35} ${cx - face.rx - 6} ${cy + 85}`} fill="none" stroke={color} strokeWidth="10" strokeLinecap="round" />
-          <path d={`M ${cx + face.rx - 2} ${cy + 5} Q ${cx + face.rx + 12} ${cy + 35} ${cx + face.rx + 6} ${cy + 85}`} fill="none" stroke={color} strokeWidth="10" strokeLinecap="round" />
-          {/* Braid lines */}
-          {[0, 1, 2, 3, 4].map(i => (
-            <g key={i}>
-              <line x1={cx - face.rx - 10} y1={cy + 15 + i * 16} x2={cx - face.rx} y2={cy + 15 + i * 16} stroke={lt} strokeWidth="1" opacity="0.25" />
-              <line x1={cx + face.rx} y1={cy + 15 + i * 16} x2={cx + face.rx + 10} y2={cy + 15 + i * 16} stroke={lt} strokeWidth="1" opacity="0.25" />
-            </g>
-          ))}
+          {/* Center part line */}
+          <line x1={cx} y1={topY - 18} x2={cx} y2={topY + 10} stroke={dk} strokeWidth="1.5" opacity="0.3" />
+          {/* Left braid */}
+          <path d={`M ${cx - rx + 2} ${cy + 5} Q ${cx - rx - 14} ${cy + 38} ${cx - rx - 8} ${cy + 90}`} fill="none" stroke={color} strokeWidth="12" strokeLinecap="round" />
+          <path d={`M ${cx - rx + 2} ${cy + 5} Q ${cx - rx - 12} ${cy + 36} ${cx - rx - 6} ${cy + 88}`} fill="none" stroke={dk} strokeWidth="4" opacity="0.15" strokeLinecap="round" />
+          {/* Right braid */}
+          <path d={`M ${cx + rx - 2} ${cy + 5} Q ${cx + rx + 14} ${cy + 38} ${cx + rx + 8} ${cy + 90}`} fill="none" stroke={color} strokeWidth="12" strokeLinecap="round" />
+          <path d={`M ${cx + rx - 2} ${cy + 5} Q ${cx + rx + 12} ${cy + 36} ${cx + rx + 6} ${cy + 88}`} fill="none" stroke={dk} strokeWidth="4" opacity="0.15" strokeLinecap="round" />
+          {/* Braid cross-hatching — left */}
+          {[0, 1, 2, 3, 4, 5].map(i => {
+            const y = cy + 14 + i * 14
+            const bx = cx - rx - 3 - i * 1.8
+            return <path key={`l${i}`} d={`M ${bx - 6} ${y - 3} L ${bx + 6} ${y + 3} M ${bx + 6} ${y - 3} L ${bx - 6} ${y + 3}`}
+              stroke={lt} strokeWidth="1" opacity="0.2" />
+          })}
+          {/* Braid cross-hatching — right */}
+          {[0, 1, 2, 3, 4, 5].map(i => {
+            const y = cy + 14 + i * 14
+            const bx = cx + rx + 3 + i * 1.8
+            return <path key={`r${i}`} d={`M ${bx - 6} ${y - 3} L ${bx + 6} ${y + 3} M ${bx + 6} ${y - 3} L ${bx - 6} ${y + 3}`}
+              stroke={lt} strokeWidth="1" opacity="0.2" />
+          })}
+          {/* Braid tips / hair ties */}
+          <circle cx={cx - rx - 8} cy={cy + 92} r={4} fill={dk} opacity="0.4" />
+          <circle cx={cx + rx + 8} cy={cy + 92} r={4} fill={dk} opacity="0.4" />
+          {/* Highlight */}
+          <ellipse cx={cx} cy={topY - 8} rx={25} ry={8} fill={lt2} opacity="0.08" />
         </g>
       )
     default:
