@@ -26,7 +26,7 @@ export default async function ProfilePage({
 
   const userId = user.id
 
-  const [{ data: profile }, weekRes, totalRes, gradingRes, compRes, injuryRes] = await Promise.all([
+  const [{ data: profile }, weekRes, totalRes, gradingRes, compRes, injuryRes, unreadFeedbackRes] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', userId).single(),
     supabase
       .from('training_sessions')
@@ -50,6 +50,11 @@ export default async function ProfilePage({
       .select('id', { count: 'exact', head: true })
       .eq('user_id', userId)
       .is('date_recovered', null),
+    supabase
+      .from('session_feedback')
+      .select('id', { count: 'exact', head: true })
+      .eq('recipient_id', userId)
+      .eq('is_read', false),
   ])
 
   const p = profile as Profile | null
@@ -58,6 +63,7 @@ export default async function ProfilePage({
   const gradingCount = gradingRes.count ?? 0
   const compCount = compRes.count ?? 0
   const injuryCount = injuryRes.count ?? 0
+  const unreadFeedbackCount = unreadFeedbackRes.count ?? 0
   const currentYear = new Date().getFullYear()
   const yearsTrained = p?.training_since_year ? currentYear - p.training_since_year : null
 
@@ -239,20 +245,26 @@ export default async function ProfilePage({
       {/* Quick links */}
       <div className="mt-6 grid grid-cols-3 gap-3">
         {[
-          { href: `/${locale}/injuries`, icon: '🩹', label: 'Skader' },
-          { href: `/${locale}/settings`, icon: '⚙️', label: 'Innstillinger' },
-          { href: `/${locale}/feedback`, icon: '💬', label: 'Tilbakemelding' },
-          { href: `/${locale}/profile/avatar`, icon: '🎨', label: 'Rediger avatar' },
-          { href: `/${locale}/achievements`, icon: '🏅', label: 'Achievements' },
-          { href: `/${locale}/profile/edit`, icon: '✏️', label: 'Rediger profil' },
-        ].map(({ href, icon, label }) => (
+          { href: `/${locale}/inbox`, icon: '📨', label: 'Tilbakemeldinger', badge: unreadFeedbackCount },
+          { href: `/${locale}/injuries`, icon: '🩹', label: 'Skader', badge: 0 },
+          { href: `/${locale}/settings`, icon: '⚙️', label: 'Innstillinger', badge: 0 },
+          { href: `/${locale}/feedback`, icon: '💬', label: 'Tilbakemelding', badge: 0 },
+          { href: `/${locale}/profile/avatar`, icon: '🎨', label: 'Rediger avatar', badge: 0 },
+          { href: `/${locale}/achievements`, icon: '🏅', label: 'Achievements', badge: 0 },
+          { href: `/${locale}/profile/edit`, icon: '✏️', label: 'Rediger profil', badge: 0 },
+        ].map(({ href, icon, label, badge }) => (
           <Link
             key={href}
             href={href}
-            className="bg-surface hover:bg-surface-hover border border-white/5 hover:border-primary/20 rounded-xl p-4 text-center transition-all duration-200"
+            className="relative bg-surface hover:bg-surface-hover border border-white/5 hover:border-primary/20 rounded-xl p-4 text-center transition-all duration-200"
           >
             <div className="text-2xl mb-1.5">{icon}</div>
             <div className="text-xs font-medium text-muted">{label}</div>
+            {badge > 0 && (
+              <span className="absolute top-2 right-2 min-w-[18px] h-[18px] flex items-center justify-center px-1 text-[10px] font-bold bg-primary text-background rounded-full">
+                {badge}
+              </span>
+            )}
           </Link>
         ))}
       </div>

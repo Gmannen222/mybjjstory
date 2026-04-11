@@ -6,6 +6,8 @@ import type { TrainingSession, SessionTechnique, SparringRound } from '@/lib/typ
 import MediaGallery from '@/components/media/MediaGallery'
 import MediaUploadForm from '@/components/media/MediaUploadForm'
 import SparringSection from '@/components/sparring/SparringSection'
+import SessionFeedbackForm from '@/components/session-feedback/SessionFeedbackForm'
+import SessionFeedbackList from '@/components/session-feedback/SessionFeedbackList'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,6 +19,7 @@ export default async function TrainingDetailPage({
   const { locale, id } = await params
   const t = await getTranslations('training')
   const tCommon = await getTranslations('common')
+  const tFeedback = await getTranslations('sessionFeedback')
   const supabase = await createClient()
   const {
     data: { user },
@@ -132,6 +135,20 @@ export default async function TrainingDetailPage({
         rounds={(sparringRounds ?? []) as SparringRound[]}
         isOwner={isOwner}
       />
+
+      {/* Session feedback section */}
+      {isOwner && (sparringRounds ?? []).length > 0 && (
+        <div className="mt-6 bg-surface rounded-xl p-6">
+          <h2 className="text-lg font-bold mb-4">{tFeedback('title')}</h2>
+          <SessionFeedbackList sessionId={id} currentUserId={user.id} />
+          <div className="mt-4 pt-4 border-t border-white/10">
+            <SessionFeedbackForm
+              sessionId={id}
+              sessionDate={s.date}
+            />
+          </div>
+        </div>
+      )}
 
       {media && media.length > 0 && (
         <div className="mt-6">

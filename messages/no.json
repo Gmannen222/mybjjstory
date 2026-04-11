@@ -468,6 +468,33 @@
       "cta": "Logg din f\u00f8rste trening"
     }
   },
+  "sessionFeedback": {
+    "title": "Tilbakemelding til partner",
+    "send": "Send",
+    "recipient": "Mottaker",
+    "recipientPlaceholder": "Velg en treningspartner",
+    "searchPlaceholder": "Sok etter brukernavn...",
+    "message": "Melding",
+    "type": "Type",
+    "types": {
+      "tip": "Tips",
+      "encouragement": "Oppmuntring",
+      "observation": "Observasjon",
+      "question": "Sporsmal"
+    },
+    "sent": "Sendt",
+    "received": "Mottatt",
+    "inbox": "Tilbakemeldinger",
+    "unread": "ulest",
+    "markRead": "Marker som lest",
+    "noFeedback": "Ingen tilbakemeldinger ennda",
+    "placeholder": "Skriv din tilbakemelding her...",
+    "sendSuccess": "Tilbakemelding sendt!",
+    "fromSession": "Fra trening",
+    "sentBy": "Fra",
+    "sentTo": "Til",
+    "you": "deg"
+  },
   "admin": {
     "title": "Admin",
     "dashboard": "Dashboard",

@@ -270,6 +270,19 @@ export interface SparringRound {
   created_at: string
 }
 
+export type SessionFeedbackType = 'tip' | 'encouragement' | 'observation' | 'question'
+
+export interface SessionFeedback {
+  id: string
+  session_id: string
+  sender_id: string
+  recipient_id: string
+  message: string
+  feedback_type: SessionFeedbackType
+  is_read: boolean
+  created_at: string
+}
+
 export type FeedbackType = 'suggestion' | 'wish' | 'bug' | 'other'
 
 export interface Feedback {

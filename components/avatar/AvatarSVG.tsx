@@ -195,9 +195,9 @@ const BELT_COLOR_MAP: Record<string, string> = {
 const OUTFIT_COLORS: Record<string, { main: string; accent: string; dark: string }> = {
   gi_white: { main: '#f0f0f0', accent: '#d8d8d8', dark: '#c0c0c0' },
   gi_blue: { main: '#2563eb', accent: '#1d4ed8', dark: '#1e40af' },
-  gi_black: { main: '#1a1a2e', accent: '#111122', dark: '#0a0a18' },
+  gi_black: { main: '#2a2a3e', accent: '#3a3a50', dark: '#1a1a2e' },
   nogi: { main: '#374151', accent: '#4b5563', dark: '#1f2937' },
-  nogi_dark: { main: '#1f2937', accent: '#111827', dark: '#0f172a' },
+  nogi_dark: { main: '#2d3748', accent: '#1f2937', dark: '#171e2e' },
 }
 
 const BODY_DIMS: Record<string, { torsoW: number; shoulderW: number; hipW: number }> = {

@@ -20,6 +20,7 @@ const SUB_PATH_MAP: Record<string, string> = {
   '/injuries': '/profile',
   '/settings': '/profile',
   '/feedback': '/profile',
+  '/inbox': '/profile',
 }
 
 export default function BottomNav() {
