@@ -66,3 +66,40 @@ export async function deletePost(postId: string): Promise<ActionResult> {
 
   return { success: true }
 }
+
+export async function updatePost(
+  postId: string,
+  prevState: ActionResult,
+  formData: FormData
+): Promise<ActionResult> {
+  const supabase = await createClient()
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    return { success: false, error: 'Du må være innlogget for å redigere innlegg.' }
+  }
+
+  const content = formData.get('content')
+  if (typeof content !== 'string' || !content.trim()) {
+    return { success: false, error: 'Innlegget kan ikke være tomt.' }
+  }
+
+  if (content.trim().length > 2000) {
+    return { success: false, error: 'Innlegget kan ikke være lengre enn 2000 tegn.' }
+  }
+
+  const { error } = await supabase
+    .from('posts')
+    .update({ content: content.trim(), updated_at: new Date().toISOString() })
+    .eq('id', postId)
+    .eq('user_id', user.id)
+
+  if (error) {
+    console.error('Failed to update post:', error)
+    return { success: false, error: 'Kunne ikke oppdatere innlegget. Prøv igjen.' }
+  }
+
+  revalidatePath('/[locale]/feed', 'page')
+
+  return { success: true }
+}

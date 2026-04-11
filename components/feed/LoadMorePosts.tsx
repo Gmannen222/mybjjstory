@@ -4,8 +4,10 @@ import { useState, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
+import { useTranslations } from 'next-intl'
 import ReactionButton from '@/components/feed/ReactionButton'
 import CommentSection from '@/components/feed/CommentSection'
+import EditPostForm from '@/components/feed/EditPostForm'
 import OnlineDot from '@/components/ui/OnlineDot'
 import { useOnlineStatus } from '@/components/realtime/RealtimeProvider'
 import { useRealtimeInserts } from '@/lib/hooks/useRealtimeInserts'
@@ -14,6 +16,7 @@ export interface PostWithProfile {
   id: string
   content: string | null
   created_at: string
+  updated_at: string | null
   user_id: string
   profiles: {
     display_name: string | null
@@ -40,12 +43,14 @@ export default function LoadMorePosts({
   userId,
   pageSize,
 }: LoadMorePostsProps) {
+  const t = useTranslations('feed')
   const [posts, setPosts] = useState<PostWithProfile[]>(initialPosts)
   const [userReactions, setUserReactions] = useState<Record<string, string>>(initialUserReactions)
   const [loading, setLoading] = useState(false)
   const [hasMore, setHasMore] = useState(initialPosts.length >= pageSize)
   const [newPostCount, setNewPostCount] = useState(0)
   const [pendingPosts, setPendingPosts] = useState<string[]>([])
+  const [editingPostId, setEditingPostId] = useState<string | null>(null)
   const { isOnline } = useOnlineStatus()
 
   const handleNewPost = useCallback(
@@ -193,11 +198,43 @@ export default function LoadMorePosts({
                       hour: '2-digit',
                       minute: '2-digit',
                     })}
+                    {post.updated_at && (
+                      <span className="ml-1 text-muted/60">({t('edited')})</span>
+                    )}
                   </div>
                 </div>
+                {post.user_id === userId && editingPostId !== post.id && (
+                  <button
+                    onClick={() => setEditingPostId(post.id)}
+                    className="ml-auto text-xs text-muted hover:text-primary transition-colors"
+                    title={t('edit')}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                      <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
+                    </svg>
+                  </button>
+                )}
               </div>
 
-              {post.content && <p className="mb-4">{post.content}</p>}
+              {editingPostId === post.id ? (
+                <EditPostForm
+                  postId={post.id}
+                  currentContent={post.content || ''}
+                  onCancel={() => setEditingPostId(null)}
+                  onSaved={() => {
+                    setPosts((prev) =>
+                      prev.map((p) =>
+                        p.id === post.id
+                          ? { ...p, content: (document.getElementById(`edit-post-${post.id}`) as HTMLTextAreaElement)?.value || p.content, updated_at: new Date().toISOString() }
+                          : p
+                      )
+                    )
+                    setEditingPostId(null)
+                  }}
+                />
+              ) : (
+                post.content && <p className="mb-4">{post.content}</p>
+              )}
 
               <div className="flex items-center justify-between pt-2 border-t border-white/5">
                 <ReactionButton

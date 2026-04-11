@@ -62,6 +62,7 @@ export default function ProfileForm({
   const [showCompetitions, setShowCompetitions] = useState(profile?.show_competitions ?? true)
   const [showStats, setShowStats] = useState(profile?.show_stats ?? false)
   const [showFeed, setShowFeed] = useState(profile?.show_feed ?? true)
+  const [showInAcademyList, setShowInAcademyList] = useState(profile?.show_in_academy_list ?? true)
 
   // Avatar upload stays client-side (Vercel 4.5 MB FormData limit)
   const [, setAvatarFile] = useState<File | null>(null)
@@ -73,6 +74,7 @@ export default function ProfileForm({
   const router = useRouter()
   const supabase = createClient()
   const tCommon = useTranslations('common')
+  const tProfile = useTranslations('profile')
 
   // Server action with useActionState
   const [state, formAction] = useActionState(updateProfile, { success: false, error: '' })
@@ -145,6 +147,7 @@ export default function ProfileForm({
       {showCompetitions && <input type="hidden" name="show_competitions" value="on" />}
       {showStats && <input type="hidden" name="show_stats" value="on" />}
       {showFeed && <input type="hidden" name="show_feed" value="on" />}
+      {showInAcademyList && <input type="hidden" name="show_in_academy_list" value="on" />}
 
       {/* Basic info */}
       <section>
@@ -338,6 +341,20 @@ export default function ProfileForm({
                 </label>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Academy list visibility */}
+        {profileVisibility !== 'private' && (
+          <div className="mt-4 pt-4 border-t border-white/5">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" checked={showInAcademyList} onChange={(e) => setShowInAcademyList(e.target.checked)}
+                className="w-4 h-4 rounded accent-primary" />
+              <div>
+                <span className="text-sm font-medium text-muted">{tProfile('showInAcademyList')}</span>
+                <p className="text-xs text-muted/70 mt-0.5">{tProfile('showInAcademyListHelp')}</p>
+              </div>
+            </label>
           </div>
         )}
       </section>

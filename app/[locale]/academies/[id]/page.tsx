@@ -3,7 +3,8 @@ import { getTranslations } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getSafeUrl } from '@/lib/url'
-import type { Academy } from '@/lib/types/database'
+import type { Academy, Profile } from '@/lib/types/database'
+import { BeltBadge } from '@/components/ui/BeltBadge'
 
 export default async function AcademyDetailPage({
   params,
@@ -25,6 +26,15 @@ export default async function AcademyDetailPage({
   const a = academy as Academy
   const safeWebsiteUrl = getSafeUrl(a.website_url)
   const safeLogoUrl = getSafeUrl(a.logo_url)
+
+  // Fetch visible members of this academy
+  const { data: members } = await supabase
+    .from('profiles')
+    .select('id, display_name, username, avatar_url, belt_rank, belt_degrees')
+    .eq('academy_id', id)
+    .in('profile_visibility', ['public', 'academy'])
+    .eq('show_in_academy_list', true)
+    .order('display_name', { ascending: true })
 
   const mapsUrl = a.lat && a.lng
     ? `https://www.google.com/maps/search/?api=1&query=${a.lat},${a.lng}`
@@ -132,6 +142,46 @@ export default async function AcademyDetailPage({
               />
             </div>
           )}
+
+          {/* Members */}
+          <div className="rounded-xl bg-surface border border-white/10 p-4">
+            <h2 className="text-sm font-medium text-muted mb-3">{t('detail.members')}</h2>
+            {(!members || members.length === 0) ? (
+              <p className="text-sm text-muted/70">{t('detail.noMembers')}</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {(members as Pick<Profile, 'id' | 'display_name' | 'username' | 'avatar_url' | 'belt_rank' | 'belt_degrees'>[]).map((member) => {
+                  const name = member.display_name || member.username || 'Ukjent'
+                  const initial = name.charAt(0).toUpperCase()
+                  return (
+                    <Link
+                      key={member.id}
+                      href={`/${locale}/profile/${member.username || member.id}`}
+                      className="flex items-center gap-3 p-3 rounded-lg bg-background/50 hover:bg-background/80 transition-colors"
+                    >
+                      {member.avatar_url ? (
+                        <img
+                          src={member.avatar_url}
+                          alt={name}
+                          className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <span className="text-sm font-bold text-primary">{initial}</span>
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-foreground truncate">{name}</p>
+                        {member.belt_rank && (
+                          <BeltBadge rank={member.belt_rank} degrees={member.belt_degrees} />
+                        )}
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

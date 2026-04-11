@@ -2,16 +2,25 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { isSafeUrl } from '@/lib/url'
 import type { Academy } from '@/lib/types/database'
 
 interface Props {
   academy: Academy
+  memberCount?: number
 }
 
-export default function AcademyCard({ academy }: Props) {
+export default function AcademyCard({ academy, memberCount }: Props) {
   const locale = useLocale()
+  const t = useTranslations('academies')
+
+  const memberLabel =
+    memberCount === undefined || memberCount === 0
+      ? t('noMembersYet')
+      : memberCount === 1
+        ? t('oneMember')
+        : t('memberCount', { count: memberCount })
 
   return (
     <Link
@@ -35,6 +44,7 @@ export default function AcademyCard({ academy }: Props) {
         <div className="min-w-0 flex-1">
           <h3 className="font-semibold text-foreground truncate">{academy.name}</h3>
           <p className="text-sm text-muted">{academy.city}{academy.region ? `, ${academy.region}` : ''}</p>
+          <p className="text-xs text-muted/70 mt-1">{memberLabel}</p>
           {academy.affiliation && (
             <span className="inline-block mt-1.5 text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
               {academy.affiliation}

@@ -11,7 +11,7 @@
     "feedback": "Tilbakemelding",
     "academies": "Akademier",
     "sparring": "Sparring",
-    "progress": "Fremgang"
+    "progress": "Statistikk"
   },
   "home": {
     "title": "MyBJJStory",
@@ -173,7 +173,25 @@
     "comments": "kommentarer",
     "share": "Del",
     "newPostsSingular": "Vis {count} nytt innlegg",
-    "newPostsPlural": "Vis {count} nye innlegg"
+    "newPostsPlural": "Vis {count} nye innlegg",
+    "edit": "Rediger",
+    "editing": "Redigerer innlegg",
+    "saveEdit": "Lagre",
+    "cancelEdit": "Avbryt",
+    "edited": "redigert",
+    "editError": "Kunne ikke oppdatere innlegget. Prøv igjen.",
+    "deleteConfirm": "Er du sikker på at du vil slette dette innlegget?"
+  },
+  "myAcademy": {
+    "title": "Mitt akademi",
+    "noAcademy": "Du er ikke koblet til et akademi ennå",
+    "noAcademyDescription": "Gå til profilen din for å velge akademi.",
+    "goToProfile": "Rediger profil",
+    "members": "Medlemmer",
+    "memberCount": "{count} medlemmer",
+    "oneMember": "1 medlem",
+    "noMembers": "Ingen andre medlemmer er synlige ennå",
+    "you": "Deg"
   },
   "profile": {
     "title": "Min profil",
@@ -182,7 +200,9 @@
     "academy": "Akademi",
     "memberSince": "Medlem siden",
     "bio": "Om meg",
-    "stats": "Statistikk"
+    "stats": "Statistikk",
+    "showInAcademyList": "Synlig for andre akademier",
+    "showInAcademyListHelp": "Hvis av, vil du kun være synlig for ditt eget akademi"
   },
   "auth": {
     "login": "Logg inn",
@@ -409,7 +429,10 @@
       "noMembers": "Ingen har koblet seg til dette akademiet ennå",
       "backToList": "Tilbake til akademier"
     },
-    "count": "{count} akademier"
+    "count": "{count} akademier",
+    "memberCount": "{count} medlemmer",
+    "oneMember": "1 medlem",
+    "noMembersYet": "Ingen medlemmer ennå"
   },
   "sparring": {
     "title": "Sparring",
@@ -438,7 +461,7 @@
     "noPartners": "Ingen sparringspartnere ennå. Legg til din første runde fra en treningsøkt!"
   },
   "progress": {
-    "title": "Fremgang",
+    "title": "Statistikk",
     "frequency": "Treningsfrekvens (siste 12 mnd)",
     "techniques": "Teknikkfordeling",
     "beltTimeline": "Beltereise",

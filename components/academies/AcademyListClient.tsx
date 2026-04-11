@@ -9,9 +9,10 @@ interface Props {
   academies: Academy[]
   regions: string[]
   affiliations: string[]
+  memberCounts: Record<string, number>
 }
 
-export default function AcademyListClient({ academies, regions, affiliations }: Props) {
+export default function AcademyListClient({ academies, regions, affiliations, memberCounts }: Props) {
   const t = useTranslations('academies')
   const [search, setSearch] = useState('')
   const [region, setRegion] = useState('')
@@ -74,7 +75,7 @@ export default function AcademyListClient({ academies, regions, affiliations }: 
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((academy) => (
-            <AcademyCard key={academy.id} academy={academy} />
+            <AcademyCard key={academy.id} academy={academy} memberCount={memberCounts[academy.id] ?? 0} />
           ))}
         </div>
       )}

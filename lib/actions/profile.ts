@@ -51,6 +51,7 @@ export async function updateProfile(
   const showCompetitions = formData.get('show_competitions') === 'on'
   const showStats = formData.get('show_stats') === 'on'
   const showFeed = formData.get('show_feed') === 'on'
+  const showInAcademyList = formData.get('show_in_academy_list') === 'on'
 
   const profileVisibility = (formData.get('profile_visibility') as ProfileVisibility) || 'private'
   const publicDisplayName = (formData.get('public_display_name') as string) || null
@@ -81,6 +82,7 @@ export async function updateProfile(
       show_stats: showStats,
       show_feed: showFeed,
       show_kids_belts: showKidsBelts,
+      show_in_academy_list: showInAcademyList,
       profile_visibility: profileVisibility,
       public_display_name: publicDisplayName,
     })

@@ -18,6 +18,7 @@ const SUB_PATH_MAP: Record<string, string> = {
   '/competitions': '/progress',
   '/sparring': '/progress',
   '/academies': '/feed',
+  '/my-academy': '/feed',
   '/injuries': '/profile',
   '/settings': '/profile',
   '/feedback': '/profile',

@@ -99,6 +99,7 @@ export interface Profile {
   is_banned: boolean
   banned_at: string | null
   ban_reason: string | null
+  show_in_academy_list: boolean
   created_at: string
   updated_at: string
 }
@@ -205,6 +206,7 @@ export interface Post {
   session_id: string | null
   grading_id: string | null
   media_id: string | null
+  updated_at: string | null
   created_at: string
 }
 

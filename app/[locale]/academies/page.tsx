@@ -11,8 +11,22 @@ export default async function AcademiesPage() {
     .from('academies')
     .select('*')
     .eq('is_active', true)
-    .eq('visibility', 'visible')
     .order('name', { ascending: true })
+
+  // Fetch member counts per academy (only visible members)
+  const { data: memberRows } = await supabase
+    .from('profiles')
+    .select('academy_id')
+    .not('academy_id', 'is', null)
+    .in('profile_visibility', ['public', 'academy'])
+    .eq('show_in_academy_list', true)
+
+  const memberCounts: Record<string, number> = {}
+  for (const row of memberRows || []) {
+    if (row.academy_id) {
+      memberCounts[row.academy_id] = (memberCounts[row.academy_id] || 0) + 1
+    }
+  }
 
   const regions = [...new Set((academies || []).map((a: Academy) => a.region).filter(Boolean))] as string[]
   const affiliations = [...new Set((academies || []).map((a: Academy) => a.affiliation).filter(Boolean))] as string[]
@@ -29,6 +43,7 @@ export default async function AcademiesPage() {
           academies={(academies || []) as Academy[]}
           regions={regions.sort()}
           affiliations={affiliations.sort()}
+          memberCounts={memberCounts}
         />
       </div>
     </div>
