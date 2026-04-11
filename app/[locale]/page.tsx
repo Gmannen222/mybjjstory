@@ -107,7 +107,7 @@ async function LandingPage({ locale }: { locale: string }) {
       <section className="border-y border-white/5 bg-surface/50">
         <div className="max-w-5xl mx-auto px-4 py-12 grid grid-cols-3 gap-8 text-center">
           <div>
-            <div className="text-3xl sm:text-4xl font-bold text-primary">100%</div>
+            <div className="text-3xl sm:text-4xl font-bold text-primary">✓</div>
             <div className="text-sm text-muted mt-1">{t('stats.free')}</div>
           </div>
           <div>
