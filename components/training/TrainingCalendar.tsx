@@ -231,7 +231,7 @@ export default function TrainingCalendar({
         {(Object.entries(TYPE_COLORS) as [TrainingType, string][]).map(([type, color]) => (
           <div key={type} className="flex items-center gap-1.5 text-xs text-muted">
             <span className={`w-2 h-2 rounded-full ${color}`} />
-            {type === 'gi' ? 'Gi' : type === 'nogi' ? 'No-Gi' : type === 'open_mat' ? 'Open Mat' : type === 'private' ? 'Privat' : 'Konkurranse'}
+            {type === 'gi' ? 'Gi' : type === 'nogi' ? 'No-Gi' : type === 'open_mat' ? 'Open Mat' : type === 'private' ? 'Privat' : type === 'competition' ? 'Konkurranse' : type === 'seminar' ? 'Seminar' : type === 'competition_prep' ? 'Konkurranseprep' : type}
           </div>
         ))}
       </div>

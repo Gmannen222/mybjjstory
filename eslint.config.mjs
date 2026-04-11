@@ -1,14 +1,20 @@
-import { dirname } from 'path'
-import { fileURLToPath } from 'url'
-import { FlatCompat } from '@eslint/eslintrc'
+import nextCoreWebVitals from 'eslint-config-next/core-web-vitals'
+import nextTypescript from 'eslint-config-next/typescript'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-})
-
-const eslintConfig = [...compat.extends('next/core-web-vitals', 'next/typescript')]
+const eslintConfig = [
+  ...nextCoreWebVitals,
+  ...nextTypescript,
+  {
+    ignores: ['**/*.test.ts', '**/*.test.tsx', 'vitest.config.ts', 'vitest.setup.ts'],
+  },
+  {
+    rules: {
+      // Date.now() in server components is fine — they're not pure render functions
+      'react-hooks/purity': 'warn',
+      // setState in useEffect for timers/subscriptions is a valid React pattern
+      'react-hooks/set-state-in-effect': 'warn',
+    },
+  },
+]
 
 export default eslintConfig

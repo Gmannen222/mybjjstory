@@ -6,7 +6,7 @@ import SubmitButton from '@/components/ui/SubmitButton'
 
 const initialState: ActionResult<{ id: string }> = { success: true }
 
-export default function CreatePostForm({ locale }: { locale: string }) {
+export default function CreatePostForm({}: { locale?: string }) {
   const [state, formAction] = useActionState(createPost, initialState)
   const [content, setContent] = useState('')
   const formRef = useRef<HTMLFormElement>(null)

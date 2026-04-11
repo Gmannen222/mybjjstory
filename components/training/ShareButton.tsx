@@ -56,7 +56,7 @@ export default function ShareButton({
         handleShare()
       }}
       disabled={sharing}
-      className="text-xs text-muted hover:text-primary transition-colors disabled:opacity-50"
+      className="text-xs text-muted hover:text-primary transition-colors disabled:opacity-50 px-3 py-2 min-h-[44px]"
     >
       {sharing ? '...' : 'Del'}
     </button>

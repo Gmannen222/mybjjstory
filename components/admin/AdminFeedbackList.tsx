@@ -45,10 +45,9 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function AdminFeedbackList({
   feedback,
-  locale,
 }: {
   feedback: FeedbackItem[]
-  locale: string
+  locale?: string
 }) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
 

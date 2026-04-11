@@ -102,10 +102,11 @@ export default function SessionForm({
       <input type="hidden" name="techniques" value={JSON.stringify(techniques)} />
 
       <div>
-        <label className="block text-sm font-medium text-muted mb-2">
+        <label htmlFor="session-date" className="block text-sm font-medium text-muted mb-2">
           {t('date')}
         </label>
         <input
+          id="session-date"
           type="date"
           name="date"
           defaultValue={existingSession?.date ?? new Date().toISOString().split('T')[0]}
@@ -124,7 +125,7 @@ export default function SessionForm({
               key={tt}
               type="button"
               onClick={() => setType(tt)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-3 min-h-[44px] rounded-lg text-sm font-medium transition-colors ${
                 type === tt
                   ? 'bg-primary text-background'
                   : 'bg-surface text-muted hover:text-foreground'
@@ -137,12 +138,14 @@ export default function SessionForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-muted mb-2">
+        <label htmlFor="session-duration" className="block text-sm font-medium text-muted mb-2">
           {t('duration')} ({t('durationMin')})
         </label>
         <input
+          id="session-duration"
           type="number"
           name="duration_min"
+          inputMode="numeric"
           defaultValue={existingSession?.duration_min?.toString() ?? ''}
           placeholder="60"
           min="1"
@@ -193,7 +196,7 @@ export default function SessionForm({
                     key={m.value}
                     type="button"
                     onClick={() => setMoodBefore(moodBefore === m.value ? '' : m.value)}
-                    className={`flex-1 py-2 rounded-lg text-lg transition-colors ${
+                    className={`flex-1 py-2 min-h-[44px] min-w-[44px] rounded-lg text-lg transition-colors ${
                       moodBefore === m.value
                         ? 'bg-primary/20 ring-1 ring-primary'
                         : 'bg-surface hover:bg-surface-hover'
@@ -215,7 +218,7 @@ export default function SessionForm({
                     key={m.value}
                     type="button"
                     onClick={() => setMoodAfter(moodAfter === m.value ? '' : m.value)}
-                    className={`flex-1 py-2 rounded-lg text-lg transition-colors ${
+                    className={`flex-1 py-2 min-h-[44px] min-w-[44px] rounded-lg text-lg transition-colors ${
                       moodAfter === m.value
                         ? 'bg-primary/20 ring-1 ring-primary'
                         : 'bg-surface hover:bg-surface-hover'
@@ -246,10 +249,11 @@ export default function SessionForm({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-muted mb-2">
+            <label htmlFor="session-notes" className="block text-sm font-medium text-muted mb-2">
               {t('notes')}
             </label>
             <textarea
+              id="session-notes"
               name="notes"
               defaultValue={existingSession?.notes ?? ''}
               rows={4}

@@ -65,8 +65,8 @@ export default function OnboardingFlow({ locale }: { locale: string }) {
     setSaving(false)
   }
 
-  // Progress bar
-  const ProgressBar = () => (
+  // Progress bar (inline JSX to avoid creating component during render)
+  const progressBar = (
     <div className="w-full max-w-md mx-auto mb-8">
       <div className="flex items-center justify-between text-xs text-muted mb-2">
         <span>Steg {currentStep} av {totalSteps}</span>
@@ -104,7 +104,7 @@ export default function OnboardingFlow({ locale }: { locale: string }) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center px-4">
         <div className="max-w-md w-full space-y-6">
-          <ProgressBar />
+          {progressBar}
           <div className="text-center">
             <h2 className="text-2xl font-bold">Hvilket belte har du?</h2>
           </div>
@@ -194,7 +194,7 @@ export default function OnboardingFlow({ locale }: { locale: string }) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center px-4">
         <div className="max-w-md w-full space-y-6">
-          <ProgressBar />
+          {progressBar}
           <div className="text-center">
             <h2 className="text-2xl font-bold">Litt om deg</h2>
           </div>
@@ -275,7 +275,7 @@ export default function OnboardingFlow({ locale }: { locale: string }) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center px-4">
         <div className="max-w-md w-full space-y-6">
-          <ProgressBar />
+          {progressBar}
           <div className="text-center">
             <h2 className="text-2xl font-bold">Din BJJ-reise</h2>
             <p className="text-muted text-sm mt-1">Hjelper oss tilpasse opplevelsen for deg</p>
@@ -386,7 +386,7 @@ export default function OnboardingFlow({ locale }: { locale: string }) {
                     key={option}
                     type="button"
                     onClick={() => setHeardFrom(option)}
-                    className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
+                    className={`px-3 py-2.5 min-h-[44px] rounded-lg text-sm transition-all ${
                       heardFrom === option
                         ? 'bg-primary text-background'
                         : 'bg-surface text-muted hover:text-foreground'

@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 import Dashboard from '@/components/dashboard/Dashboard'
-import { BeltDisplay, ALL_BELTS } from '@/components/ui/BeltBadge'
+import { BeltDisplay } from '@/components/ui/BeltBadge'
 
 export const dynamic = 'force-dynamic'
 
@@ -137,10 +137,10 @@ async function LandingPage({ locale }: { locale: string }) {
               <div className="relative">
                 <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300 inline-block">{icon}</div>
                 <h3 className="text-lg font-bold mb-2">
-                  {t(`features.${key}.title` as any)}
+                  {t(`features.${key}.title` as Parameters<typeof t>[0])}
                 </h3>
                 <p className="text-sm text-muted leading-relaxed">
-                  {t(`features.${key}.desc` as any)}
+                  {t(`features.${key}.desc` as Parameters<typeof t>[0])}
                 </p>
                 <div className="mt-4 h-5">
                   <span className="text-xs text-primary font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -168,10 +168,10 @@ async function LandingPage({ locale }: { locale: string }) {
                   {step}
                 </div>
                 <h3 className="font-bold text-lg mb-2">
-                  {t(`howItWorks.step${step}.title` as any)}
+                  {t(`howItWorks.step${step}.title` as Parameters<typeof t>[0])}
                 </h3>
                 <p className="text-sm text-muted leading-relaxed">
-                  {t(`howItWorks.step${step}.desc` as any)}
+                  {t(`howItWorks.step${step}.desc` as Parameters<typeof t>[0])}
                 </p>
               </div>
             ))}

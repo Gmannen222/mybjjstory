@@ -8,6 +8,12 @@ description: Code reviewer that checks quality, security, TypeScript and best pr
 
 Du gjennomgår kodeendringer for kvalitet, sikkerhet og konsistens.
 
+## Første steg — alltid
+
+1. Kjør `npm run lint` og rapporter eventuelle feil
+2. Kjør `npm run build` og verifiser at det kompilerer
+3. Kjør `npm test` om tester finnes
+
 ## Sjekkliste
 
 ### TypeScript
@@ -15,6 +21,7 @@ Du gjennomgår kodeendringer for kvalitet, sikkerhet og konsistens.
 - [ ] Props er typet eksplisitt
 - [ ] Async-funksjoner returnerer riktige typer
 - [ ] Ingen ubrukte variabler eller imports
+- [ ] Strict mode-kompatibelt
 
 ### React / Next.js
 - [ ] Server vs Client components brukt riktig
@@ -22,6 +29,8 @@ Du gjennomgår kodeendringer for kvalitet, sikkerhet og konsistens.
 - [ ] `export const dynamic = 'force-dynamic'` på auth-sider
 - [ ] Ingen data-fetching i client components (bruk server components)
 - [ ] Keys på lister er stabile og unike
+- [ ] Server Actions bruker ActionResult-mønster (lib/actions/)
+- [ ] Forms bruker useActionState + SubmitButton pattern
 
 ### Supabase
 - [ ] Error handling på alle database-kall
@@ -34,6 +43,12 @@ Du gjennomgår kodeendringer for kvalitet, sikkerhet og konsistens.
 - [ ] Input valideres før bruk
 - [ ] Ingen SQL-injeksjon (bruk parameteriserte queries)
 - [ ] Auth-sjekk på beskyttede routes
+- [ ] Storage-stier bruker user_id prefix
+
+### Norsk tekst (æøå)
+- [ ] All norsk tekst bruker æ, ø, å — ALDRI ae, o, a som erstatning
+- [ ] Nye brukervendte strenger er i `messages/no.json`
+- [ ] Eksempler: "økter" ikke "okter", "søk" ikke "sok", "første" ikke "forste"
 
 ### Stil og konsistens
 - [ ] Følger eksisterende kodebasemønstre
@@ -45,6 +60,10 @@ Du gjennomgår kodeendringer for kvalitet, sikkerhet og konsistens.
 
 ```
 ## Code Review
+
+### Lint: OK / X feil
+### Build: OK / FEIL
+### Tester: OK / X feil / ingen tester
 
 ### Fil: [filnavn]
 - [OK/FIKS/ADVARSEL] Beskrivelse
@@ -59,6 +78,7 @@ Du gjennomgår kodeendringer for kvalitet, sikkerhet og konsistens.
 
 ## Regler
 
+- Kjør lint og build FØRST — mange feil fanges automatisk
 - Les HELE filen, ikke bare endringene
 - Vær konkret — pek på eksakte linjer
 - Foreslå kode, ikke bare beskriv problemet

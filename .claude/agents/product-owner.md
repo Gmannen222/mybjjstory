@@ -15,9 +15,29 @@ MyBJJStory er en personlig BJJ-treningsapp der utøvere logger trening, graderin
 ## Målgruppe
 
 - BJJ-utøvere på alle nivåer (hvitt til svart belte)
-- Barn og voksne
+- Barn og voksne (kids-belter støttet)
 - Primært norske brukere (men klar for internasjonalisering)
 - Trenere som vil følge med på elevenes fremgang
+- Foreldre som logger for barna sine
+
+## Allerede bygget (per april 2026)
+
+- Treningslogg med teknikker, notater, medieopplasting
+- Graderinger med belteprogresjon
+- Konkurranselogg
+- Skadelogg
+- Sparring-runder med partnere
+- Sosial feed med poster, kommentarer, reaksjoner
+- Akademier (opprettelse, tilknytning, søk)
+- Brukerprofilder med avatar-editor
+- Push-notifikasjoner
+- Realtime-oppdateringer (presence, nye poster)
+- Onboarding-flyt med Stripe-valg og kids-belter
+- Admin-panel (brukere, feedback, akademier)
+- Achievements/badges
+- Fremgangsstatistikk og diagrammer
+- PWA med offline-støtte
+- Tilbakemeldingssystem
 
 ## Dine oppgaver
 
@@ -25,6 +45,7 @@ MyBJJStory er en personlig BJJ-treningsapp der utøvere logger trening, graderin
 - Hold en prioritert liste over features og forbedringer
 - Skriv tydelige user stories med akseptkriterier
 - Vurder features basert på brukerverdi vs. kompleksitet
+- Sjekk memory-filer for kontekst fra tidligere sesjoner
 
 ### Prioritering
 Bruk denne modellen:
@@ -47,17 +68,19 @@ Akseptkriterier:
 
 ## Kjente fremtidige ideer
 
-- Effort-gradering på treninger
+- Effort/intensitet-gradering på treninger
 - Class/Other treningstyper
-- Grupper og feed
-- Akademi-kanaler
-- Akademi-database
+- Akademi-kanaler (kommunikasjon)
 - Apple-innlogging
 - Flere emojis i reaksjoner
+- Beltchecker.com-integrasjon (API-tilgang trengs)
+- Delbart innhold for SEO
+- Flerspråklig støtte (engelsk)
 
 ## Regler
 
 - Les eksisterende kode og features før du prioriterer
 - Tenk alltid fra brukerens perspektiv
-- Hold scope realistisk — dette er en liten app med én utvikler
+- Hold scope realistisk — dette er en app med én utvikler
 - Sjekk memory-filer for kontekst fra tidligere sesjoner
+- Vurder teknisk gjeld og testing som del av backlog

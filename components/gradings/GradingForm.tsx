@@ -133,7 +133,7 @@ export default function GradingForm({
                 key={rank}
                 type="button"
                 onClick={() => setBeltRank(rank)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`px-3 py-2.5 min-h-[44px] rounded-lg text-xs font-semibold transition-all ${
                   beltRank === rank
                     ? 'ring-2 ring-primary scale-105'
                     : 'opacity-60 hover:opacity-100'
@@ -163,11 +163,13 @@ export default function GradingForm({
 
       {/* Degrees / stripes */}
       <div>
-        <label className="block text-sm font-medium text-muted mb-2">
+        <label htmlFor="grading-degrees" className="block text-sm font-medium text-muted mb-2">
           {gradingType === 'stripe' ? 'Stripe nummer' : 'Grader (striper)'}
         </label>
         <input
+          id="grading-degrees"
           type="number"
+          inputMode="numeric"
           value={degrees}
           onChange={(e) => setDegrees(e.target.value)}
           min="0"
@@ -177,10 +179,11 @@ export default function GradingForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-muted mb-2">
+        <label htmlFor="grading-date" className="block text-sm font-medium text-muted mb-2">
           {t('date')}
         </label>
         <input
+          id="grading-date"
           type="date"
           name="date"
           defaultValue={grading?.date ?? new Date().toISOString().split('T')[0]}
@@ -190,10 +193,11 @@ export default function GradingForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-muted mb-2">
+        <label htmlFor="grading-instructor" className="block text-sm font-medium text-muted mb-2">
           {t('instructor')}
         </label>
         <input
+          id="grading-instructor"
           type="text"
           name="instructor_name"
           defaultValue={grading?.instructor_name ?? ''}
@@ -202,10 +206,11 @@ export default function GradingForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-muted mb-2">
+        <label htmlFor="grading-academy" className="block text-sm font-medium text-muted mb-2">
           {t('academy')}
         </label>
         <input
+          id="grading-academy"
           type="text"
           name="academy_name"
           defaultValue={grading?.academy_name ?? ''}
@@ -214,10 +219,11 @@ export default function GradingForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-muted mb-2">
+        <label htmlFor="grading-notes" className="block text-sm font-medium text-muted mb-2">
           {t('notes')}
         </label>
         <textarea
+          id="grading-notes"
           name="notes"
           defaultValue={grading?.notes ?? ''}
           rows={3}

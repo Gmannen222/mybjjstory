@@ -32,14 +32,13 @@ interface ProfileSummary {
 
 export default function SettingsPage({
   locale,
-  userId,
   userEmail,
   profile,
   previousFeedback,
   notificationPreferences,
 }: {
   locale: string
-  userId: string
+  userId?: string
   userEmail: string
   profile: ProfileSummary | null
   previousFeedback: Feedback[]

@@ -64,7 +64,7 @@ export default function ProfileForm({
   const [showFeed, setShowFeed] = useState(profile?.show_feed ?? true)
 
   // Avatar upload stays client-side (Vercel 4.5 MB FormData limit)
-  const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [, setAvatarFile] = useState<File | null>(null)
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || '')
   const [avatarUploading, setAvatarUploading] = useState(false)
   const [avatarError, setAvatarError] = useState<string | null>(null)
@@ -72,7 +72,6 @@ export default function ProfileForm({
   const formRef = useRef<HTMLFormElement>(null)
   const router = useRouter()
   const supabase = createClient()
-  const tBelts = useTranslations('belts')
   const tCommon = useTranslations('common')
 
   // Server action with useActionState

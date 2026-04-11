@@ -121,7 +121,7 @@ export default function TechniquePicker({
               <button
                 type="button"
                 onClick={() => removeTechnique(tech.name)}
-                className="opacity-60 hover:opacity-100 ml-0.5 min-w-[28px] min-h-[28px] flex items-center justify-center rounded"
+                className="opacity-60 hover:opacity-100 ml-0.5 min-w-[36px] min-h-[36px] flex items-center justify-center rounded"
               >
                 ×
               </button>
@@ -151,7 +151,7 @@ export default function TechniquePicker({
               <button
                 type="button"
                 onClick={() => setFilterCategory('')}
-                className={`px-2 py-1 rounded text-xs whitespace-nowrap transition-colors ${
+                className={`px-3 py-2 min-h-[36px] rounded text-xs whitespace-nowrap transition-colors ${
                   !filterCategory ? 'bg-primary text-background' : 'text-muted hover:text-foreground'
                 }`}
               >
@@ -162,7 +162,7 @@ export default function TechniquePicker({
                   key={cat}
                   type="button"
                   onClick={() => setFilterCategory(filterCategory === cat ? '' : cat)}
-                  className={`px-2 py-1 rounded text-xs whitespace-nowrap transition-colors ${
+                  className={`px-3 py-2 min-h-[36px] rounded text-xs whitespace-nowrap transition-colors ${
                     filterCategory === cat ? 'bg-primary text-background' : 'text-muted hover:text-foreground'
                   }`}
                 >
@@ -178,7 +178,7 @@ export default function TechniquePicker({
                   key={tech.name}
                   type="button"
                   onClick={() => addTechnique(tech)}
-                  className="w-full flex items-center justify-between px-3 py-2 hover:bg-surface-hover transition-colors text-left"
+                  className="w-full flex items-center justify-between px-3 py-3 min-h-[44px] hover:bg-surface-hover transition-colors text-left"
                 >
                   <span className="text-sm">{tech.name}</span>
                   {tech.category && (

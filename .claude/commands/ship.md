@@ -1,13 +1,19 @@
-Run the ship pipeline: build, test, and deploy to production. This is the fast path when code is already reviewed and ready.
+Run the ship pipeline: lint, build, test, and deploy to production. This is the fast path when code is already reviewed and ready.
 
 ## Pipeline
 
-### Step 1: Build Check
-Run `npm run build` locally. If the build fails, stop and report errors. Do NOT proceed to deploy with a broken build.
+### Step 1: Quality Gate
+Run all checks sequentially. Stop at first failure:
+```bash
+npm run lint
+npm run build
+npm test --if-present
+```
+If any check fails, stop and report errors. Do NOT proceed to deploy.
 
 ### Step 2: QA Quick Check (qa-tester agent)
 Run the **qa-tester** agent for a quick sanity check:
-- Build status (from step 1)
+- Confirm lint/build/test results from step 1
 - Any critical security issues in changed files
 - If critical issues are found, stop and report
 
@@ -24,8 +30,9 @@ Run the **update-dashboard** agent in the background to update `.claude/status.m
 ```
 ## Ship Report
 
+### Lint: OK / FEIL
 ### Build: OK / FEIL
-### QA: OK / FEIL  
+### Test: OK / FEIL / ingen tester
 ### Migrations: [pushed/none pending]
 ### Deploy: [URL] / FEIL
 ### Status: LIVE / BLOKKERT

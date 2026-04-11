@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useLocale, useTranslations } from 'next-intl'
+import { useLocale } from 'next-intl'
 import { isSafeUrl } from '@/lib/url'
 import type { Academy } from '@/lib/types/database'
 
@@ -11,7 +11,6 @@ interface Props {
 }
 
 export default function AcademyCard({ academy }: Props) {
-  const t = useTranslations('academies')
   const locale = useLocale()
 
   return (

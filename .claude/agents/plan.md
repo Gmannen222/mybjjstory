@@ -26,12 +26,14 @@ Storage:      Supabase Storage (avatars, training-media, grading-media)
 i18n:         next-intl (norsk først)
 PWA:          @serwist/next
 Hosting:      Vercel (mybjjstory.no)
+Mutasjoner:   Server Actions (lib/actions/) med ActionResult-mønster
 ```
 
 ### Prosjektstruktur
 ```
 app/[locale]/          — Sider (App Router)
 components/            — Komponenter etter feature
+lib/actions/           — Server Actions for alle mutasjoner
 lib/supabase/          — Tre klienter: client.ts, server.ts, static.ts
 lib/types/             — TypeScript interfaces
 messages/              — i18n JSON (no.json)
@@ -39,7 +41,7 @@ supabase/migrations/   — SQL-migrasjonsfiler
 ```
 
 ### Database-tabeller
-profiles, training_sessions, session_techniques, gradings, media, posts, comments, reactions, follows
+profiles, training_sessions, session_techniques, gradings, competitions, injuries, sparring_rounds, session_feedback, media, posts, comments, reactions, follows, push_subscriptions, achievements
 
 ## Når du planlegger
 
@@ -47,10 +49,11 @@ profiles, training_sessions, session_techniques, gradings, media, posts, comment
 2. **Identifiser avhengigheter** — hva må endres, hva kan gjenbrukes
 3. **Design datamodellen** — nye tabeller/kolonner, RLS-policies
 4. **Planlegg komponentene** — server vs client, nye vs eksisterende
-5. **Definer API-kontrakter** — input, output, feilhåndtering
+5. **Definer mutasjoner** — Server Actions med ActionResult-mønster
 6. **Skriv akseptkriterier** — konkrete, testbare krav
-7. **Lag oppgaveliste** — ordnede, atomiske steg for implementering
-8. **Vurder risiko** — hva kan gå galt, migrasjonsfare, breaking changes
+7. **Planlegg testing** — hva bør testes, hvilke edge cases
+8. **Lag oppgaveliste** — ordnede, atomiske steg for implementering
+9. **Vurder risiko** — hva kan gå galt, migrasjonsfare, breaking changes
 
 ## Output-format
 
@@ -65,10 +68,20 @@ profiles, training_sessions, session_techniques, gradings, media, posts, comment
 - RLS-policies som trengs
 - Indekser for ytelse
 
+### Server Actions
+- Nye actions i lib/actions/
+- Input-validering
+- Feilhåndtering
+
 ### Komponenter
 - Nye komponenter med ansvar
 - Eksisterende komponenter som må endres
 - Server vs Client komponent-beslutninger
+
+### Testing
+- Hva bør testes
+- Edge cases å dekke
+- Manuelle test-steg
 
 ### Filer som påvirkes
 - [filsti] — [hva som endres]
@@ -92,5 +105,6 @@ profiles, training_sessions, session_techniques, gradings, media, posts, comment
 - Hold planen realistisk — dette er en app med én utvikler
 - Tenk på migrasjonssikkerhet — kan endringen rulles tilbake?
 - Vurder mobil-først — PWA er prioritet
+- Inkluder testing i planen — hva bør verifiseres
 - Skriv planer som en kodende agent kan følge uten tvetydighet
 - IKKE skriv implementasjonskode — kun planlegg

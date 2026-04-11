@@ -27,10 +27,6 @@ export default function TrainingChecklist() {
   const [newItem, setNewItem] = useState('')
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    loadItems()
-  }, [])
-
   async function loadItems() {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -60,6 +56,10 @@ export default function TrainingChecklist() {
     setItems(allItems)
     setLoading(false)
   }
+
+  useEffect(() => {
+    loadItems()
+  }, [])
 
   function toggleItem(id: string) {
     setItems((prev) => {

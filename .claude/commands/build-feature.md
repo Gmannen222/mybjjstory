@@ -21,33 +21,43 @@ Based on the plan, implement the feature:
 ### Step 3: UX Copy (ux-writer agent)
 Run the **ux-writer** agent to review and add Norwegian text:
 - Check that all new user-facing strings are in `messages/no.json`
-- Verify tone and BJJ terminology
+- Verify tone, BJJ terminology, and correct æøå usage
 
-### Step 4: Review (code-reviewer agent)
+### Step 4: Quality Gate
+Run these checks sequentially:
+```bash
+npm run lint
+npm run build
+npm test --if-present
+```
+If any fail, fix the issues before continuing.
+
+### Step 5: Review (code-reviewer agent)
 Run the **code-reviewer** agent on all changed files:
 - TypeScript, security, Supabase patterns, React best practices
 - If the review finds issues marked FIKS, go back to Step 2 and fix them before continuing
 
-### Step 5: QA (qa-tester agent)
+### Step 6: QA (qa-tester agent)
 Run the **qa-tester** agent:
-- Build check (`npm run build`)
+- Verify lint, build, and test pass
 - Code analysis for errors and warnings
 - If critical issues are found, fix them and re-run QA
 
-### Step 6: UX Review (ux-champion agent)
+### Step 7: UX Review (ux-champion agent)
 Run the **ux-champion** agent on the new/changed pages:
 - Mobile-first evaluation
 - Touch targets, loading states, empty states
 - Report findings but don't block the pipeline for non-critical UX issues
 
-### Step 7: Deploy (optional — ask user)
+### Step 8: Deploy (optional — ask user)
 Ask the user if they want to deploy now. If yes:
 - Run the **devops** agent to build, push migrations, and deploy to Vercel
 
 ## Report
 After completing the pipeline, give a summary:
 - What was built (files created/changed)
+- Lint/Build/Test status
 - Review status (approved / issues fixed)
-- QA status (build pass/fail)
+- QA status (pass/fail)
 - UX findings (if any)
 - Deploy status (if deployed)

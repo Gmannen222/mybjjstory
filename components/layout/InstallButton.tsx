@@ -2,8 +2,13 @@
 
 import { useState, useEffect } from 'react'
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+}
+
 export default function InstallButton() {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [isInstalled, setIsInstalled] = useState(false)
 
   useEffect(() => {
@@ -15,7 +20,7 @@ export default function InstallButton() {
 
     const handler = (e: Event) => {
       e.preventDefault()
-      setDeferredPrompt(e)
+      setDeferredPrompt(e as BeforeInstallPromptEvent)
     }
     window.addEventListener('beforeinstallprompt', handler)
 

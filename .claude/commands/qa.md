@@ -1,1 +1,1 @@
-Run the qa-tester agent to check the current state of the project. Run build, check for TypeScript errors, look for security issues, and validate user flows. Report findings in a structured QA report.
+Run the qa-tester agent to check the current state of the project. Run lint, build, and tests first, then check for TypeScript errors, look for security issues, validate æøå in Norwegian text, and validate user flows. Report findings in a structured QA report.

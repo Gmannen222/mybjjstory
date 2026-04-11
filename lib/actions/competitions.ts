@@ -107,6 +107,7 @@ export async function updateCompetition(
       notes: (formData.get('notes') as string) || null,
     })
     .eq('id', competitionId)
+    .eq('user_id', user.id)
 
   if (error) {
     console.error('Failed to update competition:', error)
@@ -132,6 +133,7 @@ export async function deleteCompetition(
     .from('competitions')
     .delete()
     .eq('id', competitionId)
+    .eq('user_id', user.id)
 
   if (error) {
     console.error('Failed to delete competition:', error)

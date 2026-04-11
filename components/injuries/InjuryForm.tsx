@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useActionState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { createInjury, updateInjury, deleteInjury, markInjuryRecovered } from '@/lib/actions/injuries'
 import SubmitButton from '@/components/ui/SubmitButton'
 import type { Injury, InjuryType, Severity, TrainingImpact } from '@/lib/types/database'
@@ -12,26 +13,15 @@ const BODY_PARTS = [
   'Nese', 'Kjeve', 'Annet',
 ]
 
-const INJURY_TYPES: { value: InjuryType; label: string }[] = [
-  { value: 'sprain', label: 'Forstuing' },
-  { value: 'tear', label: 'Ruptur / avrivning' },
-  { value: 'fracture', label: 'Brudd' },
-  { value: 'bruise', label: 'Blåmerke / klemskade' },
-  { value: 'dislocation', label: 'Luksasjon' },
-  { value: 'other', label: 'Annet' },
+const INJURY_TYPE_OPTIONS: InjuryType[] = ['sprain', 'tear', 'fracture', 'bruise', 'dislocation', 'other']
+
+const SEVERITY_OPTIONS: { value: Severity; color: string }[] = [
+  { value: 'mild', color: 'text-yellow-400' },
+  { value: 'moderate', color: 'text-orange-400' },
+  { value: 'severe', color: 'text-red-400' },
 ]
 
-const SEVERITIES: { value: Severity; label: string; color: string }[] = [
-  { value: 'mild', label: 'Mild', color: 'text-yellow-400' },
-  { value: 'moderate', label: 'Moderat', color: 'text-orange-400' },
-  { value: 'severe', label: 'Alvorlig', color: 'text-red-400' },
-]
-
-const IMPACTS: { value: TrainingImpact; label: string }[] = [
-  { value: 'none', label: 'Ingen påvirkning' },
-  { value: 'modified', label: 'Tilpasset trening' },
-  { value: 'rest', label: 'Full hvile' },
-]
+const IMPACT_OPTIONS: TrainingImpact[] = ['none', 'modified', 'rest']
 
 export default function InjuryForm({
   locale,
@@ -42,6 +32,8 @@ export default function InjuryForm({
 }) {
   const isEdit = !!injury
   const router = useRouter()
+  const t = useTranslations('injuries')
+  const tc = useTranslations('common')
 
   // Hidden field state for button-selected values
   const [bodyPart, setBodyPart] = useState(injury?.body_part ?? '')
@@ -107,12 +99,12 @@ export default function InjuryForm({
       {isEdit && !injury.date_recovered && (
         <button type="button" onClick={handleMarkRecovered} disabled={recovering}
           className="w-full py-3 bg-green-500/10 text-green-400 font-semibold rounded-lg hover:bg-green-500/20 transition-colors disabled:opacity-50">
-          {recovering ? 'Oppdaterer...' : '✓ Marker som frisk'}
+          {recovering ? 'Oppdaterer...' : `✓ ${t('markRecovered')}`}
         </button>
       )}
 
       <div>
-        <label className="block text-sm font-medium text-muted mb-2">Kroppsdel *</label>
+        <label className="block text-sm font-medium text-muted mb-2">{t('bodyPart')} *</label>
         <div className="flex flex-wrap gap-2">
           {BODY_PARTS.map((part) => (
             <button key={part} type="button" onClick={() => setBodyPart(part)}
@@ -126,46 +118,46 @@ export default function InjuryForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-muted mb-2">Type skade</label>
+        <label className="block text-sm font-medium text-muted mb-2">{t('injuryType')}</label>
         <select name="injury_type" defaultValue={injury?.injury_type ?? ''}
           className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground [&>option]:text-black [&>option]:bg-white focus:outline-none focus:border-primary">
           <option value="">Velg...</option>
-          {INJURY_TYPES.map(({ value, label }) => (
-            <option key={value} value={value}>{label}</option>
+          {INJURY_TYPE_OPTIONS.map((value) => (
+            <option key={value} value={value}>{t(`types.${value}`)}</option>
           ))}
         </select>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-muted mb-2">Alvorlighetsgrad</label>
+        <label className="block text-sm font-medium text-muted mb-2">{t('severity')}</label>
         <div className="flex gap-2">
-          {SEVERITIES.map(({ value, label, color }) => (
+          {SEVERITY_OPTIONS.map(({ value, color }) => (
             <button key={value} type="button" onClick={() => setSeverity(value)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 severity === value ? `bg-surface ring-2 ring-primary ${color}` : 'bg-surface text-muted'
               }`}>
-              {label}
+              {t(`severities.${value}`)}
             </button>
           ))}
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-muted mb-2">Påvirkning på trening</label>
+        <label className="block text-sm font-medium text-muted mb-2">{t('impact')}</label>
         <div className="flex flex-wrap gap-2">
-          {IMPACTS.map(({ value, label }) => (
+          {IMPACT_OPTIONS.map((value) => (
             <button key={value} type="button" onClick={() => setTrainingImpact(value)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 trainingImpact === value ? 'bg-primary text-background' : 'bg-surface text-muted hover:text-foreground'
               }`}>
-              {label}
+              {t(`impacts.${value}`)}
             </button>
           ))}
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-muted mb-2">Beskrivelse</label>
+        <label className="block text-sm font-medium text-muted mb-2">{t('description')}</label>
         <input type="text" name="description" defaultValue={injury?.description ?? ''}
           placeholder="Kort beskrivelse av skaden"
           className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
@@ -173,20 +165,20 @@ export default function InjuryForm({
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-muted mb-2">Dato skadet</label>
+          <label className="block text-sm font-medium text-muted mb-2">{t('dateOccurred')}</label>
           <input type="date" name="date_occurred" defaultValue={injury?.date_occurred ?? new Date().toISOString().split('T')[0]}
             required
             className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-muted mb-2">Dato frisk (valgfritt)</label>
+          <label className="block text-sm font-medium text-muted mb-2">{t('dateRecoveredOptional')}</label>
           <input type="date" name="date_recovered" defaultValue={injury?.date_recovered ?? ''}
             className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-muted mb-2">Notater</label>
+        <label className="block text-sm font-medium text-muted mb-2">{t('notes')}</label>
         <textarea name="notes" defaultValue={injury?.notes ?? ''} rows={3}
           className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary resize-none" />
       </div>
@@ -195,10 +187,10 @@ export default function InjuryForm({
       {deleteError && <p className="text-red-500 text-sm">{deleteError}</p>}
 
       <SubmitButton
-        pendingText="Lagrer..."
+        pendingText={tc('saving')}
         className="w-full py-3"
       >
-        {isEdit ? 'Oppdater skade' : 'Lagre skade'}
+        {isEdit ? t('update') : t('save')}
       </SubmitButton>
 
       {isEdit && (
@@ -209,7 +201,7 @@ export default function InjuryForm({
               onClick={() => setShowDeleteConfirm(true)}
               className="px-4 py-2.5 text-sm text-red-400 border border-red-500/20 rounded-xl hover:bg-red-500/10 transition-colors"
             >
-              Slett skade
+              {t('delete')}
             </button>
           ) : (
             <div className="flex items-center gap-2">
@@ -218,7 +210,7 @@ export default function InjuryForm({
                 onClick={() => setShowDeleteConfirm(false)}
                 className="px-4 py-2.5 text-sm text-muted border border-white/10 rounded-xl hover:bg-surface-hover transition-colors"
               >
-                Avbryt
+                {tc('cancel')}
               </button>
               <button
                 type="button"
@@ -226,7 +218,7 @@ export default function InjuryForm({
                 disabled={deleting}
                 className="px-4 py-2.5 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl hover:bg-red-500/20 transition-colors disabled:opacity-50"
               >
-                {deleting ? 'Sletter...' : 'Ja, slett'}
+                {deleting ? tc('deleting') : 'Ja, slett'}
               </button>
             </div>
           )}

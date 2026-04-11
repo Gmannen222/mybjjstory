@@ -31,7 +31,7 @@ export default function LoginPage() {
 
         <div className="bg-surface rounded-2xl p-8 space-y-6">
           <p className="text-sm text-muted">
-            Logg inn for å begynne å tracke treningene dine, dokumentere graderinger og dele med fellesskapet.
+            Logg inn for å begynne å logge treningene dine, dokumentere graderinger og dele med fellesskapet.
           </p>
 
           <button

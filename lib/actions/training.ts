@@ -168,6 +168,7 @@ export async function updateSession(
     .from('training_sessions')
     .update(payload)
     .eq('id', sessionId)
+    .eq('user_id', user.id)
 
   if (updateError) {
     console.error('Failed to update training session:', updateError)
@@ -224,6 +225,7 @@ export async function deleteSession(sessionId: string): Promise<ActionResult> {
     .from('training_sessions')
     .delete()
     .eq('id', sessionId)
+    .eq('user_id', user.id)
 
   if (error) {
     console.error('Failed to delete training session:', error)

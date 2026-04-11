@@ -1,1 +1,1 @@
-Run the code-reviewer agent on the files changed in this session. Check TypeScript, React patterns, Supabase usage, security, and code style. Report findings with specific line numbers and suggestions.
+Run the code-reviewer agent on the files changed in this session. First run `npm run lint` and `npm run build`, then check TypeScript, React patterns, Supabase usage, security, æøå in Norwegian text, and code style. Report findings with specific line numbers and suggestions.

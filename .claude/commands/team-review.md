@@ -1,5 +1,13 @@
 Run the full review pipeline with three specialist agents in sequence. Use this after implementing changes to get comprehensive feedback before deploying.
 
+## Pre-check
+Run quality gate FIRST before involving agents:
+```bash
+npm run lint
+npm run build
+npm test --if-present
+```
+
 ## Pipeline
 
 ### Step 1: Code Review (code-reviewer agent)
@@ -7,11 +15,12 @@ Run the **code-reviewer** agent on all files changed in this session:
 - TypeScript typing, React/Next.js patterns, Supabase usage
 - Security: no hardcoded secrets, input validation, RLS coverage
 - Style consistency with existing codebase
+- Correct æøå in Norwegian text
 - Report findings with line numbers and severity
 
 ### Step 2: QA (qa-tester agent)
 Run the **qa-tester** agent:
-- Run `npm run build` and report any errors
+- Confirm lint/build/test status from pre-check
 - Check for unused imports, missing error handling
 - Validate auth guards on protected pages
 - Report structured QA findings
@@ -29,6 +38,11 @@ Summarize findings in a unified report:
 
 ```
 ## Team Review
+
+### Quality Gate
+- Lint: OK / X feil
+- Build: OK / FEIL
+- Test: OK / X feil / ingen tester
 
 ### Code Review: [GODKJENT / X FEIL]
 [Key findings]

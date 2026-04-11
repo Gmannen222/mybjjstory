@@ -55,6 +55,7 @@ export async function deletePost(postId: string): Promise<ActionResult> {
     .from('posts')
     .delete()
     .eq('id', postId)
+    .eq('user_id', user.id)
 
   if (error) {
     console.error('Failed to delete post:', error)

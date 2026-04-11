@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { getTranslations } from 'next-intl/server'
 import BannedContent from '@/components/auth/BannedContent'
 
 export const dynamic = 'force-dynamic'
@@ -11,7 +10,6 @@ export default async function BannedPage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
-  const t = await getTranslations('admin.users')
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 

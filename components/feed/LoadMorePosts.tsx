@@ -10,7 +10,7 @@ import OnlineDot from '@/components/ui/OnlineDot'
 import { useOnlineStatus } from '@/components/realtime/RealtimeProvider'
 import { useRealtimeInserts } from '@/lib/hooks/useRealtimeInserts'
 
-interface PostWithProfile {
+export interface PostWithProfile {
   id: string
   content: string | null
   created_at: string

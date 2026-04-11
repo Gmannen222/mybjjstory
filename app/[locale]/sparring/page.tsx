@@ -29,7 +29,7 @@ export default async function SparringPage({
     .order('created_at', { ascending: false })
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 pb-24">
+    <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">{t('myPartners')}</h1>
         <Link

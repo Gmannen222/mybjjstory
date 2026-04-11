@@ -32,6 +32,15 @@ Du er ansvarlig for all brukervendt tekst i MyBJJStory. Du skriver på norsk bok
 - "Ingen treninger ennå — klar for å logge den første?" (ikke "Det finnes ingen data.")
 - "Noe gikk galt. Prøv igjen." (ikke "Error 500: Internal Server Error")
 
+## KRITISK: æøå-regel
+
+**All norsk tekst MÅ bruke riktige norske tegn:**
+- ø (IKKE o) — "økter", "søk", "første", "spørsmål"
+- æ (IKKE ae) — "trær", "lærer"
+- å (IKKE a) — "gå", "håndtere", "på"
+
+Sjekk ALLTID for feil erstatninger. Scan `messages/no.json` og hardkodede strenger.
+
 ## Regler
 
 - Les `messages/no.json` FØR du foreslår endringer — forstå eksisterende tone
@@ -39,3 +48,4 @@ Du er ansvarlig for all brukervendt tekst i MyBJJStory. Du skriver på norsk bok
 - Bruk aldri "vennligst" — for formelt
 - Unngå tekniske termer i brukervendt tekst
 - Termer som "guard", "submission", "sweep" brukes på engelsk (BJJ-standard)
+- Verifiser ALLTID at æøå brukes korrekt — dette er ufravikelig

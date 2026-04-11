@@ -107,6 +107,7 @@ export async function updateInjury(
       notes: (formData.get('notes') as string) || null,
     })
     .eq('id', injuryId)
+    .eq('user_id', user.id)
 
   if (error) {
     console.error('Failed to update injury:', error)
@@ -132,6 +133,7 @@ export async function deleteInjury(
     .from('injuries')
     .delete()
     .eq('id', injuryId)
+    .eq('user_id', user.id)
 
   if (error) {
     console.error('Failed to delete injury:', error)
@@ -159,6 +161,7 @@ export async function markInjuryRecovered(
     .from('injuries')
     .update({ date_recovered: today })
     .eq('id', injuryId)
+    .eq('user_id', user.id)
 
   if (error) {
     console.error('Failed to mark injury as recovered:', error)

@@ -84,7 +84,7 @@ export default function CommentSection({
   // Realtime: auto-append new comments from other users
   const currentUserIdRef = useRef<string | null>(null)
   const handleRealtimeComment = useCallback(
-    (payload: Record<string, unknown>) => {
+    (payload: Record<string, string>) => {
       if (!expanded) return
       // Skip own comments (already handled by optimistic updates)
       if (payload.user_id === currentUserIdRef.current) return
@@ -223,7 +223,7 @@ export default function CommentSection({
     <div>
       <button
         onClick={() => setExpanded(!expanded)}
-        className="text-sm text-muted hover:text-foreground transition-colors"
+        className="text-sm text-muted hover:text-foreground transition-colors py-2 min-h-[44px]"
       >
         {initialCount} {t('comments')}
         {expanded ? ' ▴' : ' ▾'}
@@ -237,7 +237,7 @@ export default function CommentSection({
             optimisticComments.map((c) => (
               <div
                 key={c.id}
-                className={`flex gap-2 ${c.sending ? 'opacity-60' : ''}`}
+                className={`group flex gap-2 ${c.sending ? 'opacity-60' : ''}`}
               >
                 <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary flex-shrink-0">
                   {(c.profiles?.display_name || '?')[0].toUpperCase()}
@@ -307,7 +307,7 @@ export default function CommentSection({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex-shrink-0 w-8 h-8 flex items-center justify-center text-muted hover:text-primary transition-colors rounded-lg hover:bg-white/5"
+              className="flex-shrink-0 w-10 h-10 flex items-center justify-center text-muted hover:text-primary transition-colors rounded-lg hover:bg-white/5"
               title="Legg til bilde"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">

@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 import CreatePostForm from '@/components/feed/CreatePostForm'
-import LoadMorePosts from '@/components/feed/LoadMorePosts'
+import LoadMorePosts, { type PostWithProfile } from '@/components/feed/LoadMorePosts'
 import EmptyState from '@/components/ui/EmptyState'
 
 export const dynamic = 'force-dynamic'
@@ -33,7 +33,7 @@ export default async function FeedPage({
     .limit(PAGE_SIZE)
 
   // Get user's reactions if logged in
-  let userReactions: Record<string, string> = {}
+  const userReactions: Record<string, string> = {}
   if (user && posts && posts.length > 0) {
     const postIds = posts.map((p) => p.id)
     const { data: myReactions } = await supabase
@@ -72,7 +72,7 @@ export default async function FeedPage({
         />
       ) : (
         <LoadMorePosts
-          initialPosts={posts as any}
+          initialPosts={posts as PostWithProfile[]}
           initialUserReactions={userReactions}
           locale={locale}
           userId={user?.id ?? null}

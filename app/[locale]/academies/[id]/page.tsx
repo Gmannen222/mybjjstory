@@ -34,7 +34,7 @@ export default async function AcademyDetailPage({
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-2xl mx-auto px-4 py-6 pb-24 sm:pb-6">
+      <div className="max-w-2xl mx-auto px-4 py-6">
         {/* Back link */}
         <Link
           href={`/${locale}/academies`}

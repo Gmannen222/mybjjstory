@@ -33,10 +33,9 @@ const ROLE_LABELS: Record<string, string> = {
 
 export default function UserDetailPanel({
   user,
-  locale,
 }: {
   user: AdminUser
-  locale: string
+  locale?: string
 }) {
   const t = useTranslations('admin.users')
   const tBelts = useTranslations('belts')

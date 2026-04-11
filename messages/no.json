@@ -443,13 +443,13 @@
     "techniques": "Teknikkfordeling",
     "beltTimeline": "Beltereise",
     "competitions": "Konkurransestatistikk",
-    "comparison": "Denne vs. forrige m\u00e5ned",
+    "comparison": "Denne vs. forrige måned",
     "streak": "Treningsstreak",
-    "currentStreak": "N\u00e5v\u00e6rende streak",
+    "currentStreak": "Nåværende streak",
     "longestStreak": "Lengste streak",
-    "weeksInRow": "uker p\u00e5 rad",
+    "weeksInRow": "uker på rad",
     "personalBest": "Personlig rekord!",
-    "sessions": "\u00d8kter",
+    "sessions": "Økter",
     "hours": "Timer",
     "avgRpe": "Snitt RPE",
     "techniquesCount": "Teknikker",
@@ -457,12 +457,12 @@
     "total": "Totalt",
     "average": "Snitt",
     "perMonth": "per mnd",
-    "noData": "Ingen data enn\u00e5",
-    "noGradings": "Ingen graderinger registrert enn\u00e5",
-    "noCompetitions": "Ingen konkurranser registrert enn\u00e5",
-    "current": "N\u00e5v\u00e6rende",
+    "noData": "Ingen data ennå",
+    "noGradings": "Ingen graderinger registrert ennå",
+    "noCompetitions": "Ingen konkurranser registrert ennå",
+    "current": "Nåværende",
     "gold": "Gull",
-    "silver": "S\u00f8lv",
+    "silver": "Sølv",
     "bronze": "Bronse",
     "totalComps": "Konkurranser",
     "winLoss": "Seire / Tap",
@@ -486,9 +486,9 @@
       "competition_prep": "Konkurranseprep"
     },
     "empty": {
-      "title": "Ingen data \u00e5 vise",
-      "description": "Begynn \u00e5 logge treninger, graderinger og konkurranser for \u00e5 se din fremgang over tid.",
-      "cta": "Logg din f\u00f8rste trening"
+      "title": "Ingen data å vise",
+      "description": "Begynn å logge treninger, graderinger og konkurranser for å se din fremgang over tid.",
+      "cta": "Logg din første trening"
     }
   },
   "sessionFeedback": {
