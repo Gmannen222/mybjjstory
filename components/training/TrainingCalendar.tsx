@@ -17,6 +17,8 @@ const TYPE_COLORS: Record<TrainingType, string> = {
   open_mat: 'bg-green-400',
   private: 'bg-amber-400',
   competition: 'bg-red-400',
+  seminar: 'bg-cyan-400',
+  competition_prep: 'bg-orange-400',
 }
 
 const TYPE_ICONS: Record<TrainingType, string> = {
@@ -25,6 +27,8 @@ const TYPE_ICONS: Record<TrainingType, string> = {
   open_mat: '🤸',
   private: '🎓',
   competition: '🏆',
+  seminar: '📚',
+  competition_prep: '🎯',
 }
 
 const WEEKDAYS = ['Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør', 'Søn']

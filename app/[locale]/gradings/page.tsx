@@ -50,9 +50,9 @@ export default async function GradingsPage({
       {gradingList.length === 0 ? (
         <EmptyState
           icon="🏅"
-          title="Ingen graderinger registrert ennå"
-          description="Logg belteoppgraderinger og striper for å bygge opp din belt-historikk."
-          ctaText={t('newGrading')}
+          title={t('empty.title')}
+          description={t('empty.description')}
+          ctaText={t('empty.cta')}
           ctaHref={`/${locale}/gradings/new`}
         />
       ) : (

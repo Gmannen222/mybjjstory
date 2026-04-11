@@ -6,7 +6,9 @@ export type BeltRank =
   | 'green_white' | 'green' | 'green_black'
   | 'blue' | 'purple' | 'brown' | 'black'
 
-export type TrainingType = 'gi' | 'nogi' | 'open_mat' | 'private' | 'competition'
+export type TrainingType = 'gi' | 'nogi' | 'open_mat' | 'private' | 'competition' | 'seminar' | 'competition_prep'
+
+export type MoodType = 'great' | 'good' | 'neutral' | 'tired' | 'bad'
 
 export type TechniqueCategory =
   | 'guard'
@@ -106,6 +108,10 @@ export interface TrainingSession {
   type: TrainingType
   notes: string | null
   is_public: boolean
+  effort_rpe: number | null
+  mood_before: MoodType | null
+  mood_after: MoodType | null
+  body_weight_kg: number | null
   created_at: string
   updated_at: string
 }
@@ -246,6 +252,22 @@ export interface UserAchievement {
   user_id: string
   achievement_id: string
   earned_at: string
+}
+
+export interface SparringRound {
+  id: string
+  session_id: string
+  user_id: string
+  partner_name: string
+  partner_user_id: string | null
+  intensity: number | null
+  technique_rating: number | null
+  flow_rating: number | null
+  learning_rating: number | null
+  mood_rating: number | null
+  notes: string | null
+  is_shared: boolean
+  created_at: string
 }
 
 export type FeedbackType = 'suggestion' | 'wish' | 'bug' | 'other'

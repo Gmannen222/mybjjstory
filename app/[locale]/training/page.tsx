@@ -58,14 +58,14 @@ export default async function TrainingPage({
       {allSessions.length === 0 ? (
         filters.type || filters.month ? (
           <div className="text-center py-20 text-muted">
-            <p className="text-lg">Ingen treninger med dette filteret</p>
+            <p className="text-lg">{t('empty.filtered')}</p>
           </div>
         ) : (
           <EmptyState
             icon="🥋"
-            title="Ingen treningsøkter ennå"
-            description="Begynn å logg treningene dine og følg fremgangen din over tid."
-            ctaText={t('newSession')}
+            title={t('empty.title')}
+            description={t('empty.description')}
+            ctaText={t('empty.cta')}
             ctaHref={`/${locale}/training/new`}
           />
         )

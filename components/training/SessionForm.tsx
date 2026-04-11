@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
 import TechniquePicker from '@/components/training/TechniquePicker'
-import type { TrainingSession, TrainingType, TechniqueCategory } from '@/lib/types/database'
+import type { TrainingSession, TrainingType, MoodType, TechniqueCategory } from '@/lib/types/database'
 
 const TRAINING_TYPES: TrainingType[] = [
   'gi',
@@ -13,6 +13,16 @@ const TRAINING_TYPES: TrainingType[] = [
   'open_mat',
   'private',
   'competition',
+  'seminar',
+  'competition_prep',
+]
+
+const MOOD_OPTIONS: { value: MoodType; emoji: string }[] = [
+  { value: 'great', emoji: '😄' },
+  { value: 'good', emoji: '🙂' },
+  { value: 'neutral', emoji: '😐' },
+  { value: 'tired', emoji: '😴' },
+  { value: 'bad', emoji: '😣' },
 ]
 
 interface SelectedTechnique {
@@ -34,6 +44,10 @@ export default function SessionForm({
   const [type, setType] = useState<TrainingType>(existingSession?.type ?? 'gi')
   const [durationMin, setDurationMin] = useState(existingSession?.duration_min?.toString() ?? '')
   const [notes, setNotes] = useState(existingSession?.notes ?? '')
+  const [effortRpe, setEffortRpe] = useState(existingSession?.effort_rpe?.toString() ?? '')
+  const [moodBefore, setMoodBefore] = useState<MoodType | ''>(existingSession?.mood_before ?? '')
+  const [moodAfter, setMoodAfter] = useState<MoodType | ''>(existingSession?.mood_after ?? '')
+  const [bodyWeightKg, setBodyWeightKg] = useState(existingSession?.body_weight_kg?.toString() ?? '')
   const [techniques, setTechniques] = useState<SelectedTechnique[]>(existingTechniques ?? [])
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -57,6 +71,10 @@ export default function SessionForm({
       type,
       duration_min: durationMin ? parseInt(durationMin) : null,
       notes: notes || null,
+      effort_rpe: effortRpe ? parseInt(effortRpe) : null,
+      mood_before: moodBefore || null,
+      mood_after: moodAfter || null,
+      body_weight_kg: bodyWeightKg ? parseFloat(bodyWeightKg) : null,
     }
 
     if (isEdit) {
@@ -181,6 +199,87 @@ export default function SessionForm({
           {t('techniques')}
         </label>
         <TechniquePicker selected={techniques} onChange={setTechniques} />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-muted mb-2">
+          {t('effortRpe')} {effortRpe && <span className="text-primary">{effortRpe}/10</span>}
+        </label>
+        <input
+          type="range"
+          min="1"
+          max="10"
+          value={effortRpe || 5}
+          onChange={(e) => setEffortRpe(e.target.value)}
+          className="w-full accent-primary"
+        />
+        <div className="flex justify-between text-xs text-muted mt-1">
+          <span>{t('effortLight')}</span>
+          <span>{t('effortMax')}</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-muted mb-2">
+            {t('moodBefore')}
+          </label>
+          <div className="flex gap-1">
+            {MOOD_OPTIONS.map((m) => (
+              <button
+                key={m.value}
+                type="button"
+                onClick={() => setMoodBefore(moodBefore === m.value ? '' : m.value)}
+                className={`flex-1 py-2 rounded-lg text-lg transition-colors ${
+                  moodBefore === m.value
+                    ? 'bg-primary/20 ring-1 ring-primary'
+                    : 'bg-surface hover:bg-surface-hover'
+                }`}
+                title={t(`moods.${m.value}`)}
+              >
+                {m.emoji}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-muted mb-2">
+            {t('moodAfter')}
+          </label>
+          <div className="flex gap-1">
+            {MOOD_OPTIONS.map((m) => (
+              <button
+                key={m.value}
+                type="button"
+                onClick={() => setMoodAfter(moodAfter === m.value ? '' : m.value)}
+                className={`flex-1 py-2 rounded-lg text-lg transition-colors ${
+                  moodAfter === m.value
+                    ? 'bg-primary/20 ring-1 ring-primary'
+                    : 'bg-surface hover:bg-surface-hover'
+                }`}
+                title={t(`moods.${m.value}`)}
+              >
+                {m.emoji}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-muted mb-2">
+          {t('bodyWeight')} (kg)
+        </label>
+        <input
+          type="number"
+          value={bodyWeightKg}
+          onChange={(e) => setBodyWeightKg(e.target.value)}
+          placeholder="75.0"
+          min="30"
+          max="200"
+          step="0.1"
+          className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary"
+        />
       </div>
 
       <div>

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Competition } from '@/lib/types/database'
@@ -29,6 +30,7 @@ export default async function CompetitionsPage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
+  const t = await getTranslations('competitions')
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -88,9 +90,9 @@ export default async function CompetitionsPage({
       {comps.length === 0 ? (
         <EmptyState
           icon="🏆"
-          title="Ingen konkurranser registrert ennå"
-          description="Logg resultater fra turneringer og følg din konkurransekarriere."
-          ctaText="Registrer din første konkurranse"
+          title={t('empty.title')}
+          description={t('empty.description')}
+          ctaText={t('empty.cta')}
           ctaHref={`/${locale}/competitions/new`}
         />
       ) : (

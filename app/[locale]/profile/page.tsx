@@ -239,9 +239,12 @@ export default async function ProfilePage({
       {/* Quick links */}
       <div className="mt-6 grid grid-cols-3 gap-3">
         {[
-          { href: `/${locale}/training/new`, icon: '🥋', label: 'Logg trening' },
-          { href: `/${locale}/gradings`, icon: '🏅', label: 'Graderinger' },
+          { href: `/${locale}/injuries`, icon: '🩹', label: 'Skader' },
+          { href: `/${locale}/settings`, icon: '⚙️', label: 'Innstillinger' },
+          { href: `/${locale}/feedback`, icon: '💬', label: 'Tilbakemelding' },
           { href: `/${locale}/profile/avatar`, icon: '🎨', label: 'Rediger avatar' },
+          { href: `/${locale}/achievements`, icon: '🏅', label: 'Achievements' },
+          { href: `/${locale}/profile/edit`, icon: '✏️', label: 'Rediger profil' },
         ].map(({ href, icon, label }) => (
           <Link
             key={href}

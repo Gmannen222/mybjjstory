@@ -8,7 +8,9 @@
     "profile": "Profil",
     "settings": "Innstillinger",
     "feedback": "Tilbakemelding",
-    "academies": "Akademier"
+    "academies": "Akademier",
+    "sparring": "Sparring",
+    "progress": "Fremgang"
   },
   "home": {
     "title": "MyBJJStory",
@@ -102,8 +104,23 @@
       "nogi": "No-Gi",
       "open_mat": "Open Mat",
       "private": "Privattimer",
-      "competition": "Konkurranse"
+      "competition": "Konkurranse",
+      "seminar": "Seminar",
+      "competition_prep": "Konkurranseprep"
     },
+    "effortRpe": "Innsats (RPE)",
+    "effortLight": "Lett",
+    "effortMax": "Maks",
+    "moodBefore": "Humør før",
+    "moodAfter": "Humør etter",
+    "moods": {
+      "great": "Strålende",
+      "good": "Bra",
+      "neutral": "Nøytral",
+      "tired": "Sliten",
+      "bad": "Dårlig"
+    },
+    "bodyWeight": "Kroppsvekt",
     "techniques": "Teknikker",
     "notes": "Notater",
     "save": "Lagre",
@@ -117,6 +134,12 @@
     "view": {
       "list": "Liste",
       "calendar": "Kalender"
+    },
+    "empty": {
+      "title": "Ingen treningsøkter ennå",
+      "description": "Begynn å logge treningene dine og følg fremgangen din over tid.",
+      "cta": "Logg din første trening",
+      "filtered": "Ingen treninger med dette filteret"
     }
   },
   "gradings": {
@@ -128,6 +151,11 @@
     "academy": "Akademi",
     "notes": "Notater",
     "noGradings": "Ingen graderinger registrert ennå",
+    "empty": {
+      "title": "Ingen graderinger ennå",
+      "description": "Dokumenter belteoppgraderinger og striper for å bygge din BJJ-historikk.",
+      "cta": "Registrer din første gradering"
+    },
     "gradingTypes": {
       "belt": "Beltegradering",
       "stripe": "Stripe"
@@ -136,6 +164,10 @@
   "feed": {
     "title": "Feed",
     "empty": "Ingen innlegg ennå. Vær den første til å dele noe!",
+    "emptyState": {
+      "title": "Ingen innlegg ennå",
+      "description": "Del treninger, tanker og milepæler med BJJ-fellesskapet."
+    },
     "comment": "Kommenter",
     "comments": "kommentarer",
     "share": "Del"
@@ -175,7 +207,12 @@
   "achievements": {
     "title": "Prestasjoner",
     "loading": "Laster prestasjoner...",
-    "progress": "{earned} av {total}"
+    "progress": "{earned} av {total}",
+    "empty": {
+      "title": "Ingen prestasjoner ennå",
+      "description": "Tren jevnt, logg treninger og lås opp prestasjoner over tid.",
+      "cta": "Logg en trening"
+    }
   },
   "belts": {
     "white": "Hvitt",
@@ -201,6 +238,11 @@
     "new": "Ny konkurranse",
     "register": "Registrer konkurranse",
     "noCompetitions": "Ingen konkurranser registrert ennå",
+    "empty": {
+      "title": "Ingen konkurranser ennå",
+      "description": "Registrer resultater fra turneringer og følg din konkurransekarriere.",
+      "cta": "Registrer din første konkurranse"
+    },
     "event": "Arrangement",
     "date": "Dato",
     "organization": "Organisasjon",
@@ -244,6 +286,11 @@
     "new": "Registrer skade",
     "noInjuries": "Ingen skader registrert",
     "noInjuriesHope": "Forhåpentligvis forblir det slik!",
+    "empty": {
+      "title": "Ingen skader registrert",
+      "description": "Forhåpentligvis forblir det slik! Hvis du blir skadet, kan du logge det her for å holde oversikt.",
+      "cta": "Registrer en skade"
+    },
     "active": "Aktive skader",
     "recovered": "Tilfrisknet",
     "bodyPart": "Kroppsdel",
@@ -340,6 +387,86 @@
       "backToList": "Tilbake til akademier"
     },
     "count": "{count} akademier"
+  },
+  "sparring": {
+    "title": "Sparring",
+    "addRound": "Legg til sparringsrunde",
+    "partner": "Sparringspartner",
+    "partnerPlaceholder": "Navn på partner",
+    "intensity": "Intensitet",
+    "technique": "Teknikk",
+    "flow": "Flyt",
+    "learning": "Laering",
+    "mood": "Stemning",
+    "noRounds": "Ingen sparringsrunder registrert ennå",
+    "rounds": "runder",
+    "myPartners": "Mine sparringspartnere",
+    "lastSparring": "Sist sparret",
+    "avgRating": "Snittrating",
+    "shared": "Delt",
+    "private": "Privat",
+    "shareWith": "Del med partner",
+    "save": "Lagre runde",
+    "notes": "Notater",
+    "notesPlaceholder": "Hva lærte du? Hva fungerte bra?",
+    "deleteConfirm": "Er du sikker på at du vil slette denne runden?",
+    "avgScore": "Snitt",
+    "totalRounds": "Totalt",
+    "noPartners": "Ingen sparringspartnere ennå. Legg til din første runde fra en treningsokt!"
+  },
+  "progress": {
+    "title": "Fremgang",
+    "frequency": "Treningsfrekvens (siste 12 mnd)",
+    "techniques": "Teknikkfordeling",
+    "beltTimeline": "Beltereise",
+    "competitions": "Konkurransestatistikk",
+    "comparison": "Denne vs. forrige m\u00e5ned",
+    "streak": "Treningsstreak",
+    "currentStreak": "N\u00e5v\u00e6rende streak",
+    "longestStreak": "Lengste streak",
+    "weeksInRow": "uker p\u00e5 rad",
+    "personalBest": "Personlig rekord!",
+    "sessions": "\u00d8kter",
+    "hours": "Timer",
+    "avgRpe": "Snitt RPE",
+    "techniquesCount": "Teknikker",
+    "techniquesLogged": "teknikker logget",
+    "total": "Totalt",
+    "average": "Snitt",
+    "perMonth": "per mnd",
+    "noData": "Ingen data enn\u00e5",
+    "noGradings": "Ingen graderinger registrert enn\u00e5",
+    "noCompetitions": "Ingen konkurranser registrert enn\u00e5",
+    "current": "N\u00e5v\u00e6rende",
+    "gold": "Gull",
+    "silver": "S\u00f8lv",
+    "bronze": "Bronse",
+    "totalComps": "Konkurranser",
+    "winLoss": "Seire / Tap",
+    "winRate": "Seiersprosent",
+    "categories": {
+      "guard": "Guard",
+      "pass": "Passering",
+      "sweep": "Sweep",
+      "submission": "Submission",
+      "takedown": "Takedown",
+      "escape": "Escape",
+      "other": "Annet"
+    },
+    "types": {
+      "gi": "Gi",
+      "nogi": "No-Gi",
+      "open_mat": "Open Mat",
+      "private": "Privattimer",
+      "competition": "Konkurranse",
+      "seminar": "Seminar",
+      "competition_prep": "Konkurranseprep"
+    },
+    "empty": {
+      "title": "Ingen data \u00e5 vise",
+      "description": "Begynn \u00e5 logge treninger, graderinger og konkurranser for \u00e5 se din fremgang over tid.",
+      "cta": "Logg din f\u00f8rste trening"
+    }
   },
   "admin": {
     "title": "Admin",

@@ -51,15 +51,24 @@ export default async function FeedPage({
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">{t('title')}</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">{t('title')}</h1>
+        <Link
+          href={`/${locale}/academies`}
+          className="flex items-center gap-2 px-4 py-2 bg-surface border border-white/10 rounded-lg text-sm text-muted hover:text-foreground hover:border-primary/30 transition-colors"
+        >
+          <span>🏫</span>
+          <span>Akademier</span>
+        </Link>
+      </div>
 
       {user && <CreatePostForm locale={locale} />}
 
       {!posts || posts.length === 0 ? (
         <EmptyState
           icon="📝"
-          title="Ingen innlegg ennå"
-          description="Del treninger, tanker og milepæler med BJJ-miljøet."
+          title={t('emptyState.title')}
+          description={t('emptyState.description')}
         />
       ) : (
         <div className="space-y-4 mt-6">

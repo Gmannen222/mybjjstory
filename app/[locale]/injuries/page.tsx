@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Injury } from '@/lib/types/database'
@@ -32,6 +33,7 @@ export default async function InjuriesPage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
+  const t = await getTranslations('injuries')
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -65,8 +67,10 @@ export default async function InjuriesPage({
       {allInjuries.length === 0 ? (
         <EmptyState
           icon="💪"
-          title="Ingen skader registrert"
-          description="Forhåpentligvis forblir det slik!"
+          title={t('empty.title')}
+          description={t('empty.description')}
+          ctaText={t('empty.cta')}
+          ctaHref={`/${locale}/injuries/new`}
         />
       ) : (
         <>

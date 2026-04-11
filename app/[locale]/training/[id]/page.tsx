@@ -2,9 +2,10 @@ import { createClient } from '@/lib/supabase/server'
 import { getTranslations } from 'next-intl/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import type { TrainingSession, SessionTechnique } from '@/lib/types/database'
+import type { TrainingSession, SessionTechnique, SparringRound } from '@/lib/types/database'
 import MediaGallery from '@/components/media/MediaGallery'
 import MediaUploadForm from '@/components/media/MediaUploadForm'
+import SparringSection from '@/components/sparring/SparringSection'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,9 +35,10 @@ export default async function TrainingDetailPage({
   const s = trainingSession as TrainingSession
   const isOwner = s.user_id === user.id
 
-  const [{ data: techniques }, { data: media }] = await Promise.all([
+  const [{ data: techniques }, { data: media }, { data: sparringRounds }] = await Promise.all([
     supabase.from('session_techniques').select('*').eq('session_id', id),
     supabase.from('media').select('*').eq('session_id', id).order('created_at', { ascending: false }),
+    supabase.from('sparring_rounds').select('*').eq('session_id', id).order('created_at', { ascending: true }),
   ])
 
   return (
@@ -66,10 +68,31 @@ export default async function TrainingDetailPage({
           </span>
         </div>
 
-        {s.duration_min && (
-          <p className="text-muted">
-            {s.duration_min} {t('durationMin')}
-          </p>
+        <div className="flex flex-wrap gap-4 text-muted">
+          {s.duration_min && (
+            <span>{s.duration_min} {t('durationMin')}</span>
+          )}
+          {s.effort_rpe && (
+            <span>RPE {s.effort_rpe}/10</span>
+          )}
+          {s.body_weight_kg && (
+            <span>{s.body_weight_kg} kg</span>
+          )}
+        </div>
+
+        {(s.mood_before || s.mood_after) && (
+          <div className="flex gap-4 mt-3">
+            {s.mood_before && (
+              <span className="text-sm text-muted">
+                {t('moodBefore')}: {t(`moods.${s.mood_before}`)}
+              </span>
+            )}
+            {s.mood_after && (
+              <span className="text-sm text-muted">
+                {t('moodAfter')}: {t(`moods.${s.mood_after}`)}
+              </span>
+            )}
+          </div>
         )}
 
         {techniques && techniques.length > 0 && (
@@ -102,6 +125,13 @@ export default async function TrainingDetailPage({
           </div>
         )}
       </div>
+
+      {/* Sparring section */}
+      <SparringSection
+        sessionId={id}
+        rounds={(sparringRounds ?? []) as SparringRound[]}
+        isOwner={isOwner}
+      />
 
       {media && media.length > 0 && (
         <div className="mt-6">
