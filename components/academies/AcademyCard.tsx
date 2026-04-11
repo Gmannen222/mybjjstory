@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
+import { isSafeUrl } from '@/lib/url'
 import type { Academy } from '@/lib/types/database'
 
 interface Props {
@@ -18,7 +19,7 @@ export default function AcademyCard({ academy }: Props) {
       className="block rounded-xl bg-surface border border-white/10 p-4 hover:border-primary/40 transition-colors"
     >
       <div className="flex items-start gap-3">
-        {academy.logo_url ? (
+        {academy.logo_url && isSafeUrl(academy.logo_url) ? (
           <img
             src={academy.logo_url}
             alt={academy.name}

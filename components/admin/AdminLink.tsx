@@ -12,8 +12,10 @@ export default function AdminLink() {
 
   useEffect(() => {
     const supabase = createClient()
-    supabase.auth.getSession().then(({ data }) => {
-      setShow(isAdmin(data.session?.user?.email))
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        isAdmin(supabase, user.id).then(setShow)
+      }
     })
   }, [])
 

@@ -14,9 +14,9 @@ export default async function AdminLayout({
 }) {
   const { locale } = await params
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  if (!session || !isAdmin(session.user.email)) {
+  if (!user || !(await isAdmin(supabase, user.id))) {
     redirect(`/${locale}`)
   }
 

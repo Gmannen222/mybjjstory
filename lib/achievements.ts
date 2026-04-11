@@ -31,6 +31,15 @@ export async function checkAchievements(supabase: SupabaseClient, userId: string
       .single(),
   ])
 
+  if (trainingsRes.error || earnedRes.error || profileRes.error) {
+    console.error('Achievement check failed:', {
+      trainings: trainingsRes.error?.message,
+      earned: earnedRes.error?.message,
+      profile: profileRes.error?.message,
+    })
+    return []
+  }
+
   const trainings = trainingsRes.data || []
   const totalCount = trainings.length
   const totalMinutes = trainings.reduce((sum, t) => sum + (t.duration_min ?? 0), 0)

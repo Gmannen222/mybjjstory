@@ -18,7 +18,7 @@ export default function AcademyListClient({ academies, regions, affiliations }: 
   const [affiliation, setAffiliation] = useState('')
 
   const filtered = useMemo(() => {
-    const q = search.toLowerCase()
+    const q = search.trim().toLowerCase()
     return academies.filter((a) => {
       if (region && a.region !== region) return false
       if (affiliation && a.affiliation !== affiliation) return false

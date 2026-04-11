@@ -26,20 +26,20 @@ export default function TrainingChecklist() {
   const [items, setItems] = useState<ChecklistItem[]>([])
   const [newItem, setNewItem] = useState('')
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
 
   useEffect(() => {
     loadItems()
   }, [])
 
   async function loadItems() {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
 
     const { data: customItems } = await supabase
       .from('training_checklists')
       .select('*')
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .order('sort_order')
 
     const savedChecked: string[] = JSON.parse(localStorage.getItem(CHECKED_KEY) || '[]')
@@ -74,12 +74,13 @@ export default function TrainingChecklist() {
 
   async function addItem() {
     if (!newItem.trim()) return
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
 
     const { data, error } = await supabase
       .from('training_checklists')
-      .insert({ user_id: session.user.id, label: newItem.trim(), sort_order: items.length })
+      .insert({ user_id: user.id, label: newItem.trim(), sort_order: items.length })
       .select()
       .single()
 
@@ -91,6 +92,7 @@ export default function TrainingChecklist() {
 
   async function removeItem(id: string) {
     if (id.startsWith('default-')) return
+    const supabase = createClient()
     await supabase.from('training_checklists').delete().eq('id', id)
     setItems((prev) => prev.filter((i) => i.id !== id))
   }

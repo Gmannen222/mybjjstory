@@ -13,10 +13,10 @@ export default function TrainingChart({ userId }: { userId: string }) {
   const [weeks, setWeeks] = useState<WeekData[]>([])
   const [loading, setLoading] = useState(true)
   const [mode, setMode] = useState<'count' | 'minutes'>('count')
-  const supabase = createClient()
 
   useEffect(() => {
     async function load() {
+      const supabase = createClient()
       const now = new Date()
       const twelveWeeksAgo = new Date(now.getTime() - 12 * 7 * 24 * 60 * 60 * 1000)
 
@@ -53,16 +53,18 @@ export default function TrainingChart({ userId }: { userId: string }) {
       }
 
       const result: WeekData[] = []
+      const currentYear = now.getFullYear().toString()
       weekMap.forEach((value, key) => {
-        const [, w] = key.split('-W')
-        result.push({ label: `U${w}`, ...value })
+        const [year, w] = key.split('-W')
+        const label = year !== currentYear ? `U${w}'${year.slice(2)}` : `U${w}`
+        result.push({ label, ...value })
       })
 
       setWeeks(result)
       setLoading(false)
     }
     load()
-  }, [userId, supabase])
+  }, [userId])
 
   if (loading) {
     return (

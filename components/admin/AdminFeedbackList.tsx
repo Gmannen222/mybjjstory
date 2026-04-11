@@ -77,18 +77,29 @@ function FeedbackCard({
   const router = useRouter()
   const [note, setNote] = useState(item.admin_note || '')
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   async function updateStatus(newStatus: string) {
+    setError(null)
     const supabase = createClient()
-    await supabase.from('feedback').update({ status: newStatus }).eq('id', item.id)
+    const { error: err } = await supabase.from('feedback').update({ status: newStatus }).eq('id', item.id)
+    if (err) {
+      setError(err.message)
+      return
+    }
     router.refresh()
   }
 
   async function saveNote() {
+    setError(null)
     setSaving(true)
     const supabase = createClient()
-    await supabase.from('feedback').update({ admin_note: note.trim() || null }).eq('id', item.id)
+    const { error: err } = await supabase.from('feedback').update({ admin_note: note.trim() || null }).eq('id', item.id)
     setSaving(false)
+    if (err) {
+      setError(err.message)
+      return
+    }
     router.refresh()
   }
 
@@ -129,6 +140,11 @@ function FeedbackCard({
       {/* Expanded details */}
       {expanded && (
         <div className="px-5 pb-5 border-t border-white/5 pt-4 space-y-4">
+          {error && (
+            <div className="text-sm text-red-400 bg-red-400/10 rounded-lg px-3 py-2">
+              {error}
+            </div>
+          )}
           {/* Full message */}
           <div>
             <p className="text-sm whitespace-pre-wrap">{item.message}</p>

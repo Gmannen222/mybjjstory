@@ -3,6 +3,8 @@ import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 import AdminFeedbackList from '@/components/admin/AdminFeedbackList'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminFeedbackPage({
   params,
   searchParams,
@@ -86,6 +88,12 @@ export default async function AdminFeedbackPage({
   )
 }
 
+const BADGE_COLORS: Record<string, string> = {
+  blue: 'bg-blue-400/20 text-blue-400',
+  yellow: 'bg-yellow-400/20 text-yellow-400',
+  green: 'bg-green-400/20 text-green-400',
+}
+
 function FilterTab({
   href,
   label,
@@ -99,9 +107,7 @@ function FilterTab({
   active: boolean
   color?: string
 }) {
-  const colorClass = color
-    ? `bg-${color}-400/20 text-${color}-400`
-    : 'bg-white/10 text-muted'
+  const colorClass = color ? BADGE_COLORS[color] || 'bg-white/10 text-muted' : 'bg-white/10 text-muted'
 
   return (
     <Link

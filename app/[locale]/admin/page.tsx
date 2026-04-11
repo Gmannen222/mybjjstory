@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 const BELT_COLORS: Record<string, string> = {
   white: 'bg-white',
   blue: 'bg-blue-500',
@@ -52,7 +54,7 @@ export default async function AdminDashboardPage({
       .from('training_sessions')
       .select('user_id')
       .gte('date', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]),
-    supabase.from('profiles').select('belt_rank'),
+    supabase.from('profiles').select('belt_rank').limit(10000),
     supabase
       .from('feedback')
       .select('id, type, message, status, created_at')

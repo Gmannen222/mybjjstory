@@ -2,6 +2,7 @@ import { createStaticClient } from '@/lib/supabase/static'
 import { getTranslations } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { getSafeUrl } from '@/lib/url'
 import type { Academy } from '@/lib/types/database'
 
 export default async function AcademyDetailPage({
@@ -22,6 +23,8 @@ export default async function AcademyDetailPage({
   if (!academy) notFound()
 
   const a = academy as Academy
+  const safeWebsiteUrl = getSafeUrl(a.website_url)
+  const safeLogoUrl = getSafeUrl(a.logo_url)
 
   const mapsUrl = a.lat && a.lng
     ? `https://www.google.com/maps/search/?api=1&query=${a.lat},${a.lng}`
@@ -43,9 +46,9 @@ export default async function AcademyDetailPage({
 
         {/* Header */}
         <div className="flex items-start gap-4 mb-8">
-          {a.logo_url ? (
+          {safeLogoUrl ? (
             <img
-              src={a.logo_url}
+              src={safeLogoUrl}
               alt={a.name}
               className="w-16 h-16 rounded-xl object-contain bg-white/5 flex-shrink-0"
             />
@@ -86,11 +89,11 @@ export default async function AcademyDetailPage({
           )}
 
           {/* Website */}
-          {a.website_url && (
+          {safeWebsiteUrl && (
             <div className="rounded-xl bg-surface border border-white/10 p-4">
               <h2 className="text-sm font-medium text-muted mb-2">{t('card.website')}</h2>
               <a
-                href={a.website_url}
+                href={safeWebsiteUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
