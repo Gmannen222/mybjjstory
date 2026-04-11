@@ -32,14 +32,14 @@ export default async function FeedbackPage({
   const { locale } = await params
   const t = await getTranslations('feedback')
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  if (!session) redirect(`/${locale}`)
+  if (!user) redirect(`/${locale}`)
 
   const { data: previousFeedback } = await supabase
     .from('feedback')
     .select('*')
-    .eq('user_id', session.user.id)
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
   const feedbackList = previousFeedback || []
@@ -51,7 +51,7 @@ export default async function FeedbackPage({
         <p className="text-muted mt-1">{t('subtitle')}</p>
       </div>
 
-      <FeedbackForm userId={session.user.id} />
+      <FeedbackForm userId={user.id} />
 
       {/* Previous feedback */}
       {feedbackList.length > 0 && (

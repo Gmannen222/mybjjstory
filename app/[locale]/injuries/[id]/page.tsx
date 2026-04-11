@@ -13,15 +13,15 @@ export default async function EditInjuryPage({
 }) {
   const { locale, id } = await params
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  if (!session) redirect(`/${locale}`)
+  if (!user) redirect(`/${locale}`)
 
   const { data } = await supabase
     .from('injuries')
     .select('*')
     .eq('id', id)
-    .eq('user_id', session.user.id)
+    .eq('user_id', user.id)
     .single()
 
   if (!data) notFound()

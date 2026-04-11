@@ -13,21 +13,21 @@ export default async function EditGradingPage({
 }) {
   const { locale, id } = await params
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  if (!session) redirect(`/${locale}`)
+  if (!user) redirect(`/${locale}`)
 
   const [{ data }, { data: profile }] = await Promise.all([
     supabase
       .from('gradings')
       .select('*')
       .eq('id', id)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .single(),
     supabase
       .from('profiles')
       .select('show_kids_belts')
-      .eq('id', session.user.id)
+      .eq('id', user.id)
       .single(),
   ])
 

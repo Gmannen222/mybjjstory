@@ -12,20 +12,20 @@ export default async function AvatarPage({
 }) {
   const { locale } = await params
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  if (!session) redirect(`/${locale}`)
+  if (!user) redirect(`/${locale}`)
 
   const [{ data: profile }, { data: injuries }] = await Promise.all([
     supabase
       .from('profiles')
       .select('belt_rank, avatar_config')
-      .eq('id', session.user.id)
+      .eq('id', user.id)
       .single(),
     supabase
       .from('injuries')
       .select('body_part')
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .is('date_recovered', null),
   ])
 

@@ -18,10 +18,10 @@ export default async function TrainingDetailPage({
   const tCommon = await getTranslations('common')
   const supabase = await createClient()
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  if (!session) redirect(`/${locale}`)
+  if (!user) redirect(`/${locale}`)
 
   const { data: trainingSession } = await supabase
     .from('training_sessions')
@@ -32,7 +32,7 @@ export default async function TrainingDetailPage({
   if (!trainingSession) notFound()
 
   const s = trainingSession as TrainingSession
-  const isOwner = s.user_id === session.user.id
+  const isOwner = s.user_id === user.id
 
   const [{ data: techniques }, { data: media }] = await Promise.all([
     supabase.from('session_techniques').select('*').eq('session_id', id),

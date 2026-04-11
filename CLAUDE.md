@@ -25,6 +25,13 @@ supabase/migrations/   — SQL migration files
 proxy.ts               — next-intl middleware (NOT middleware.ts)
 ```
 
+## Conventions
+- Migration filenames: use `supabase migration new <name>` for unique timestamps
+- Utility functions live in `lib/` (e.g., lib/achievements.ts, lib/admin.ts, lib/url.ts)
+- Components organized by feature: `components/[feature]/ComponentName.tsx`
+- Error pattern: console.error + surface to user via state (no toast library)
+- One feature per commit — don't batch multiple features at end of session
+
 ## Key Patterns
 - **Server components** fetch data, **client components** handle interactivity
 - `export const dynamic = 'force-dynamic'` on auth-protected pages

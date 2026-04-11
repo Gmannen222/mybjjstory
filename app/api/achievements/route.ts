@@ -1,50 +1,63 @@
-import type { SupabaseClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
+import { NextResponse } from 'next/server'
 
-/**
- * Check and award any new achievements for a user.
- * Call this after logging a training session, grading, or competition.
- */
-export async function checkAchievements(supabase: SupabaseClient, userId: string) {
-  const [trainingsRes, compRes, goldRes, earnedRes, profileRes] = await Promise.all([
-    supabase
+export async function POST() {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const userId = user.id
+
+  // Use service role for reading and writing achievements
+  const serviceClient = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
+  const [trainingsRes, compRes, goldRes, earnedRes, gradingsRes] = await Promise.all([
+    serviceClient
       .from('training_sessions')
       .select('date, duration_min')
       .eq('user_id', userId)
       .order('date'),
-    supabase
+    serviceClient
       .from('competitions')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', userId),
-    supabase
+    serviceClient
       .from('competitions')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', userId)
       .eq('result', 'gold'),
-    supabase
+    serviceClient
       .from('user_achievements')
       .select('achievement_id')
       .eq('user_id', userId),
-    supabase
-      .from('profiles')
+    serviceClient
+      .from('gradings')
       .select('belt_rank')
-      .eq('id', userId)
-      .single(),
+      .eq('user_id', userId),
   ])
 
-  if (trainingsRes.error || earnedRes.error || profileRes.error) {
+  if (trainingsRes.error || earnedRes.error || gradingsRes.error) {
     console.error('Achievement check failed:', {
       trainings: trainingsRes.error?.message,
       earned: earnedRes.error?.message,
-      profile: profileRes.error?.message,
+      gradings: gradingsRes.error?.message,
     })
-    return []
+    return NextResponse.json({ error: 'Failed to check achievements' }, { status: 500 })
   }
 
   const trainings = trainingsRes.data || []
   const totalCount = trainings.length
   const totalMinutes = trainings.reduce((sum, t) => sum + (t.duration_min ?? 0), 0)
   const totalHours = Math.floor(totalMinutes / 60)
-  const earnedSet = new Set((earnedRes.data || []).map((e: { achievement_id: string }) => e.achievement_id))
+  const earnedSet = new Set((earnedRes.data || []).map((e) => e.achievement_id))
+  const beltHistory = new Set((gradingsRes.data || []).map((g) => g.belt_rank))
 
   const toAward: string[] = []
 
@@ -85,7 +98,6 @@ export async function checkAchievements(supabase: SupabaseClient, userId: string
     weekSet.add(weekKey)
   }
 
-  // Count consecutive weeks from current week backwards
   let streakWeeks = 0
   const checkDate = new Date(now)
   for (let i = 0; i < 60; i++) {
@@ -94,7 +106,6 @@ export async function checkAchievements(supabase: SupabaseClient, userId: string
       streakWeeks++
       checkDate.setDate(checkDate.getDate() - 7)
     } else if (i === 0) {
-      // Current week might not have training yet, skip
       checkDate.setDate(checkDate.getDate() - 7)
       continue
     } else {
@@ -106,25 +117,28 @@ export async function checkAchievements(supabase: SupabaseClient, userId: string
   if (streakWeeks >= 30) award('streak_30')
   if (streakWeeks >= 52) award('streak_52')
 
-  // Belt achievements
-  const belt = profileRes.data?.belt_rank
-  if (belt === 'blue') award('blue_belt')
-  if (belt === 'purple') award('purple_belt')
-  if (belt === 'brown') award('brown_belt')
-  if (belt === 'black') award('black_belt')
+  // Belt achievements — check grading history, not just current rank
+  if (beltHistory.has('blue')) award('blue_belt')
+  if (beltHistory.has('purple')) award('purple_belt')
+  if (beltHistory.has('brown')) award('brown_belt')
+  if (beltHistory.has('black')) award('black_belt')
 
   // Competition achievements
   if ((compRes.count ?? 0) >= 1) award('first_comp')
   if ((goldRes.count ?? 0) >= 1) award('comp_gold')
 
-  // Insert new achievements
+  // Insert new achievements with service role (bypasses RLS)
   if (toAward.length > 0) {
-    await supabase.from('user_achievements').insert(
+    const { error: insertError } = await serviceClient.from('user_achievements').insert(
       toAward.map((id) => ({ user_id: userId, achievement_id: id }))
     )
+    if (insertError) {
+      console.error('Failed to insert achievements:', insertError.message)
+      return NextResponse.json({ error: 'Failed to award achievements' }, { status: 500 })
+    }
   }
 
-  return toAward
+  return NextResponse.json({ awarded: toAward })
 }
 
 function getISOWeek(date: Date): string {

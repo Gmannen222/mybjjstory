@@ -14,17 +14,17 @@ export default async function NewGradingPage({
   const t = await getTranslations('gradings')
   const supabase = await createClient()
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  if (!session) {
+  if (!user) {
     redirect(`/${locale}`)
   }
 
   const { data: profile } = await supabase
     .from('profiles')
     .select('show_kids_belts')
-    .eq('id', session.user.id)
+    .eq('id', user.id)
     .single()
 
   return (

@@ -16,8 +16,8 @@ export default async function FeedPage({
   const t = await getTranslations('feed')
   const supabase = await createClient()
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+  } = await supabase.auth.getUser()
 
   const { data: posts } = await supabase
     .from('posts')
@@ -32,12 +32,12 @@ export default async function FeedPage({
 
   // Get user's reactions if logged in
   let userReactions: Record<string, string> = {}
-  if (session && posts && posts.length > 0) {
+  if (user && posts && posts.length > 0) {
     const postIds = posts.map((p) => p.id)
     const { data: myReactions } = await supabase
       .from('reactions')
       .select('post_id, type')
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .in('post_id', postIds)
 
     if (myReactions) {
@@ -51,7 +51,7 @@ export default async function FeedPage({
     <div className="max-w-3xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">{t('title')}</h1>
 
-      {session && <CreatePostForm locale={locale} />}
+      {user && <CreatePostForm locale={locale} />}
 
       {!posts || posts.length === 0 ? (
         <div className="text-center py-20 text-muted">

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import FeedbackForm from './FeedbackForm'
@@ -133,7 +134,7 @@ export default function SettingsPage({
       <section className="bg-surface rounded-2xl p-5">
         <div className="flex items-center gap-4">
           {profile?.avatar_url ? (
-            <img src={profile.avatar_url} alt="" className="w-14 h-14 rounded-full" />
+            <Image src={profile.avatar_url} alt="" width={56} height={56} className="w-14 h-14 rounded-full" />
           ) : (
             <div className="w-14 h-14 rounded-full bg-surface-hover flex items-center justify-center text-2xl">
               👤

@@ -12,10 +12,10 @@ export default async function AchievementsPage({
   const { locale } = await params
   const supabase = await createClient()
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  if (!session) redirect(`/${locale}`)
+  if (!user) redirect(`/${locale}`)
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">

@@ -19,7 +19,7 @@ export default async function AdminFeedbackPage({
 
   let query = supabase
     .from('feedback')
-    .select('*, profiles:user_id(display_name, email, belt_rank)')
+    .select('*, profiles:user_id(display_name, belt_rank)')
     .order('created_at', { ascending: false })
 
   if (filters.status && filters.status !== 'all') {

@@ -27,14 +27,14 @@ export default async function CompetitionsPage({
 }) {
   const { locale } = await params
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  if (!session) redirect(`/${locale}`)
+  if (!user) redirect(`/${locale}`)
 
   const { data: competitions } = await supabase
     .from('competitions')
     .select('*')
-    .eq('user_id', session.user.id)
+    .eq('user_id', user.id)
     .order('event_date', { ascending: false })
 
   const comps = (competitions || []) as Competition[]

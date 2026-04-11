@@ -12,11 +12,11 @@ export default async function HomePage({
   const { locale } = await params
   const supabase = await createClient()
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  if (session) {
-    return <Dashboard locale={locale} userId={session.user.id} />
+  if (user) {
+    return <Dashboard locale={locale} userId={user.id} />
   }
 
   return <LandingPage locale={locale} />

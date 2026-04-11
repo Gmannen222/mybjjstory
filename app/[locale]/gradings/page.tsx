@@ -16,15 +16,15 @@ export default async function GradingsPage({
   const t = await getTranslations('gradings')
   const supabase = await createClient()
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  if (!session) redirect(`/${locale}`)
+  if (!user) redirect(`/${locale}`)
 
   const { data: gradings } = await supabase
     .from('gradings')
     .select('*')
-    .eq('user_id', session.user.id)
+    .eq('user_id', user.id)
     .order('date', { ascending: true })
 
   const gradingList = (gradings as Grading[]) || []

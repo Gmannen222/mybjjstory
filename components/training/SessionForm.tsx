@@ -99,10 +99,8 @@ export default function SessionForm({
       }
     }
 
-    // Check achievements after saving
-    import('@/lib/achievements').then(({ checkAchievements }) => {
-      checkAchievements(supabase, authSession.session!.user.id)
-    })
+    // Check achievements after saving (via API route with service role)
+    fetch('/api/achievements', { method: 'POST' })
 
     router.push(`/${locale}/training`)
     router.refresh()

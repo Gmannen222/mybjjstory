@@ -17,14 +17,14 @@ export default async function ProfilePage({
   const t = await getTranslations('profile')
   const supabase = await createClient()
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  if (!session) {
+  if (!user) {
     redirect(`/${locale}`)
   }
 
-  const userId = session.user.id
+  const userId = user.id
 
   const [{ data: profile }, weekRes, totalRes, gradingRes, compRes, injuryRes] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', userId).single(),
@@ -107,7 +107,7 @@ export default async function ProfilePage({
 
             {/* Name */}
             <h1 className="text-2xl sm:text-3xl font-bold">
-              {p?.display_name || session.user.user_metadata?.full_name || session.user.email}
+              {p?.display_name || user.user_metadata?.full_name || user.email}
             </h1>
             {p?.username && (
               <p className="text-sm text-muted mt-1">@{p.username}</p>
