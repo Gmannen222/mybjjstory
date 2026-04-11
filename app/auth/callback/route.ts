@@ -15,6 +15,21 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
+      // Check if user has completed onboarding — if so, skip onboarding redirect
+      if (next.includes('/onboarding')) {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('username, belt_rank')
+            .eq('id', user.id)
+            .single()
+          if (profile?.username && profile?.belt_rank) {
+            const locale = next.split('/')[1] || 'no'
+            return NextResponse.redirect(`${origin}/${locale}`)
+          }
+        }
+      }
       return NextResponse.redirect(`${origin}${next}`)
     }
   }
