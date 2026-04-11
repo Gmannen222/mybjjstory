@@ -69,19 +69,14 @@ async function LandingPage({ locale }: { locale: string }) {
             {t('hero.subtitle')}
           </p>
 
-          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="mt-10 flex flex-col items-center gap-4">
             <Link
               href={`/${locale}/login`}
-              className="px-8 py-4 bg-primary text-background font-bold rounded-xl hover:bg-primary-hover transition-all hover:scale-105 hover:shadow-[0_0_30px_-5px_rgba(201,168,76,0.4)] text-lg"
+              className="px-10 py-4 bg-primary text-background font-bold rounded-xl hover:bg-primary-hover transition-all hover:scale-105 hover:shadow-[0_0_30px_-5px_rgba(201,168,76,0.4)] text-lg"
             >
-              {t('hero.cta')}
+              {t('cta.button')}
             </Link>
-            <a
-              href="#features"
-              className="px-8 py-4 border border-white/20 text-foreground font-semibold rounded-xl hover:bg-surface hover:border-white/30 transition-colors text-lg"
-            >
-              {t('hero.secondary')}
-            </a>
+            <p className="text-sm text-muted">Alle som registrerer seg i beta beholder tilgangen etter lansering.</p>
           </div>
 
           {/* Belt progression preview */}
@@ -232,7 +227,6 @@ async function LandingPage({ locale }: { locale: string }) {
           >
             {t('cta.button')}
           </Link>
-          <p className="text-xs text-muted mt-4">Alle som registrerer seg i beta beholder tilgangen etter lansering.</p>
         </div>
       </section>
 
