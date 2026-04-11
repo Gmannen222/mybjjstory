@@ -22,7 +22,7 @@
   },
   "landing": {
     "hero": {
-      "badge": "Gratis for alle BJJ-utøvere",
+      "badge": "BETA — Bli med og form appen!",
       "title1": "Din BJJ-reise,",
       "title2": "dokumentert.",
       "subtitle": "Logg treninger, dokumenter graderinger, del med fellesskapet. Alt du trenger for å følge din progresjon i brasiliansk jiu-jitsu.",
@@ -30,9 +30,9 @@
       "secondary": "Se funksjoner"
     },
     "stats": {
-      "free": "Gratis",
-      "mobile": "Fungerer på mobil",
-      "community": "For fellesskapet"
+      "free": "Gratis i beta",
+      "mobile": "Ny funksjonalitet fortløpende",
+      "community": "Laget for BJJ-utøvere"
     },
     "features": {
       "title": "Alt du trenger for din BJJ-reise",

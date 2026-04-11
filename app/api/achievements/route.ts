@@ -77,6 +77,9 @@ export async function POST() {
     if (!earnedSet.has(id)) toAward.push(id)
   }
 
+  // Beta tester — always award during beta period
+  award('beta_tester')
+
   // Training count achievements
   if (totalCount >= 1) award('first_training')
   if (totalCount >= 10) award('training_10')

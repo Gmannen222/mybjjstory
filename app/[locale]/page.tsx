@@ -107,15 +107,15 @@ async function LandingPage({ locale }: { locale: string }) {
       <section className="border-y border-white/5 bg-surface/50">
         <div className="max-w-5xl mx-auto px-4 py-12 grid grid-cols-3 gap-8 text-center">
           <div>
-            <div className="text-3xl sm:text-4xl font-bold text-primary">✓</div>
+            <div className="text-3xl sm:text-4xl font-bold text-primary">🆓</div>
             <div className="text-sm text-muted mt-1">{t('stats.free')}</div>
           </div>
           <div>
-            <div className="text-3xl sm:text-4xl font-bold text-primary">PWA</div>
+            <div className="text-3xl sm:text-4xl font-bold text-primary">🚀</div>
             <div className="text-sm text-muted mt-1">{t('stats.mobile')}</div>
           </div>
           <div>
-            <div className="text-3xl sm:text-4xl font-bold text-primary">BJJ</div>
+            <div className="text-3xl sm:text-4xl font-bold text-primary">🥋</div>
             <div className="text-sm text-muted mt-1">{t('stats.community')}</div>
           </div>
         </div>
@@ -232,7 +232,7 @@ async function LandingPage({ locale }: { locale: string }) {
           >
             {t('cta.button')}
           </Link>
-          <p className="text-xs text-muted mt-4">Prøv gratis. Ingen kredittkort.</p>
+          <p className="text-xs text-muted mt-4">Gratis i beta. Bli med og form fremtidens BJJ-app!</p>
         </div>
       </section>
 

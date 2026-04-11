@@ -21,6 +21,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   belt: 'Belter',
   competition: 'Konkurranser',
   social: 'Sosialt',
+  special: 'Spesielt',
 }
 
 export default function AchievementsList({ compact = false }: { compact?: boolean }) {
