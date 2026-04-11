@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
 import type { Profile, BeltRank, ProfileVisibility } from '@/lib/types/database'
 import { BELT_COLORS, BELT_LABELS, ADULT_BELTS, KIDS_BELTS, BeltDisplay } from '@/components/ui/BeltBadge'
+import AcademySelector from '@/components/profile/AcademySelector'
 
 const VISIBILITY_OPTIONS: { value: ProfileVisibility; label: string; desc: string }[] = [
   { value: 'private', label: 'Privat', desc: 'Kun synlig for deg' },
@@ -45,6 +46,7 @@ export default function ProfileForm({
   const [beltRank, setBeltRank] = useState<BeltRank | ''>(profile?.belt_rank || '')
   const [beltDegrees, setBeltDegrees] = useState(String(profile?.belt_degrees || 0))
   const [academyName, setAcademyName] = useState(profile?.academy_name || '')
+  const [academyId, setAcademyId] = useState<string | null>(profile?.academy_id || null)
   const [favoriteGuard, setFavoriteGuard] = useState(profile?.favorite_guard || '')
   const [favoriteSubmission, setFavoriteSubmission] = useState(profile?.favorite_submission || '')
   const [weightClass, setWeightClass] = useState(profile?.weight_class || '')
@@ -105,6 +107,7 @@ export default function ProfileForm({
         belt_rank: beltRank || null,
         belt_degrees: parseInt(beltDegrees),
         academy_name: academyName || null,
+        academy_id: academyId || null,
         avatar_url: avatarUrl,
         weight_class: weightClass || null,
         favorite_guard: favoriteGuard || null,
@@ -215,11 +218,14 @@ export default function ProfileForm({
               min="0" max="6"
               className="w-24 px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-muted mb-2">Akademi / klubb</label>
-            <input type="text" value={academyName} onChange={(e) => setAcademyName(e.target.value)}
-              className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
-          </div>
+          <AcademySelector
+            value={academyName}
+            academyId={academyId}
+            onChange={(name, id) => {
+              setAcademyName(name)
+              setAcademyId(id)
+            }}
+          />
           <div>
             <label className="block text-sm font-medium text-muted mb-2">Vektklasse</label>
             <select value={weightClass} onChange={(e) => setWeightClass(e.target.value)}

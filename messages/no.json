@@ -355,6 +355,26 @@
     "statusRead": "Lest",
     "statusResolved": "Løst"
   },
+  "academySelector": {
+    "label": "Akademi / klubb",
+    "searchPlaceholder": "Søk etter akademi...",
+    "searching": "Søker...",
+    "noResults": "Ingen akademier funnet",
+    "addNew": "Finner du ikke akademiet ditt? Legg til nytt",
+    "addNewTitle": "Legg til nytt akademi",
+    "academyName": "Akademinavn",
+    "city": "By",
+    "region": "Region",
+    "website": "Nettside",
+    "submitAcademy": "Legg til akademi",
+    "pendingApproval": "Akademiet er lagt til og venter på godkjenning",
+    "linked": "Koblet til akademi",
+    "saving": "Lagrer...",
+    "cancel": "Avbryt",
+    "addError": "Kunne ikke legge til akademiet. Prøv igjen.",
+    "duplicateAcademy": "Et akademi med dette navnet finnes allerede.",
+    "authRequired": "Du må være logget inn"
+  },
   "academies": {
     "title": "Akademier",
     "description": "Finn et BJJ-akademi i nærheten av deg",
@@ -525,6 +545,17 @@
       "adminNote": "Admin-notat",
       "adminNotePlaceholder": "Skriv et internt notat...",
       "saveNote": "Lagre notat"
+    },
+    "academies": {
+      "title": "Akademier",
+      "pending": "Ventende akademier",
+      "approved": "Godkjente akademier",
+      "approve": "Godkjenn",
+      "reject": "Avvis",
+      "deactivate": "Deaktiver",
+      "noPending": "Ingen akademier venter på godkjenning.",
+      "submittedBy": "Innsendt av",
+      "members": "medlemmer"
     }
   }
 }

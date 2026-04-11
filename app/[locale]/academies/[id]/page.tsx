@@ -68,6 +68,21 @@ export default async function AcademyDetailPage({
           </div>
         </div>
 
+        {/* Description & instructor */}
+        {(a.description || a.head_instructor) && (
+          <div className="rounded-xl bg-surface border border-white/10 p-5 mb-4">
+            {a.head_instructor && (
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-sm text-muted">Hovedinstruktør:</span>
+                <span className="text-sm font-semibold text-foreground">{a.head_instructor}</span>
+              </div>
+            )}
+            {a.description && (
+              <p className="text-sm text-muted leading-relaxed">{a.description}</p>
+            )}
+          </div>
+        )}
+
         {/* Info cards */}
         <div className="space-y-4">
           {/* Address */}

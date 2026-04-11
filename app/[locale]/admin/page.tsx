@@ -36,6 +36,7 @@ export default async function AdminDashboardPage({
     { count: totalPosts },
     { count: totalGradings },
     { count: newFeedback },
+    { count: pendingAcademies },
     { data: recentUsers },
     { data: activeTrainers },
     { data: beltData },
@@ -46,6 +47,7 @@ export default async function AdminDashboardPage({
     supabase.from('posts').select('*', { count: 'exact', head: true }),
     supabase.from('gradings').select('*', { count: 'exact', head: true }),
     supabase.from('feedback').select('*', { count: 'exact', head: true }).eq('status', 'new'),
+    supabase.from('academies').select('*', { count: 'exact', head: true }).eq('is_active', false),
     supabase
       .from('profiles')
       .select('id')
@@ -172,6 +174,29 @@ export default async function AdminDashboardPage({
             className="block mt-4 text-sm text-primary hover:underline"
           >
             Se alle tilbakemeldinger →
+          </Link>
+        </div>
+
+        {/* Pending academies */}
+        <div className="bg-surface rounded-xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-bold">{t('academies.title')}</h2>
+            {(pendingAcademies || 0) > 0 && (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-400/20 text-yellow-400 font-medium">
+                {pendingAcademies} ventende
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-muted">
+            {(pendingAcademies || 0) === 0
+              ? 'Ingen akademier venter på godkjenning.'
+              : `${pendingAcademies} akademier venter på godkjenning.`}
+          </p>
+          <Link
+            href={`/${locale}/admin/academies`}
+            className="block mt-4 text-sm text-primary hover:underline"
+          >
+            Administrer akademier →
           </Link>
         </div>
       </div>

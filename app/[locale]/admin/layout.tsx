@@ -37,6 +37,12 @@ export default async function AdminLayout({
           >
             Tilbakemeldinger
           </Link>
+          <Link
+            href={`/${locale}/admin/academies`}
+            className="text-muted hover:text-foreground transition-colors"
+          >
+            Akademier
+          </Link>
         </nav>
       </div>
       {children}

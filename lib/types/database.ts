@@ -309,6 +309,9 @@ export interface Academy {
   lat: number | null
   lng: number | null
   logo_url: string | null
+  description: string | null
+  head_instructor: string | null
+  submitted_by: string | null
   created_at: string
   updated_at: string
 }
