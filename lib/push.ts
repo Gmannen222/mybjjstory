@@ -1,12 +1,16 @@
 import webpush from 'web-push'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 
-// Configure VAPID
-webpush.setVapidDetails(
-  'mailto:kontakt@mybjjstory.no',
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-)
+// Lazy VAPID initialization — only configure when actually sending
+let vapidConfigured = false
+function ensureVapid() {
+  if (vapidConfigured) return
+  const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+  const privateKey = process.env.VAPID_PRIVATE_KEY
+  if (!publicKey || !privateKey) return
+  webpush.setVapidDetails('mailto:kontakt@mybjjstory.no', publicKey, privateKey)
+  vapidConfigured = true
+}
 
 function getServiceClient() {
   return createServiceClient(
@@ -56,6 +60,9 @@ export async function sendPushNotification(
     const enabled = await shouldNotify(userId, options.type)
     if (!enabled) return
   }
+
+  ensureVapid()
+  if (!vapidConfigured) return
 
   const serviceClient = getServiceClient()
 
