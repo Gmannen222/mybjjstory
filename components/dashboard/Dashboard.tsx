@@ -145,6 +145,9 @@ export default function Dashboard({
         }
       }
 
+      if (profileRes.error) {
+        console.error('Dashboard profile fetch error:', profileRes.error)
+      }
       const profileData = profileRes.data as ProfileData | null
       setProfile(profileData)
       setDashConfig({ ...DEFAULT_DASHBOARD, ...(profileData?.dashboard_config ?? {}) })
