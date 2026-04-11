@@ -19,7 +19,7 @@ export type TechniqueCategory =
   | 'escape'
   | 'other'
 
-export type UserRole = 'athlete' | 'competitor' | 'instructor' | 'academy'
+export type UserRole = 'athlete' | 'competitor' | 'instructor' | 'academy' | 'admin'
 
 export type ReactionType = 'oss' | 'high_five' | 'fire'
 

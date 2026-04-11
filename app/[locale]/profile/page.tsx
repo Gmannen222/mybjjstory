@@ -253,6 +253,7 @@ export default async function ProfilePage({
           { href: `/${locale}/achievements`, icon: '🏅', label: 'Achievements', badge: 0 },
           { href: `/${locale}/profile/edit`, icon: '✏️', label: 'Rediger profil', badge: 0 },
           { href: `/${locale}/academies`, icon: '🏛️', label: 'Akademier', badge: 0 },
+          ...(p?.role === 'admin' ? [{ href: `/${locale}/admin`, icon: '🛡️', label: 'Admin', badge: 0 }] : []),
         ].map(({ href, icon, label, badge }) => (
           <Link
             key={href}
