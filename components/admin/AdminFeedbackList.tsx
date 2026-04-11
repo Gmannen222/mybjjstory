@@ -12,6 +12,8 @@ interface FeedbackItem {
   contact_email: string | null
   status: string
   admin_note: string | null
+  admin_reply: string | null
+  replied_at: string | null
   created_at: string
   user_id: string
   profiles: {
@@ -76,7 +78,9 @@ function FeedbackCard({
   const t = useTranslations('admin.feedback')
   const router = useRouter()
   const [note, setNote] = useState(item.admin_note || '')
+  const [reply, setReply] = useState(item.admin_reply || '')
   const [saving, setSaving] = useState(false)
+  const [savingReply, setSavingReply] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   async function updateStatus(newStatus: string) {
@@ -100,6 +104,28 @@ function FeedbackCard({
       setError(err.message)
       return
     }
+    router.refresh()
+  }
+
+  async function sendReply() {
+    if (!reply.trim()) return
+    setError(null)
+    setSavingReply(true)
+    const supabase = createClient()
+    const { error: err } = await supabase
+      .from('feedback')
+      .update({
+        admin_reply: reply.trim(),
+        replied_at: new Date().toISOString(),
+        status: 'resolved',
+      })
+      .eq('id', item.id)
+    setSavingReply(false)
+    if (err) {
+      setError(err.message)
+      return
+    }
+    setReply('')
     router.refresh()
   }
 
@@ -188,10 +214,10 @@ function FeedbackCard({
             )}
           </div>
 
-          {/* Admin note */}
+          {/* Admin note (internal) */}
           <div>
             <label className="block text-xs font-medium text-muted mb-1">
-              {t('adminNote')}
+              {t('adminNote')} <span className="text-muted/50">(intern)</span>
             </label>
             <textarea
               value={note}
@@ -206,6 +232,43 @@ function FeedbackCard({
               className="mt-2 px-3 py-1.5 text-xs bg-primary text-background rounded-lg font-medium hover:bg-primary-hover transition-colors disabled:opacity-50"
             >
               {saving ? '...' : t('saveNote')}
+            </button>
+          </div>
+
+          {/* Admin reply (user-facing) */}
+          <div className="border border-primary/20 bg-primary/5 rounded-xl p-4 space-y-3">
+            <label className="block text-xs font-medium text-primary">
+              Svar til bruker <span className="text-primary/50">(synlig for brukeren)</span>
+            </label>
+
+            {item.admin_reply && item.replied_at && (
+              <div className="bg-primary/10 rounded-lg p-3">
+                <p className="text-sm whitespace-pre-wrap">{item.admin_reply}</p>
+                <p className="text-xs text-muted mt-2">
+                  Besvart {new Date(item.replied_at).toLocaleDateString('nb-NO', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </p>
+              </div>
+            )}
+
+            <textarea
+              value={reply}
+              onChange={(e) => setReply(e.target.value)}
+              placeholder="Skriv et svar som brukeren kan se..."
+              rows={2}
+              className="w-full bg-background/50 border border-primary/20 rounded-lg px-3 py-2 text-sm placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+            />
+            <button
+              onClick={sendReply}
+              disabled={savingReply || !reply.trim()}
+              className="px-4 py-1.5 text-xs bg-primary text-background rounded-lg font-medium hover:bg-primary-hover transition-colors disabled:opacity-50"
+            >
+              {savingReply ? 'Sender...' : 'Send svar'}
             </button>
           </div>
         </div>

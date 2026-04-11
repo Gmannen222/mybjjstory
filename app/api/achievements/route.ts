@@ -18,7 +18,7 @@ export async function POST() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  const [trainingsRes, compRes, goldRes, earnedRes, gradingsRes] = await Promise.all([
+  const [trainingsRes, compRes, goldRes, earnedRes, gradingsRes, feedbackRes, sparringRes, postsRes] = await Promise.all([
     serviceClient
       .from('training_sessions')
       .select('date, duration_min')
@@ -40,6 +40,18 @@ export async function POST() {
     serviceClient
       .from('gradings')
       .select('belt_rank')
+      .eq('user_id', userId),
+    serviceClient
+      .from('session_feedback')
+      .select('id', { count: 'exact', head: true })
+      .eq('sender_id', userId),
+    serviceClient
+      .from('sparring_rounds')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId),
+    serviceClient
+      .from('posts')
+      .select('id', { count: 'exact', head: true })
       .eq('user_id', userId),
   ])
 
@@ -126,6 +138,23 @@ export async function POST() {
   // Competition achievements
   if ((compRes.count ?? 0) >= 1) award('first_comp')
   if ((goldRes.count ?? 0) >= 1) award('comp_gold')
+
+  // Social achievements — feedback
+  const feedbackCount = feedbackRes.count ?? 0
+  if (feedbackCount >= 1) award('first_feedback')
+  if (feedbackCount >= 5) award('feedback_5')
+  if (feedbackCount >= 10) award('feedback_10')
+
+  // Social achievements — sparring
+  const sparringCount = sparringRes.count ?? 0
+  if (sparringCount >= 1) award('first_sparring')
+  if (sparringCount >= 50) award('sparring_50')
+  if (sparringCount >= 100) award('sparring_100')
+
+  // Social achievements — posts
+  const postsCount = postsRes.count ?? 0
+  if (postsCount >= 1) award('first_post')
+  if (postsCount >= 10) award('posts_10')
 
   // Insert new achievements with service role (bypasses RLS)
   if (toAward.length > 0) {

@@ -96,6 +96,9 @@ export interface Profile {
   passion_level: number | null
   currently_training: boolean
   heard_about_from: string | null
+  is_banned: boolean
+  banned_at: string | null
+  ban_reason: string | null
   created_at: string
   updated_at: string
 }
@@ -292,6 +295,9 @@ export interface Feedback {
   message: string
   contact_email: string | null
   status: 'new' | 'read' | 'resolved'
+  admin_note: string | null
+  admin_reply: string | null
+  replied_at: string | null
   created_at: string
 }
 

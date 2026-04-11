@@ -2,7 +2,7 @@
 
 ## Akkurat nå
 
-Session feedback-feature implementert med inbox-system, avatar-farger fikset, test-data seeded.
+UX/QA-review gjennomfort: 19 issues fikset + PWA install-knapp. Deployet til Vercel.
 
 ## I dag (2026-04-11)
 
@@ -24,14 +24,17 @@ Session feedback-feature implementert med inbox-system, avatar-farger fikset, te
 - [x] Session feedback-feature: inbox med unread-teller, feedback-form med character-count, test-data seeding
 - [x] Avatar-farger: gradient ved profil-visning, farger matcher belt-rank
 - [x] Comprehensive test-data: 8 brukere, 50+ treninger, gradings, media, posts, follow-chains
+- [x] UX/QA-review: 19 issues fikset (dato-format, touch targets, focus-visible, force-dynamic, onboarding-validering, collapsible SessionForm, RPE-fix, hjem-tab, login loading, sticky save, feed pagination, inline confirm, iOS select)
+- [x] PWA install-knapp ved siden av logg ut i header
+- [x] Commit 009131c deployet til mybjjstory.no
 
 ## Prosjekt
 
 | Metrikk | Verdi |
 |---------|-------|
-| Siste commit | c6e50b5 |
+| Siste commit | 009131c |
 | Build | OK |
-| Ruter | 35 |
+| Ruter | 38 |
 | DB-tabeller | 12 |
 
 ## Neste steg

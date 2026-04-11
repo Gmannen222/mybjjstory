@@ -178,7 +178,15 @@ export default function SettingsPage({
 
         {previousFeedback.length > 0 && (
           <div className="pt-4 border-t border-white/5">
-            <h3 className="text-sm font-bold text-muted mb-3">Dine tidligere meldinger</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-muted">Dine tidligere meldinger</h3>
+              <Link
+                href={`/${locale}/feedback`}
+                className="text-xs text-primary hover:underline"
+              >
+                Se alle
+              </Link>
+            </div>
             <div className="space-y-2">
               {previousFeedback.map((fb) => (
                 <div key={fb.id} className="bg-background rounded-xl p-3">
@@ -200,6 +208,19 @@ export default function SettingsPage({
                     </span>
                   </div>
                   <p className="text-sm">{fb.message}</p>
+
+                  {/* Admin reply */}
+                  {fb.admin_reply && (
+                    <div className="mt-2 border border-primary/20 bg-primary/5 rounded-lg p-2.5">
+                      <p className="text-xs font-medium text-primary mb-1">Svar fra MyBJJStory</p>
+                      <p className="text-sm">{fb.admin_reply}</p>
+                      {fb.replied_at && (
+                        <p className="text-xs text-muted mt-1">
+                          {new Date(fb.replied_at).toLocaleDateString('nb-NO')}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

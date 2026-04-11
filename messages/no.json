@@ -547,6 +547,29 @@
       "adminNotePlaceholder": "Skriv et internt notat...",
       "saveNote": "Lagre notat"
     },
+    "users": {
+      "title": "Brukere",
+      "search": "Sok etter bruker...",
+      "filterBelt": "Filtrer pa belte",
+      "filterAll": "Alle",
+      "showBanned": "Vis utestengte",
+      "noUsers": "Ingen brukere funnet",
+      "joined": "Registrert",
+      "lastActive": "Sist aktiv",
+      "sessions": "Treningsokter",
+      "ban": "Utesteng",
+      "unban": "Fjern utestengelse",
+      "banReason": "Begrunnelse",
+      "banReasonPlaceholder": "Skriv begrunnelse for utestengelse...",
+      "confirmBan": "Bekreft utestengelse",
+      "confirmUnban": "Bekreft fjerning",
+      "banned": "Utestengt",
+      "active": "Aktiv",
+      "bannedAt": "Utestengt",
+      "bannedPage": "Kontoen din er suspendert",
+      "bannedMessage": "Ta kontakt med administrator for mer informasjon.",
+      "role": "Rolle"
+    },
     "academies": {
       "title": "Akademier",
       "pending": "Ventende akademier",
@@ -556,7 +579,20 @@
       "deactivate": "Deaktiver",
       "noPending": "Ingen akademier venter på godkjenning.",
       "submittedBy": "Innsendt av",
-      "members": "medlemmer"
+      "members": "medlemmer",
+      "edit": "Rediger",
+      "editTitle": "Rediger akademi",
+      "save": "Lagre",
+      "cancel": "Avbryt",
+      "saving": "Lagrer...",
+      "saved": "Akademi oppdatert!",
+      "fieldName": "Navn",
+      "fieldCity": "By",
+      "fieldRegion": "Region",
+      "fieldWebsite": "Nettside",
+      "fieldAffiliation": "Tilknytning",
+      "fieldDescription": "Beskrivelse",
+      "fieldHeadInstructor": "Hovedinstruktør"
     }
   }
 }

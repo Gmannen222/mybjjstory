@@ -75,6 +75,7 @@ export default function AcademySelector({ value, academyId, onChange }: AcademyS
       .select('id, name, city')
       .ilike('name', `%${query}%`)
       .eq('is_active', true)
+      .eq('visibility', 'visible')
       .limit(10)
     setResults(data || [])
     setIsSearching(false)

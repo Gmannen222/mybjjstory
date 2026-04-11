@@ -15,6 +15,9 @@ const ICON_MAP: Record<string, string> = {
   calendar: '\u{1F4C5}',
   belt: '\u{1F94B}',
   gold_medal: '\u{1F947}',
+  speech: '\u{1F4AC}',
+  handshake: '\u{1F91D}',
+  megaphone: '\u{1F4E3}',
 }
 
 interface AchievementBadgeProps {

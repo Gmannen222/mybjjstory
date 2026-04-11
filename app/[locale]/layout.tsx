@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { routing } from '../i18n/routing'
 import Header from '@/components/layout/Header'
 import BottomNav from '@/components/layout/BottomNav'
+import BanCheck from '@/components/auth/BanCheck'
 
 export default async function LocaleLayout({
   children,
@@ -24,6 +25,7 @@ export default async function LocaleLayout({
     <html lang={locale} className="h-full">
       <body className="min-h-full flex flex-col bg-background text-foreground antialiased">
         <NextIntlClientProvider messages={messages}>
+          <BanCheck locale={locale} />
           <Header />
           <main className="flex-1 pb-20 sm:pb-0">{children}</main>
           <BottomNav />

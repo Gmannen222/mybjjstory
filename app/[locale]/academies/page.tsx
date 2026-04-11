@@ -11,6 +11,7 @@ export default async function AcademiesPage() {
     .from('academies')
     .select('*')
     .eq('is_active', true)
+    .eq('visibility', 'visible')
     .order('name', { ascending: true })
 
   const regions = [...new Set((academies || []).map((a: Academy) => a.region).filter(Boolean))] as string[]
