@@ -232,7 +232,7 @@ async function LandingPage({ locale }: { locale: string }) {
           >
             {t('cta.button')}
           </Link>
-          <p className="text-xs text-muted mt-4">Gratis i beta. Bli med og form fremtidens BJJ-app!</p>
+          <p className="text-xs text-muted mt-4">Alle som registrerer seg i beta beholder tilgangen etter lansering.</p>
         </div>
       </section>
 
