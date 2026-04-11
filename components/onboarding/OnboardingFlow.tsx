@@ -4,9 +4,10 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { BeltRank } from '@/lib/types/database'
-import { BELT_COLORS, BELT_LABELS as ALL_BELT_LABELS, ADULT_BELTS } from '@/components/ui/BeltBadge'
+import { BELT_COLORS, BELT_LABELS as ALL_BELT_LABELS, ADULT_BELTS, KIDS_BELTS, BeltDisplay } from '@/components/ui/BeltBadge'
 
-const BELT_RANKS = ADULT_BELTS
+const ADULT_BELT_RANKS = ADULT_BELTS
+const KIDS_BELT_RANKS = KIDS_BELTS
 
 const HEARD_FROM_OPTIONS = [
   'Venner / treningspartner',
@@ -22,6 +23,8 @@ type Step = 'welcome' | 'belt' | 'info' | 'bjj' | 'done'
 export default function OnboardingFlow({ locale }: { locale: string }) {
   const [step, setStep] = useState<Step>('welcome')
   const [beltRank, setBeltRank] = useState<BeltRank>('white')
+  const [beltDegrees, setBeltDegrees] = useState(0)
+  const [isKids, setIsKids] = useState(false)
   const [displayName, setDisplayName] = useState('')
   const [username, setUsername] = useState('')
   const [academyName, setAcademyName] = useState('')
@@ -48,6 +51,7 @@ export default function OnboardingFlow({ locale }: { locale: string }) {
         display_name: displayName || sessionData.session.user.user_metadata?.full_name || null,
         username: username || null,
         belt_rank: beltRank,
+        belt_degrees: beltDegrees,
         academy_name: academyName || null,
         training_since_year: trainingSinceYear ? parseInt(trainingSinceYear) : null,
         currently_training: currentlyTraining,
@@ -105,8 +109,28 @@ export default function OnboardingFlow({ locale }: { locale: string }) {
             <h2 className="text-2xl font-bold">Hvilket belte har du?</h2>
           </div>
 
-          <div className="space-y-3">
-            {BELT_RANKS.map((rank) => {
+          {/* Voksen / Barn toggle */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => { setIsKids(false); setBeltRank('white'); setBeltDegrees(0) }}
+              className={`flex-1 py-3 rounded-xl font-medium transition-all ${
+                !isKids ? 'bg-primary text-background' : 'bg-surface/50 text-muted hover:bg-surface'
+              }`}
+            >
+              Voksen
+            </button>
+            <button
+              onClick={() => { setIsKids(true); setBeltRank('white'); setBeltDegrees(0) }}
+              className={`flex-1 py-3 rounded-xl font-medium transition-all ${
+                isKids ? 'bg-primary text-background' : 'bg-surface/50 text-muted hover:bg-surface'
+              }`}
+            >
+              Barn
+            </button>
+          </div>
+
+          <div className="space-y-3 max-h-[40vh] overflow-y-auto">
+            {(isKids ? KIDS_BELT_RANKS : ADULT_BELT_RANKS).map((rank) => {
               const colors = BELT_COLORS[rank]
               const isSelected = beltRank === rank
               return (
@@ -130,6 +154,29 @@ export default function OnboardingFlow({ locale }: { locale: string }) {
                 </button>
               )
             })}
+          </div>
+
+          {/* Stripe selector */}
+          <div>
+            <p className="text-sm text-muted mb-3">Antall striper</p>
+            <div className="flex gap-2">
+              {[0, 1, 2, 3, 4].map((d) => (
+                <button
+                  key={d}
+                  onClick={() => setBeltDegrees(d)}
+                  className={`flex-1 py-3 rounded-xl font-bold transition-all ${
+                    beltDegrees === d
+                      ? 'bg-primary text-background'
+                      : 'bg-surface/50 text-muted hover:bg-surface'
+                  }`}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
+            <div className="mt-3 w-48 mx-auto">
+              <BeltDisplay rank={beltRank} degrees={beltDegrees} size="md" />
+            </div>
           </div>
 
           <button

@@ -215,7 +215,7 @@ export default function ProfileForm({
           <div>
             <label className="block text-sm font-medium text-muted mb-2">Grader (striper)</label>
             <input type="number" value={beltDegrees} onChange={(e) => setBeltDegrees(e.target.value)}
-              min="0" max="6"
+              min="0" max="4"
               className="w-24 px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
           </div>
           <AcademySelector
