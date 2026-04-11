@@ -42,6 +42,7 @@ export default function CompetitionForm({
   const [notes, setNotes] = useState(competition?.notes ?? '')
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const router = useRouter()
@@ -87,7 +88,7 @@ export default function CompetitionForm({
   }
 
   const handleDelete = async () => {
-    if (!competition || !confirm('Er du sikker på at du vil slette denne konkurransen?')) return
+    if (!competition) return
     setDeleting(true)
 
     const { error: dbError } = await supabase.from('competitions').delete().eq('id', competition.id)
@@ -186,7 +187,7 @@ export default function CompetitionForm({
         <h3 className="text-sm font-bold">Kilde</h3>
         <div>
           <select value={source} onChange={(e) => setSource(e.target.value as CompetitionSource)}
-            className="w-full px-4 py-3 bg-background border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary">
+            className="w-full px-4 py-3 bg-background border border-white/10 rounded-lg text-foreground [&>option]:text-black [&>option]:bg-white focus:outline-none focus:border-primary">
             {SOURCES.map(({ value, label }) => (
               <option key={value} value={value}>{label}</option>
             ))}
@@ -216,10 +217,35 @@ export default function CompetitionForm({
       </button>
 
       {isEdit && (
-        <button type="button" onClick={handleDelete} disabled={deleting}
-          className="w-full py-3 bg-red-500/10 text-red-400 font-semibold rounded-lg hover:bg-red-500/20 transition-colors disabled:opacity-50">
-          {deleting ? 'Sletter...' : 'Slett konkurranse'}
-        </button>
+        <div className="flex justify-center">
+          {!showDeleteConfirm ? (
+            <button
+              type="button"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="px-4 py-2.5 text-sm text-red-400 border border-red-500/20 rounded-xl hover:bg-red-500/10 transition-colors"
+            >
+              Slett konkurranse
+            </button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2.5 text-sm text-muted border border-white/10 rounded-xl hover:bg-surface-hover transition-colors"
+              >
+                Avbryt
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleting}
+                className="px-4 py-2.5 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl hover:bg-red-500/20 transition-colors disabled:opacity-50"
+              >
+                {deleting ? 'Sletter...' : 'Ja, slett'}
+              </button>
+            </div>
+          )}
+        </div>
       )}
     </form>
   )

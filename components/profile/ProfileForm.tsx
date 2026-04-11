@@ -229,7 +229,7 @@ export default function ProfileForm({
           <div>
             <label className="block text-sm font-medium text-muted mb-2">Vektklasse</label>
             <select value={weightClass} onChange={(e) => setWeightClass(e.target.value)}
-              className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary">
+              className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground [&>option]:text-black [&>option]:bg-white focus:outline-none focus:border-primary">
               <option value="">Velg...</option>
               {WEIGHT_CLASSES.map((w) => <option key={w} value={w}>{w}</option>)}
             </select>
@@ -249,7 +249,7 @@ export default function ProfileForm({
           <div>
             <label className="block text-sm font-medium text-muted mb-2">Favorittguard</label>
             <select value={favoriteGuard} onChange={(e) => setFavoriteGuard(e.target.value)}
-              className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary">
+              className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground [&>option]:text-black [&>option]:bg-white focus:outline-none focus:border-primary">
               <option value="">Velg...</option>
               {GUARDS.map((g) => <option key={g} value={g}>{g}</option>)}
             </select>
@@ -257,7 +257,7 @@ export default function ProfileForm({
           <div>
             <label className="block text-sm font-medium text-muted mb-2">Favorittsubmission</label>
             <select value={favoriteSubmission} onChange={(e) => setFavoriteSubmission(e.target.value)}
-              className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary">
+              className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground [&>option]:text-black [&>option]:bg-white focus:outline-none focus:border-primary">
               <option value="">Velg...</option>
               {SUBMISSIONS.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
@@ -334,12 +334,14 @@ export default function ProfileForm({
         )}
       </section>
 
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      <div className="sticky bottom-0 bg-background/95 backdrop-blur-md border-t border-white/10 p-4 -mx-6 -mb-6 mt-6 z-10">
+        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
 
-      <button type="submit" disabled={saving}
-        className="w-full py-3 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50">
-        {saving ? tCommon('loading') : tCommon('save')}
-      </button>
+        <button type="submit" disabled={saving}
+          className="w-full py-3 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50">
+          {saving ? tCommon('loading') : tCommon('save')}
+        </button>
+      </div>
     </form>
   )
 }

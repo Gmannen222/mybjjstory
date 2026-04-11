@@ -65,7 +65,9 @@ export default async function TrainingDetailPage({
 
       <div className="mt-6 bg-surface rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold">{s.date}</h1>
+          <h1 className="text-2xl font-bold">{new Date(s.date + 'T00:00:00').toLocaleDateString('no-NO', {
+            weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+          })}</h1>
           <span className="px-3 py-1 bg-primary/20 text-primary text-sm font-semibold rounded-full">
             {t(`types.${s.type}`)}
           </span>

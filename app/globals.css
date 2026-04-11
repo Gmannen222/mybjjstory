@@ -46,9 +46,10 @@ body {
   outline-offset: 2px;
 }
 
-/* Inputs use border-color change as focus indicator — suppress the extra outline ring */
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  outline: none;
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-color: var(--color-primary);
 }

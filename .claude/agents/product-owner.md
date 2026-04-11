@@ -1,6 +1,6 @@
 ---
 name: product-owner
-model: sonnet
+model: opus
 description: Product owner that manages backlog, priorities and user stories
 ---
 

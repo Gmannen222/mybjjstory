@@ -70,11 +70,11 @@ export default function Dashboard({
   const [loading, setLoading] = useState(true)
   const [showSettings, setShowSettings] = useState(false)
   const [dashConfig, setDashConfig] = useState<DashboardConfig>(DEFAULT_DASHBOARD)
-  const supabase = createClient()
   const t = useTranslations('home')
   const tTraining = useTranslations('training')
 
   useEffect(() => {
+    const supabase = createClient()
     async function load() {
       const now = new Date()
       const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
@@ -161,7 +161,7 @@ export default function Dashboard({
       setLoading(false)
     }
     load()
-  }, [userId, supabase])
+  }, [userId])
 
   if (loading) {
     return (
@@ -451,10 +451,10 @@ export default function Dashboard({
 
 function RecentTraining({ userId, locale }: { userId: string; locale: string }) {
   const [sessions, setSessions] = useState<RecentSession[]>([])
-  const supabase = createClient()
   const tTraining = useTranslations('training')
 
   useEffect(() => {
+    const supabase = createClient()
     supabase
       .from('training_sessions')
       .select('id, date, type, duration_min')
@@ -462,7 +462,7 @@ function RecentTraining({ userId, locale }: { userId: string; locale: string }) 
       .order('date', { ascending: false })
       .limit(5)
       .then(({ data }) => setSessions(data || []))
-  }, [userId, supabase])
+  }, [userId])
 
   if (sessions.length === 0) {
     return (
@@ -535,9 +535,9 @@ interface ActiveInjury {
 
 function ActiveInjuriesList({ userId, locale }: { userId: string; locale: string }) {
   const [injuries, setInjuries] = useState<ActiveInjury[]>([])
-  const supabase = createClient()
 
   useEffect(() => {
+    const supabase = createClient()
     supabase
       .from('injuries')
       .select('id, body_part, severity, date_occurred, training_impact')
@@ -546,7 +546,7 @@ function ActiveInjuriesList({ userId, locale }: { userId: string; locale: string
       .order('date_occurred', { ascending: false })
       .limit(5)
       .then(({ data }) => setInjuries(data || []))
-  }, [userId, supabase])
+  }, [userId])
 
   if (injuries.length === 0) return null
 

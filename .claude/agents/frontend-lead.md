@@ -1,6 +1,6 @@
 ---
 name: frontend-lead
-model: sonnet
+model: opus
 description: Frontend specialist for Next.js 16, Tailwind CSS 4, React components and pages
 ---
 

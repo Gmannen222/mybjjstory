@@ -5,8 +5,10 @@ import { usePathname } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import AuthButton from '@/components/auth/AuthButton'
 import AdminLink from '@/components/admin/AdminLink'
+import InstallButton from '@/components/layout/InstallButton'
 
 const NAV_LINKS = [
+  { key: 'home', path: '' },
   { key: 'training', path: '/training' },
   { key: 'progress', path: '/progress' },
   { key: 'feed', path: '/feed' },
@@ -31,6 +33,9 @@ export default function Header() {
 
   const isActive = (path: string) => {
     const full = `/${locale}${path}`
+    if (path === '') {
+      return pathname === `/${locale}` || pathname === `/${locale}/`
+    }
     if (pathname.startsWith(full)) return true
     for (const [sub, parent] of Object.entries(SUB_PATH_MAP)) {
       if (parent === path && pathname.startsWith(`/${locale}${sub}`)) return true
@@ -69,7 +74,10 @@ export default function Header() {
           <AdminLink />
         </nav>
 
-        <AuthButton compact />
+        <div className="flex items-center gap-2">
+          <InstallButton />
+          <AuthButton compact />
+        </div>
       </div>
     </header>
   )

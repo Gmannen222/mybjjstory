@@ -49,8 +49,10 @@ export default function SessionForm({
   const [moodAfter, setMoodAfter] = useState<MoodType | ''>(existingSession?.mood_after ?? '')
   const [bodyWeightKg, setBodyWeightKg] = useState(existingSession?.body_weight_kg?.toString() ?? '')
   const [techniques, setTechniques] = useState<SelectedTechnique[]>(existingTechniques ?? [])
+  const [rpeSelected, setRpeSelected] = useState(!!existingSession?.effort_rpe)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const router = useRouter()
@@ -118,14 +120,14 @@ export default function SessionForm({
     }
 
     // Check achievements after saving (via API route with service role)
-    fetch('/api/achievements', { method: 'POST' })
+    fetch('/api/achievements', { method: 'POST' }).catch(console.error)
 
     router.push(`/${locale}/training?saved=true`)
     router.refresh()
   }
 
   const handleDelete = async () => {
-    if (!existingSession || !confirm('Er du sikker på at du vil slette denne treningsøkten?')) return
+    if (!existingSession) return
     setDeleting(true)
 
     await supabase.from('session_techniques').delete().eq('session_id', existingSession.id)
@@ -201,98 +203,106 @@ export default function SessionForm({
         <TechniquePicker selected={techniques} onChange={setTechniques} />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-muted mb-2">
-          {t('effortRpe')} {effortRpe && <span className="text-primary">{effortRpe}/10</span>}
-        </label>
-        <input
-          type="range"
-          min="1"
-          max="10"
-          value={effortRpe || 5}
-          onChange={(e) => setEffortRpe(e.target.value)}
-          className="w-full accent-primary"
-        />
-        <div className="flex justify-between text-xs text-muted mt-1">
-          <span>{t('effortLight')}</span>
-          <span>{t('effortMax')}</span>
-        </div>
-      </div>
+      <details className="group" open={isEdit || undefined}>
+        <summary className="cursor-pointer text-sm font-medium text-primary hover:text-primary-hover transition-colors list-none flex items-center gap-2 py-2">
+          <span className="transition-transform group-open:rotate-90">&#9654;</span>
+          Flere detaljer
+        </summary>
+        <div className="space-y-6 mt-4">
+          <div>
+            <label className="block text-sm font-medium text-muted mb-2">
+              {t('effortRpe')} {rpeSelected ? <span className="text-primary">{effortRpe || 5}/10</span> : <span className="text-muted italic">Ikke valgt</span>}
+            </label>
+            <input
+              type="range"
+              min="1"
+              max="10"
+              value={effortRpe || 5}
+              onChange={(e) => { setEffortRpe(e.target.value); setRpeSelected(true) }}
+              className="w-full accent-primary"
+            />
+            <div className="flex justify-between text-xs text-muted mt-1">
+              <span>{t('effortLight')}</span>
+              <span>{t('effortMax')}</span>
+            </div>
+          </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-muted mb-2">
-            {t('moodBefore')}
-          </label>
-          <div className="flex gap-1">
-            {MOOD_OPTIONS.map((m) => (
-              <button
-                key={m.value}
-                type="button"
-                onClick={() => setMoodBefore(moodBefore === m.value ? '' : m.value)}
-                className={`flex-1 py-2 rounded-lg text-lg transition-colors ${
-                  moodBefore === m.value
-                    ? 'bg-primary/20 ring-1 ring-primary'
-                    : 'bg-surface hover:bg-surface-hover'
-                }`}
-                title={t(`moods.${m.value}`)}
-              >
-                {m.emoji}
-              </button>
-            ))}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-muted mb-2">
+                {t('moodBefore')}
+              </label>
+              <div className="flex gap-1">
+                {MOOD_OPTIONS.map((m) => (
+                  <button
+                    key={m.value}
+                    type="button"
+                    onClick={() => setMoodBefore(moodBefore === m.value ? '' : m.value)}
+                    className={`flex-1 py-2 rounded-lg text-lg transition-colors ${
+                      moodBefore === m.value
+                        ? 'bg-primary/20 ring-1 ring-primary'
+                        : 'bg-surface hover:bg-surface-hover'
+                    }`}
+                    title={t(`moods.${m.value}`)}
+                  >
+                    {m.emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-muted mb-2">
+                {t('moodAfter')}
+              </label>
+              <div className="flex gap-1">
+                {MOOD_OPTIONS.map((m) => (
+                  <button
+                    key={m.value}
+                    type="button"
+                    onClick={() => setMoodAfter(moodAfter === m.value ? '' : m.value)}
+                    className={`flex-1 py-2 rounded-lg text-lg transition-colors ${
+                      moodAfter === m.value
+                        ? 'bg-primary/20 ring-1 ring-primary'
+                        : 'bg-surface hover:bg-surface-hover'
+                    }`}
+                    title={t(`moods.${m.value}`)}
+                  >
+                    {m.emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-muted mb-2">
+              {t('bodyWeight')} (kg)
+            </label>
+            <input
+              type="number"
+              value={bodyWeightKg}
+              onChange={(e) => setBodyWeightKg(e.target.value)}
+              placeholder="75.0"
+              min="30"
+              max="200"
+              step="0.1"
+              className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-muted mb-2">
+              {t('notes')}
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={4}
+              className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary resize-none"
+            />
           </div>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-muted mb-2">
-            {t('moodAfter')}
-          </label>
-          <div className="flex gap-1">
-            {MOOD_OPTIONS.map((m) => (
-              <button
-                key={m.value}
-                type="button"
-                onClick={() => setMoodAfter(moodAfter === m.value ? '' : m.value)}
-                className={`flex-1 py-2 rounded-lg text-lg transition-colors ${
-                  moodAfter === m.value
-                    ? 'bg-primary/20 ring-1 ring-primary'
-                    : 'bg-surface hover:bg-surface-hover'
-                }`}
-                title={t(`moods.${m.value}`)}
-              >
-                {m.emoji}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-muted mb-2">
-          {t('bodyWeight')} (kg)
-        </label>
-        <input
-          type="number"
-          value={bodyWeightKg}
-          onChange={(e) => setBodyWeightKg(e.target.value)}
-          placeholder="75.0"
-          min="30"
-          max="200"
-          step="0.1"
-          className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-muted mb-2">
-          {t('notes')}
-        </label>
-        <textarea
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          rows={4}
-          className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary resize-none"
-        />
-      </div>
+      </details>
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
 
@@ -304,15 +314,38 @@ export default function SessionForm({
         {saving ? tCommon('saving') : isEdit ? 'Oppdater trening' : t('save')}
       </button>
 
-      {isEdit && (
+      {isEdit && !showDeleteConfirm && (
         <button
           type="button"
-          onClick={handleDelete}
+          onClick={() => setShowDeleteConfirm(true)}
           disabled={deleting}
           className="w-full py-3 bg-red-500/10 text-red-400 font-semibold rounded-lg hover:bg-red-500/20 transition-colors disabled:opacity-50"
         >
-          {deleting ? tCommon('deleting') : 'Slett treningsøkt'}
+          Slett treningsøkt
         </button>
+      )}
+
+      {isEdit && showDeleteConfirm && (
+        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 space-y-3">
+          <p className="text-sm text-red-400 font-medium">Er du sikker på at du vil slette denne treningsøkten?</p>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => setShowDeleteConfirm(false)}
+              className="flex-1 py-2.5 border border-white/20 rounded-lg text-sm font-medium hover:bg-surface transition-colors"
+            >
+              Avbryt
+            </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={deleting}
+              className="flex-1 py-2.5 bg-red-500 text-white rounded-lg text-sm font-semibold hover:bg-red-600 transition-colors disabled:opacity-50"
+            >
+              {deleting ? tCommon('deleting') : 'Ja, slett'}
+            </button>
+          </div>
+        </div>
       )}
     </form>
   )

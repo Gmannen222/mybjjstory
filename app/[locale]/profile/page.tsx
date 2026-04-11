@@ -92,7 +92,7 @@ export default async function ProfilePage({
             </Link>
             <Link
               href={`/${locale}/settings`}
-              className="px-3 py-2 border border-white/10 rounded-lg text-sm text-muted hover:text-foreground hover:bg-surface-hover transition-colors"
+              className="px-3 py-2 min-w-[44px] min-h-[44px] flex items-center justify-center border border-white/10 rounded-lg text-sm text-muted hover:text-foreground hover:bg-surface-hover transition-colors"
             >
               ⚙
             </Link>
@@ -252,6 +252,7 @@ export default async function ProfilePage({
           { href: `/${locale}/profile/avatar`, icon: '🎨', label: 'Rediger avatar', badge: 0 },
           { href: `/${locale}/achievements`, icon: '🏅', label: 'Achievements', badge: 0 },
           { href: `/${locale}/profile/edit`, icon: '✏️', label: 'Rediger profil', badge: 0 },
+          { href: `/${locale}/academies`, icon: '🏛️', label: 'Akademier', badge: 0 },
         ].map(({ href, icon, label, badge }) => (
           <Link
             key={href}

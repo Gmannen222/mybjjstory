@@ -2,7 +2,7 @@
 
 ## Akkurat nå
 
-Arbeidsreview: optimaliserer settings, dashboard-system og hooks.
+Session feedback-feature implementert med inbox-system, avatar-farger fikset, test-data seeded.
 
 ## I dag (2026-04-11)
 
@@ -18,13 +18,18 @@ Arbeidsreview: optimaliserer settings, dashboard-system og hooks.
 - [x] Ryddet stale worktree-branch
 - [x] Nytt dashboard-system: status.md (erstatter 693-linjers HTML)
 - [x] Fikset hooks-format i settings.json
-- [ ] Optimaliserer settings og arbeidsprosess
+- [x] Optimalisert settings og arbeidsprosess
+- [x] Nytt status-system: status.md med akkurat-nå + daglig logg (erstatter 693-linjers HTML)
+- [x] UX-forbedringer: mobil nav Mer-menu, success-bannere, touch-targets, ARIA-labels, EmptyState/SavedBanner-komponenter, design-tokens, i18n-fixes, loading-skeletons, focus-visible-ringer
+- [x] Session feedback-feature: inbox med unread-teller, feedback-form med character-count, test-data seeding
+- [x] Avatar-farger: gradient ved profil-visning, farger matcher belt-rank
+- [x] Comprehensive test-data: 8 brukere, 50+ treninger, gradings, media, posts, follow-chains
 
 ## Prosjekt
 
 | Metrikk | Verdi |
 |---------|-------|
-| Siste commit | df5bfdb |
+| Siste commit | c6e50b5 |
 | Build | OK |
 | Ruter | 35 |
 | DB-tabeller | 12 |

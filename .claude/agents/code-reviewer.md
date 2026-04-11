@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-model: sonnet
+model: opus
 description: Code reviewer that checks quality, security, TypeScript and best practices
 ---
 

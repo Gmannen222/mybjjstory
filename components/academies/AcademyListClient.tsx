@@ -41,7 +41,7 @@ export default function AcademyListClient({ academies, regions, affiliations }: 
         <select
           value={region}
           onChange={(e) => setRegion(e.target.value)}
-          className="px-4 py-2.5 rounded-lg bg-surface border border-white/10 text-foreground focus:outline-none focus:border-primary/50 transition-colors"
+          className="px-4 py-2.5 rounded-lg bg-surface border border-white/10 text-foreground [&>option]:text-black [&>option]:bg-white focus:outline-none focus:border-primary/50 transition-colors"
         >
           <option value="">{t('filters.regionAll')}</option>
           {regions.map((r) => (
@@ -51,7 +51,7 @@ export default function AcademyListClient({ academies, regions, affiliations }: 
         <select
           value={affiliation}
           onChange={(e) => setAffiliation(e.target.value)}
-          className="px-4 py-2.5 rounded-lg bg-surface border border-white/10 text-foreground focus:outline-none focus:border-primary/50 transition-colors"
+          className="px-4 py-2.5 rounded-lg bg-surface border border-white/10 text-foreground [&>option]:text-black [&>option]:bg-white focus:outline-none focus:border-primary/50 transition-colors"
         >
           <option value="">{t('filters.affiliationAll')}</option>
           {affiliations.map((a) => (

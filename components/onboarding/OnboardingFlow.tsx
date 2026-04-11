@@ -200,6 +200,10 @@ export default function OnboardingFlow({ locale }: { locale: string }) {
             </div>
           </div>
 
+          {displayName && !username.trim() && (
+            <p className="text-sm text-red-400">Brukernavn er obligatorisk</p>
+          )}
+
           <div className="flex gap-3">
             <button
               onClick={() => setStep('belt')}
@@ -209,7 +213,8 @@ export default function OnboardingFlow({ locale }: { locale: string }) {
             </button>
             <button
               onClick={() => setStep('bjj')}
-              className="flex-1 py-4 bg-primary text-background font-bold rounded-xl hover:bg-primary-hover transition-colors"
+              disabled={!username.trim()}
+              className="flex-1 py-4 bg-primary text-background font-bold rounded-xl hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Neste
             </button>

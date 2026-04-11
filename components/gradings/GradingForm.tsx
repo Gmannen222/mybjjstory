@@ -27,6 +27,7 @@ export default function GradingForm({
   const [showKidsBelts, setShowKidsBelts] = useState(showKidsBeltsDefault)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const router = useRouter()
@@ -81,7 +82,7 @@ export default function GradingForm({
   }
 
   const handleDelete = async () => {
-    if (!grading || !confirm('Er du sikker på at du vil slette denne graderingen?')) return
+    if (!grading) return
     setDeleting(true)
 
     const { error: dbError } = await supabase.from('gradings').delete().eq('id', grading.id)
@@ -258,14 +259,35 @@ export default function GradingForm({
       </button>
 
       {isEdit && (
-        <button
-          type="button"
-          onClick={handleDelete}
-          disabled={deleting}
-          className="w-full py-3 bg-red-500/10 text-red-400 font-semibold rounded-lg hover:bg-red-500/20 transition-colors disabled:opacity-50"
-        >
-          {deleting ? tCommon('deleting') : 'Slett gradering'}
-        </button>
+        <div className="flex justify-center">
+          {!showDeleteConfirm ? (
+            <button
+              type="button"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="px-4 py-2.5 text-sm text-red-400 border border-red-500/20 rounded-xl hover:bg-red-500/10 transition-colors"
+            >
+              Slett gradering
+            </button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2.5 text-sm text-muted border border-white/10 rounded-xl hover:bg-surface-hover transition-colors"
+              >
+                Avbryt
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleting}
+                className="px-4 py-2.5 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl hover:bg-red-500/20 transition-colors disabled:opacity-50"
+              >
+                {deleting ? 'Sletter...' : 'Ja, slett'}
+              </button>
+            </div>
+          )}
+        </div>
       )}
     </form>
   )

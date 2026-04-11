@@ -1,6 +1,6 @@
 ---
 name: backend-lead
-model: sonnet
+model: opus
 description: Backend specialist for Supabase, PostgreSQL, RLS, migrations and Edge Functions
 ---
 

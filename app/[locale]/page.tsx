@@ -4,6 +4,8 @@ import Link from 'next/link'
 import Dashboard from '@/components/dashboard/Dashboard'
 import { BeltDisplay, ALL_BELTS } from '@/components/ui/BeltBadge'
 
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage({
   params,
 }: {
@@ -85,10 +87,10 @@ async function LandingPage({ locale }: { locale: string }) {
           {/* Belt progression preview */}
           <div className="mt-16 flex flex-col items-center gap-3">
             <p className="text-xs text-muted uppercase tracking-widest">Din reise</p>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
               {beltProgression.map(({ rank, degrees }, i) => (
                 <div key={rank} className="flex items-center gap-2">
-                  <div className="w-28 sm:w-36">
+                  <div className="w-20 sm:w-28">
                     <BeltDisplay rank={rank} degrees={degrees} size="sm" />
                   </div>
                   {i < beltProgression.length - 1 && (

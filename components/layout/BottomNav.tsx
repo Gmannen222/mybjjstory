@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 
 const NAV_ITEMS = [
+  { key: 'home', path: '', icon: '🏠' },
   { key: 'training', path: '/training', icon: '🥋' },
   { key: 'progress', path: '/progress', icon: '📊' },
   { key: 'feed', path: '/feed', icon: '📰' },
@@ -21,6 +22,7 @@ const SUB_PATH_MAP: Record<string, string> = {
   '/settings': '/profile',
   '/feedback': '/profile',
   '/inbox': '/profile',
+  '/onboarding': '__none__',
 }
 
 export default function BottomNav() {
@@ -30,6 +32,10 @@ export default function BottomNav() {
 
   const isActive = (path: string) => {
     const full = `/${locale}${path}`
+    // Home tab: only active on exact dashboard path
+    if (path === '') {
+      return pathname === `/${locale}` || pathname === `/${locale}/`
+    }
     if (pathname.startsWith(full)) return true
     // Check if current path is a sub-path of this tab
     for (const [sub, parent] of Object.entries(SUB_PATH_MAP)) {
@@ -49,7 +55,7 @@ export default function BottomNav() {
             <Link
               key={key}
               href={href}
-              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 text-xs transition-colors ${
+              className={`flex flex-col items-center gap-0.5 min-w-[56px] min-h-[48px] justify-center px-3 py-1.5 text-xs transition-colors ${
                 active
                   ? 'text-primary'
                   : 'text-muted hover:text-foreground'
