@@ -178,11 +178,20 @@ export default function TrainingCalendar({
           else if (count === 2) heatBg = 'bg-primary/20'
           else if (count >= 3) heatBg = 'bg-primary/30'
 
+          const fullDateLabel = new Date(dateKey + 'T00:00:00').toLocaleDateString('no-NO', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+          })
+
           return (
             <button
               key={dateKey}
               type="button"
               onClick={() => setSelectedDay(isSelected ? null : dateKey)}
+              aria-label={count > 0 ? `${fullDateLabel}, ${count} trening${count !== 1 ? 'er' : ''}` : fullDateLabel}
+              aria-pressed={isSelected}
               className={`
                 aspect-square rounded-lg flex flex-col items-center justify-center gap-0.5
                 text-sm transition-all duration-150 relative

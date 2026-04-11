@@ -8,6 +8,9 @@ import TrainingFilter from '@/components/training/TrainingFilter'
 import TrainingCalendar from '@/components/training/TrainingCalendar'
 import TrainingViewToggle from '@/components/training/TrainingViewToggle'
 import TrainingChecklist from '@/components/training/TrainingChecklist'
+import EmptyState from '@/components/ui/EmptyState'
+import SavedBanner from '@/components/ui/SavedBanner'
+import { Suspense } from 'react'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,17 +56,19 @@ export default async function TrainingPage({
   const listView = (
     <>
       {allSessions.length === 0 ? (
-        <div className="text-center py-20 text-muted">
-          <p className="text-lg">{filters.type || filters.month ? 'Ingen treninger med dette filteret' : t('noSessions')}</p>
-          {!filters.type && !filters.month && (
-            <Link
-              href={`/${locale}/training/new`}
-              className="inline-block mt-4 px-6 py-3 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors"
-            >
-              {t('newSession')}
-            </Link>
-          )}
-        </div>
+        filters.type || filters.month ? (
+          <div className="text-center py-20 text-muted">
+            <p className="text-lg">Ingen treninger med dette filteret</p>
+          </div>
+        ) : (
+          <EmptyState
+            icon="🥋"
+            title="Ingen treningsøkter ennå"
+            description="Begynn å logg treningene dine og følg fremgangen din over tid."
+            ctaText={t('newSession')}
+            ctaHref={`/${locale}/training/new`}
+          />
+        )
       ) : (
         <div className="space-y-3">
           {allSessions.map((s) => (
@@ -122,6 +127,9 @@ export default async function TrainingPage({
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
+      <Suspense>
+        <SavedBanner message="Treningen ble lagret!" />
+      </Suspense>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">{t('title')}</h1>
         <Link

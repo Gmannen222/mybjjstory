@@ -121,7 +121,7 @@ export default function TechniquePicker({
               <button
                 type="button"
                 onClick={() => removeTechnique(tech.name)}
-                className="opacity-60 hover:opacity-100 ml-0.5"
+                className="opacity-60 hover:opacity-100 ml-0.5 min-w-[28px] min-h-[28px] flex items-center justify-center rounded"
               >
                 ×
               </button>

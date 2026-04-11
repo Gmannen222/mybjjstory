@@ -157,13 +157,25 @@
   },
   "common": {
     "loading": "Laster...",
+    "saving": "Lagrer...",
+    "deleting": "Sletter...",
     "save": "Lagre",
+    "saved": "Lagret!",
     "cancel": "Avbryt",
     "delete": "Slett",
     "edit": "Rediger",
     "back": "Tilbake",
     "error": "Noe gikk galt",
-    "success": "Lagret!"
+    "success": "Lagret!",
+    "tryAgain": "Prøv igjen",
+    "deleteConfirmGeneric": "Er du sikker på at du vil slette dette?",
+    "deleteError": "Slettingen mislyktes. Prøv igjen.",
+    "updateError": "Oppdateringen mislyktes. Prøv igjen."
+  },
+  "achievements": {
+    "title": "Prestasjoner",
+    "loading": "Laster prestasjoner...",
+    "progress": "{earned} av {total}"
   },
   "belts": {
     "white": "Hvitt",

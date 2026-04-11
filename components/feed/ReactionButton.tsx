@@ -10,6 +10,12 @@ const REACTION_ICONS: Record<ReactionType, string> = {
   fire: '🔥',
 }
 
+const REACTION_LABELS: Record<ReactionType, string> = {
+  oss: 'Reager med Oss (kimono)',
+  high_five: 'Reager med High Five',
+  fire: 'Reager med Ild',
+}
+
 interface ReactionButtonProps {
   postId: string
   initialCount: number
@@ -62,7 +68,9 @@ export default function ReactionButton({
         <button
           key={type}
           onClick={() => handleReaction(type)}
-          className={`px-2 py-1 rounded-lg text-sm transition-all ${
+          aria-label={`${REACTION_LABELS[type]}${myReaction === type ? ' (aktiv)' : ''}`}
+          aria-pressed={myReaction === type}
+          className={`px-2.5 py-2.5 rounded-lg text-sm transition-all min-w-[44px] min-h-[44px] flex items-center justify-center ${
             myReaction === type
               ? 'bg-primary/20 scale-110'
               : 'hover:bg-surface-hover'

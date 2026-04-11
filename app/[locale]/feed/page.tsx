@@ -1,9 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
+import Image from 'next/image'
 import ReactionButton from '@/components/feed/ReactionButton'
 import CommentSection from '@/components/feed/CommentSection'
 import CreatePostForm from '@/components/feed/CreatePostForm'
+import EmptyState from '@/components/ui/EmptyState'
 
 export const dynamic = 'force-dynamic'
 
@@ -54,9 +56,11 @@ export default async function FeedPage({
       {user && <CreatePostForm locale={locale} />}
 
       {!posts || posts.length === 0 ? (
-        <div className="text-center py-20 text-muted">
-          <p className="text-lg">{t('empty')}</p>
-        </div>
+        <EmptyState
+          icon="📝"
+          title="Ingen innlegg ennå"
+          description="Del treninger, tanker og milepæler med BJJ-miljøet."
+        />
       ) : (
         <div className="space-y-4 mt-6">
           {posts.map((post) => {
@@ -77,9 +81,11 @@ export default async function FeedPage({
                 <div className="flex items-center gap-3 mb-3">
                   <Link href={profile?.username ? `/${locale}/profile/${profile.username}` : '#'} className="shrink-0">
                     {profile?.avatar_url ? (
-                      <img
+                      <Image
                         src={profile.avatar_url}
                         alt=""
+                        width={40}
+                        height={40}
                         className="w-10 h-10 rounded-full hover:ring-2 hover:ring-primary transition-all"
                       />
                     ) : (

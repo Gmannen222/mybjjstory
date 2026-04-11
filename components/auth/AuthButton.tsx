@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
 import type { Session } from '@supabase/supabase-js'
@@ -52,9 +53,11 @@ export default function AuthButton({ compact = false }: { compact?: boolean }) {
     return (
       <div className="flex items-center gap-3">
         {!compact && avatar && (
-          <img
+          <Image
             src={avatar}
             alt={name ?? ''}
+            width={32}
+            height={32}
             className="w-8 h-8 rounded-full"
           />
         )}

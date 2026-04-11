@@ -76,7 +76,7 @@ export default function GradingForm({
       })
       .eq('id', session.session.user.id)
 
-    router.push(`/${locale}/gradings`)
+    router.push(`/${locale}/gradings?saved=true`)
     router.refresh()
   }
 
@@ -87,7 +87,7 @@ export default function GradingForm({
     const { error: dbError } = await supabase.from('gradings').delete().eq('id', grading.id)
 
     if (dbError) {
-      setError('Kunne ikke slette')
+      setError(tCommon('deleteError'))
       setDeleting(false)
       return
     }
@@ -254,7 +254,7 @@ export default function GradingForm({
         disabled={saving}
         className="w-full py-3 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
       >
-        {saving ? tCommon('loading') : isEdit ? 'Oppdater gradering' : tCommon('save')}
+        {saving ? tCommon('saving') : isEdit ? 'Oppdater gradering' : tCommon('save')}
       </button>
 
       {isEdit && (
@@ -264,7 +264,7 @@ export default function GradingForm({
           disabled={deleting}
           className="w-full py-3 bg-red-500/10 text-red-400 font-semibold rounded-lg hover:bg-red-500/20 transition-colors disabled:opacity-50"
         >
-          {deleting ? 'Sletter...' : 'Slett gradering'}
+          {deleting ? tCommon('deleting') : 'Slett gradering'}
         </button>
       )}
     </form>

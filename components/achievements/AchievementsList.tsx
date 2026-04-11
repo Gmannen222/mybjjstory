@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useTranslations } from 'next-intl'
 import AchievementBadge from './AchievementBadge'
 
 interface AchievementWithStatus {
@@ -26,6 +27,7 @@ export default function AchievementsList({ compact = false }: { compact?: boolea
   const [achievements, setAchievements] = useState<AchievementWithStatus[]>([])
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
+  const t = useTranslations('achievements')
 
   useEffect(() => {
     async function load() {
@@ -61,7 +63,22 @@ export default function AchievementsList({ compact = false }: { compact?: boolea
   }, [supabase])
 
   if (loading) {
-    return <div className="text-muted text-sm py-4">Laster achievements...</div>
+    return (
+      <div className="space-y-8" aria-busy="true" aria-label="Laster achievements">
+        <div className="bg-surface rounded-xl p-4 border border-white/5 animate-pulse">
+          <div className="h-4 bg-surface-hover rounded w-1/3 mb-3" />
+          <div className="h-2 bg-surface-hover rounded-full" />
+        </div>
+        <div>
+          <div className="h-3 bg-surface-hover rounded w-1/4 mb-3 animate-pulse" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="animate-pulse bg-surface-hover rounded-xl h-16" />
+            ))}
+          </div>
+        </div>
+      </div>
+    )
   }
 
   const earnedCount = achievements.filter((a) => a.earned).length
@@ -74,7 +91,7 @@ export default function AchievementsList({ compact = false }: { compact?: boolea
       <div>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-muted uppercase tracking-wider">
-            Achievements ({earnedCount}/{achievements.length})
+            {t('title')} ({t('progress', { earned: earnedCount, total: achievements.length })})
           </h3>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">

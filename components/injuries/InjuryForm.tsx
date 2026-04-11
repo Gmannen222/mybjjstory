@@ -85,7 +85,7 @@ export default function InjuryForm({
       return
     }
 
-    router.push(`/${locale}/injuries`)
+    router.push(`/${locale}/injuries?saved=true`)
     router.refresh()
   }
 
@@ -116,7 +116,7 @@ export default function InjuryForm({
     const { error: dbError } = await supabase.from('injuries').delete().eq('id', injury.id)
 
     if (dbError) {
-      setError('Kunne ikke slette')
+      setError('Slettingen mislyktes. Prøv igjen.')
       setDeleting(false)
       return
     }

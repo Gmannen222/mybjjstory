@@ -32,7 +32,7 @@ export default function TrainingFilter({
       <div className="flex gap-1.5 flex-wrap">
         <button
           onClick={() => router.push(buildUrl('', currentMonth))}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+          className={`px-4 py-2.5 rounded-lg text-xs font-medium transition-colors min-h-[44px] ${
             !currentType ? 'bg-primary text-background' : 'bg-surface text-muted hover:text-foreground'
           }`}
         >
@@ -42,7 +42,7 @@ export default function TrainingFilter({
           <button
             key={type}
             onClick={() => router.push(buildUrl(currentType === type ? '' : type, currentMonth))}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+            className={`px-4 py-2.5 rounded-lg text-xs font-medium transition-colors min-h-[44px] ${
               currentType === type ? 'bg-primary text-background' : 'bg-surface text-muted hover:text-foreground'
             }`}
           >
@@ -56,14 +56,14 @@ export default function TrainingFilter({
         type="month"
         value={currentMonth}
         onChange={(e) => router.push(buildUrl(currentType, e.target.value))}
-        className="px-3 py-1.5 bg-surface border border-white/10 rounded-lg text-xs text-foreground focus:outline-none focus:border-primary"
+        className="px-3 py-2.5 bg-surface border border-white/10 rounded-lg text-xs text-foreground focus:outline-none focus:border-primary min-h-[44px]"
       />
 
       {/* Clear filters */}
       {(currentType || currentMonth) && (
         <button
           onClick={() => router.push(`/${locale}/training`)}
-          className="px-3 py-1.5 text-xs text-red-400 hover:text-red-300 transition-colors"
+          className="px-4 py-2.5 text-xs text-red-400 hover:text-red-300 transition-colors min-h-[44px]"
         >
           Nullstill
         </button>

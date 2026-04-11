@@ -4,6 +4,9 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Grading } from '@/lib/types/database'
 import { BeltDisplay, BELT_LABELS } from '@/components/ui/BeltBadge'
+import EmptyState from '@/components/ui/EmptyState'
+import SavedBanner from '@/components/ui/SavedBanner'
+import { Suspense } from 'react'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,6 +34,9 @@ export default async function GradingsPage({
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
+      <Suspense>
+        <SavedBanner message="Graderingen ble lagret!" />
+      </Suspense>
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold">{t('title')}</h1>
         <Link
@@ -42,9 +48,13 @@ export default async function GradingsPage({
       </div>
 
       {gradingList.length === 0 ? (
-        <div className="text-center py-20 text-muted">
-          <p className="text-lg">{t('noGradings')}</p>
-        </div>
+        <EmptyState
+          icon="🏅"
+          title="Ingen graderinger registrert ennå"
+          description="Logg belteoppgraderinger og striper for å bygge opp din belt-historikk."
+          ctaText={t('newGrading')}
+          ctaHref={`/${locale}/gradings/new`}
+        />
       ) : (
         <div className="relative">
           {/* Timeline line */}

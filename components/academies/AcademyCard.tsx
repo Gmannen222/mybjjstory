@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useLocale, useTranslations } from 'next-intl'
 import { isSafeUrl } from '@/lib/url'
 import type { Academy } from '@/lib/types/database'
@@ -20,9 +21,11 @@ export default function AcademyCard({ academy }: Props) {
     >
       <div className="flex items-start gap-3">
         {academy.logo_url && isSafeUrl(academy.logo_url) ? (
-          <img
+          <Image
             src={academy.logo_url}
             alt={academy.name}
+            width={48}
+            height={48}
             className="w-12 h-12 rounded-lg object-contain bg-white/5 flex-shrink-0"
           />
         ) : (

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import AchievementsList from '@/components/achievements/AchievementsList'
 
 export const dynamic = 'force-dynamic'
@@ -11,6 +12,7 @@ export default async function AchievementsPage({
 }) {
   const { locale } = await params
   const supabase = await createClient()
+  const t = await getTranslations('achievements')
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -19,7 +21,7 @@ export default async function AchievementsPage({
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Achievements</h1>
+      <h1 className="text-2xl font-bold mb-6">{t('title')}</h1>
       <AchievementsList />
     </div>
   )

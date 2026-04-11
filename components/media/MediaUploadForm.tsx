@@ -19,6 +19,7 @@ export default function MediaUploadForm({
 }: MediaUploadFormProps) {
   const [uploading, setUploading] = useState(false)
   const [caption, setCaption] = useState('')
+  const [error, setError] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
   const supabase = createClient()
@@ -28,6 +29,7 @@ export default function MediaUploadForm({
     if (!file) return
 
     setUploading(true)
+    setError(null)
 
     const { data: sessionData } = await supabase.auth.getSession()
     if (!sessionData.session) {
@@ -45,6 +47,7 @@ export default function MediaUploadForm({
       .upload(fileName, file)
 
     if (uploadError) {
+      setError('Kunne ikke laste opp filen. Prøv igjen.')
       setUploading(false)
       return
     }
@@ -88,6 +91,7 @@ export default function MediaUploadForm({
       >
         {uploading ? 'Laster opp...' : 'Last opp'}
       </button>
+      {error && <p className="text-red-500 text-sm">{error}</p>}
     </div>
   )
 }

@@ -2,6 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Competition } from '@/lib/types/database'
+import EmptyState from '@/components/ui/EmptyState'
+import SavedBanner from '@/components/ui/SavedBanner'
+import { Suspense } from 'react'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,6 +53,9 @@ export default async function CompetitionsPage({
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
+      <Suspense>
+        <SavedBanner message="Konkurransen ble lagret!" />
+      </Suspense>
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold">Konkurranser</h1>
         <Link
@@ -80,9 +86,13 @@ export default async function CompetitionsPage({
       )}
 
       {comps.length === 0 ? (
-        <div className="text-center py-20 text-muted">
-          <p className="text-lg">Ingen konkurranser registrert ennå</p>
-        </div>
+        <EmptyState
+          icon="🏆"
+          title="Ingen konkurranser registrert ennå"
+          description="Logg resultater fra turneringer og følg din konkurransekarriere."
+          ctaText="Registrer din første konkurranse"
+          ctaHref={`/${locale}/competitions/new`}
+        />
       ) : (
         <div className="space-y-3">
           {comps.map((c) => (
@@ -106,9 +116,9 @@ export default async function CompetitionsPage({
                 <div className="text-right">
                   {(c.wins > 0 || c.losses > 0) && (
                     <div className="text-sm">
-                      <span className="text-green-400">{c.wins}W</span>
+                      <span className="text-green-400">{c.wins}S</span>
                       {' / '}
-                      <span className="text-red-400">{c.losses}L</span>
+                      <span className="text-red-400">{c.losses}T</span>
                     </div>
                   )}
                 </div>

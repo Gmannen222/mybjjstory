@@ -416,7 +416,7 @@ export default function Dashboard({
               { href: `/${locale}/feed`, icon: '📰', label: 'Feed', accent: 'hover:border-purple-500/30' },
               { href: `/${locale}/gradings`, icon: '🏅', label: 'Graderinger', accent: 'hover:border-orange-500/30' },
               { href: `/${locale}/injuries`, icon: '🩹', label: 'Skader', accent: 'hover:border-red-500/30' },
-              { href: `/${locale}/achievements`, icon: '🏅', label: 'Achievements', accent: 'hover:border-amber-500/30' },
+              { href: `/${locale}/achievements`, icon: '🏅', label: 'Prestasjoner', accent: 'hover:border-amber-500/30' },
             ].map(({ href, icon, label, accent }) => (
               <Link
                 key={href}

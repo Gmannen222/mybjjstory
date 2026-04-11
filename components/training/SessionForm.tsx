@@ -102,7 +102,7 @@ export default function SessionForm({
     // Check achievements after saving (via API route with service role)
     fetch('/api/achievements', { method: 'POST' })
 
-    router.push(`/${locale}/training`)
+    router.push(`/${locale}/training?saved=true`)
     router.refresh()
   }
 
@@ -115,7 +115,7 @@ export default function SessionForm({
     const { error: dbError } = await supabase.from('training_sessions').delete().eq('id', existingSession.id)
 
     if (dbError) {
-      setError('Kunne ikke slette')
+      setError(tCommon('deleteError'))
       setDeleting(false)
       return
     }
@@ -202,7 +202,7 @@ export default function SessionForm({
         disabled={saving}
         className="w-full py-3 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
       >
-        {saving ? tCommon('loading') : isEdit ? 'Oppdater trening' : t('save')}
+        {saving ? tCommon('saving') : isEdit ? 'Oppdater trening' : t('save')}
       </button>
 
       {isEdit && (
@@ -212,7 +212,7 @@ export default function SessionForm({
           disabled={deleting}
           className="w-full py-3 bg-red-500/10 text-red-400 font-semibold rounded-lg hover:bg-red-500/20 transition-colors disabled:opacity-50"
         >
-          {deleting ? 'Sletter...' : 'Slett treningsøkt'}
+          {deleting ? tCommon('deleting') : 'Slett treningsøkt'}
         </button>
       )}
     </form>

@@ -82,7 +82,7 @@ export default function CompetitionForm({
       return
     }
 
-    router.push(`/${locale}/competitions`)
+    router.push(`/${locale}/competitions?saved=true`)
     router.refresh()
   }
 
@@ -93,7 +93,7 @@ export default function CompetitionForm({
     const { error: dbError } = await supabase.from('competitions').delete().eq('id', competition.id)
 
     if (dbError) {
-      setError('Kunne ikke slette')
+      setError('Slettingen mislyktes. Prøv igjen.')
       setDeleting(false)
       return
     }

@@ -1,12 +1,26 @@
 'use client'
 
 import Link from 'next/link'
-import { useLocale } from 'next-intl'
+import { usePathname } from 'next/navigation'
+import { useLocale, useTranslations } from 'next-intl'
 import AuthButton from '@/components/auth/AuthButton'
 import AdminLink from '@/components/admin/AdminLink'
 
+const NAV_LINKS = [
+  { key: 'training', path: '/training' },
+  { key: 'competitions', path: '/competitions' },
+  { key: 'feed', path: '/feed' },
+  { key: 'academies', path: '/academies' },
+  { key: 'gradings', path: '/gradings' },
+  { key: 'injuries', path: '/injuries' },
+  { key: 'profile', path: '/profile' },
+  { key: 'feedback', path: '/feedback' },
+] as const
+
 export default function Header() {
   const locale = useLocale()
+  const pathname = usePathname()
+  const t = useTranslations('nav')
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-background/80 backdrop-blur-md">
@@ -19,31 +33,32 @@ export default function Header() {
         </Link>
 
         <nav className="hidden sm:flex items-center gap-5 text-sm text-muted">
-          <Link href={`/${locale}/training`} className="hover:text-foreground transition-colors">
-            Trening
-          </Link>
-          <Link href={`/${locale}/competitions`} className="hover:text-foreground transition-colors">
-            Konkurranser
-          </Link>
-          <Link href={`/${locale}/feed`} className="hover:text-foreground transition-colors">
-            Feed
-          </Link>
-          <Link href={`/${locale}/academies`} className="hover:text-foreground transition-colors">
-            Akademier
-          </Link>
-          <Link href={`/${locale}/gradings`} className="hover:text-foreground transition-colors">
-            Graderinger
-          </Link>
-          <Link href={`/${locale}/injuries`} className="hover:text-foreground transition-colors">
-            Skader
-          </Link>
-          <Link href={`/${locale}/profile`} className="hover:text-foreground transition-colors">
-            Profil
-          </Link>
-          <Link href={`/${locale}/feedback`} className="hover:text-foreground transition-colors">
-            Tilbakemelding
-          </Link>
-          <Link href={`/${locale}/settings`} className="hover:text-foreground transition-colors">
+          {NAV_LINKS.map(({ key, path }) => {
+            const href = `/${locale}${path}`
+            const isActive = pathname.startsWith(href)
+            return (
+              <Link
+                key={key}
+                href={href}
+                className={`transition-colors ${
+                  isActive
+                    ? 'text-primary font-semibold'
+                    : 'hover:text-foreground'
+                }`}
+              >
+                {t(key)}
+              </Link>
+            )
+          })}
+          <Link
+            href={`/${locale}/settings`}
+            aria-label={t('settings')}
+            className={`transition-colors ${
+              pathname.startsWith(`/${locale}/settings`)
+                ? 'text-primary font-semibold'
+                : 'hover:text-foreground'
+            }`}
+          >
             ⚙
           </Link>
           <AdminLink />

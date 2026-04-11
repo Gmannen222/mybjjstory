@@ -2,6 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Injury } from '@/lib/types/database'
+import EmptyState from '@/components/ui/EmptyState'
+import SavedBanner from '@/components/ui/SavedBanner'
+import { Suspense } from 'react'
 
 export const dynamic = 'force-dynamic'
 
@@ -46,6 +49,9 @@ export default async function InjuriesPage({
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
+      <Suspense>
+        <SavedBanner message="Skaden ble lagret!" />
+      </Suspense>
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold">Skader</h1>
         <Link
@@ -57,10 +63,11 @@ export default async function InjuriesPage({
       </div>
 
       {allInjuries.length === 0 ? (
-        <div className="text-center py-20 text-muted">
-          <p className="text-lg">Ingen skader registrert</p>
-          <p className="text-sm mt-2">Forhåpentligvis forblir det slik!</p>
-        </div>
+        <EmptyState
+          icon="💪"
+          title="Ingen skader registrert"
+          description="Forhåpentligvis forblir det slik!"
+        />
       ) : (
         <>
           {active.length > 0 && (

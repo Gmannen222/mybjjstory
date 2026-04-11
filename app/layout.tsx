@@ -10,8 +10,11 @@ export const metadata: Metadata = {
   applicationName: 'MyBJJStory',
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
+    statusBarStyle: 'black-translucent',
     title: 'MyBJJStory',
+  },
+  icons: {
+    apple: '/icons/icon-192.png',
   },
   formatDetection: {
     telephone: false,

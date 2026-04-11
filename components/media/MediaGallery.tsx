@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import type { Media } from '@/lib/types/database'
 
 export default function MediaGallery({ media }: { media: Media[] }) {
@@ -31,13 +32,15 @@ export default function MediaGallery({ media }: { media: Media[] }) {
             <button
               key={m.id}
               onClick={() => setSelectedIndex(i)}
-              className="aspect-square rounded-lg overflow-hidden bg-surface-hover"
+              className="relative aspect-square rounded-lg overflow-hidden bg-surface-hover"
             >
               {m.media_type === 'image' ? (
-                <img
+                <Image
                   src={url}
                   alt={m.caption || ''}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  fill
+                  className="object-cover hover:scale-105 transition-transform duration-300"
+                  sizes="(max-width: 640px) 50vw, 33vw"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-3xl">
@@ -76,9 +79,11 @@ export default function MediaGallery({ media }: { media: Media[] }) {
               )
             }
             return (
-              <img
+              <Image
                 src={url}
                 alt={m.caption || ''}
+                width={1200}
+                height={900}
                 className="max-w-full max-h-[80vh] rounded-lg object-contain"
                 onClick={(e) => e.stopPropagation()}
               />
