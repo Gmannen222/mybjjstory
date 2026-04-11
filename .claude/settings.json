@@ -2,7 +2,30 @@
   "permissions": {
     "allow": [
       "Edit(file_path:.claude/**)",
-      "Write(file_path:.claude/**)"
+      "Write(file_path:.claude/**)",
+      "Bash(npm run build)",
+      "Bash(npm run lint)",
+      "Bash(git status)",
+      "Bash(git log*)",
+      "Bash(git diff*)",
+      "Bash(git branch*)",
+      "Bash(git push origin master)",
+      "Bash(npx supabase migration*)",
+      "Bash(npx supabase db*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"A git commit was just made. Update .claude/status.md using the update-dashboard agent (background).\"}}'",
+            "if": "Bash(git commit*)"
+          }
+        ]
+      }
     ]
   }
 }
