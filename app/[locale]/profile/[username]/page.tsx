@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import Image from 'next/image'
 import type { Profile, Competition, Injury } from '@/lib/types/database'
 import { BeltBadge } from '@/components/ui/BeltBadge'
+import ProfileAvatar from '@/components/profile/ProfileAvatar'
 
 export const dynamic = 'force-dynamic'
 
@@ -49,13 +49,12 @@ export default async function PublicProfilePage({
       {/* Profile header */}
       <div className="bg-surface rounded-xl p-6">
         <div className="flex items-center gap-4">
-          {p.avatar_url ? (
-            <Image src={p.avatar_url} alt="" width={64} height={64} className="w-16 h-16 rounded-full" />
-          ) : (
-            <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-2xl font-bold text-primary">
-              {(p.display_name || '?')[0].toUpperCase()}
-            </div>
-          )}
+          <ProfileAvatar
+            userId={p.id}
+            avatarUrl={p.avatar_url}
+            displayName={p.display_name}
+            size="md"
+          />
           <div>
             <h1 className="text-xl font-bold">{p.display_name}</h1>
             <p className="text-sm text-muted">@{p.username}</p>

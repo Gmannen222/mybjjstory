@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { sendPushNotification } from '@/lib/push'
 
 export async function POST() {
   const supabase = await createClient()
@@ -168,6 +169,26 @@ export async function POST() {
       console.error('Failed to insert achievements:', insertError.message)
       return NextResponse.json({ error: 'Failed to award achievements' }, { status: 500 })
     }
+
+    // Fire-and-forget push notifications for each new achievement
+    void (async () => {
+      try {
+        const { data: achievementDefs } = await serviceClient
+          .from('achievements')
+          .select('id, name')
+          .in('id', toAward)
+        if (achievementDefs) {
+          for (const ach of achievementDefs) {
+            await sendPushNotification(
+              userId,
+              'Ny achievement!',
+              `Du har låst opp: ${ach.name}`,
+              { url: '/achievements', type: 'achievements' }
+            )
+          }
+        }
+      } catch { /* push failure must not affect response */ }
+    })()
   }
 
   return NextResponse.json({ awarded: toAward })

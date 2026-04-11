@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useActionState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
 import type { Profile, BeltRank, ProfileVisibility } from '@/lib/types/database'
 import { BELT_COLORS, BELT_LABELS, ADULT_BELTS, KIDS_BELTS, BeltDisplay } from '@/components/ui/BeltBadge'
 import AcademySelector from '@/components/profile/AcademySelector'
+import SubmitButton from '@/components/ui/SubmitButton'
+import { updateProfile } from '@/lib/actions/profile'
 
 const VISIBILITY_OPTIONS: { value: ProfileVisibility; label: string; desc: string }[] = [
   { value: 'private', label: 'Privat', desc: 'Kun synlig for deg' },
@@ -40,24 +42,17 @@ export default function ProfileForm({
   profile: Profile | null
   locale: string
 }) {
-  const [displayName, setDisplayName] = useState(profile?.display_name || '')
-  const [username, setUsername] = useState(profile?.username || '')
-  const [bio, setBio] = useState(profile?.bio || '')
+  // --- Interactive state for fields that need JS-driven UI ---
   const [beltRank, setBeltRank] = useState<BeltRank | ''>(profile?.belt_rank || '')
   const [beltDegrees, setBeltDegrees] = useState(String(profile?.belt_degrees || 0))
   const [academyName, setAcademyName] = useState(profile?.academy_name || '')
   const [academyId, setAcademyId] = useState<string | null>(profile?.academy_id || null)
-  const [favoriteGuard, setFavoriteGuard] = useState(profile?.favorite_guard || '')
-  const [favoriteSubmission, setFavoriteSubmission] = useState(profile?.favorite_submission || '')
-  const [weightClass, setWeightClass] = useState(profile?.weight_class || '')
-  const [trainingSinceYear, setTrainingSinceYear] = useState(String(profile?.training_since_year || ''))
-  const [isPublic, setIsPublic] = useState(profile?.is_public || false)
   const [showKidsBelts, setShowKidsBelts] = useState(profile?.show_kids_belts || false)
-  const [avatarFile, setAvatarFile] = useState<File | null>(null)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [profileVisibility, setProfileVisibility] = useState<ProfileVisibility>(profile?.profile_visibility ?? 'private')
+  const [isPublic, setIsPublic] = useState(profile?.is_public || false)
+  const [trainingSinceYear, setTrainingSinceYear] = useState(String(profile?.training_since_year || ''))
 
-  // Visibility toggles
+  // Visibility toggles — need state so hidden inputs track checkbox values
   const [showBelt, setShowBelt] = useState(profile?.show_belt ?? true)
   const [showAcademy, setShowAcademy] = useState(profile?.show_academy ?? true)
   const [showTrainingSince, setShowTrainingSince] = useState(profile?.show_training_since ?? true)
@@ -67,83 +62,91 @@ export default function ProfileForm({
   const [showCompetitions, setShowCompetitions] = useState(profile?.show_competitions ?? true)
   const [showStats, setShowStats] = useState(profile?.show_stats ?? false)
   const [showFeed, setShowFeed] = useState(profile?.show_feed ?? true)
-  const [profileVisibility, setProfileVisibility] = useState<ProfileVisibility>(profile?.profile_visibility ?? 'private')
-  const [publicDisplayName, setPublicDisplayName] = useState(profile?.public_display_name ?? '')
 
+  // Avatar upload stays client-side (Vercel 4.5 MB FormData limit)
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || '')
+  const [avatarUploading, setAvatarUploading] = useState(false)
+  const [avatarError, setAvatarError] = useState<string | null>(null)
+
+  const formRef = useRef<HTMLFormElement>(null)
   const router = useRouter()
   const supabase = createClient()
   const tBelts = useTranslations('belts')
   const tCommon = useTranslations('common')
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
-    setError(null)
+  // Server action with useActionState
+  const [state, formAction] = useActionState(updateProfile, { success: false, error: '' })
 
-    const { data: sessionData } = await supabase.auth.getSession()
-    if (!sessionData.session) return
-
-    const userId = sessionData.session.user.id
-    let avatarUrl = profile?.avatar_url
-
-    if (avatarFile) {
-      const ext = avatarFile.name.split('.').pop()
-      const path = `${userId}/avatar.${ext}`
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(path, avatarFile, { upsert: true })
-      if (!uploadError) {
-        const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path)
-        avatarUrl = urlData.publicUrl
-      }
+  // On successful save, redirect to profile page
+  useEffect(() => {
+    if (state.success) {
+      router.push(`/${locale}/profile`)
+      router.refresh()
     }
+  }, [state, router, locale])
 
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({
-        display_name: displayName || null,
-        username: username || null,
-        bio: bio || null,
-        belt_rank: beltRank || null,
-        belt_degrees: parseInt(beltDegrees),
-        academy_name: academyName || null,
-        academy_id: academyId || null,
-        avatar_url: avatarUrl,
-        weight_class: weightClass || null,
-        favorite_guard: favoriteGuard || null,
-        favorite_submission: favoriteSubmission || null,
-        training_since_year: trainingSinceYear ? parseInt(trainingSinceYear) : null,
-        is_public: isPublic,
-        show_belt: showBelt,
-        show_academy: showAcademy,
-        show_training_since: showTrainingSince,
-        show_favorite_guard: showFavoriteGuard,
-        show_favorite_submission: showFavoriteSubmission,
-        show_injuries: showInjuries,
-        show_competitions: showCompetitions,
-        show_stats: showStats,
-        show_feed: showFeed,
-        show_kids_belts: showKidsBelts,
-        profile_visibility: profileVisibility,
-        public_display_name: publicDisplayName || null,
-      })
-      .eq('id', userId)
+  /**
+   * Avatar upload: client-side direct to Supabase Storage.
+   * This runs before the form action submits. The uploaded URL is stored
+   * in a hidden input so the server action can save it to the profile.
+   */
+  const handleAvatarUpload = async (file: File) => {
+    setAvatarFile(file)
+    setAvatarError(null)
+    setAvatarUploading(true)
 
-    if (updateError) {
-      setError(updateError.code === '23505' ? 'Brukernavnet er allerede tatt' : tCommon('error'))
-      setSaving(false)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      setAvatarError('Du må være innlogget for å laste opp bilde.')
+      setAvatarUploading(false)
       return
     }
 
-    router.push(`/${locale}/profile`)
-    router.refresh()
+    const ext = file.name.split('.').pop()
+    const path = `${user.id}/avatar.${ext}`
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(path, file, { upsert: true })
+
+    if (uploadError) {
+      console.error('Avatar upload failed:', uploadError)
+      setAvatarError('Kunne ikke laste opp bildet. Prøv igjen.')
+      setAvatarUploading(false)
+      return
+    }
+
+    const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path)
+    setAvatarUrl(urlData.publicUrl)
+    setAvatarUploading(false)
   }
 
   const currentYear = new Date().getFullYear()
   const yearsTrained = trainingSinceYear ? currentYear - parseInt(trainingSinceYear) : null
 
+  // Determine error to display — from server action state
+  const error = !state.success && state.error ? state.error : null
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form ref={formRef} action={formAction} className="space-y-8">
+      {/* Hidden inputs for JS-driven fields that don't have native form elements */}
+      <input type="hidden" name="belt_rank" value={beltRank} />
+      <input type="hidden" name="academy_name" value={academyName} />
+      <input type="hidden" name="academy_id" value={academyId || ''} />
+      <input type="hidden" name="avatar_url" value={avatarUrl} />
+      <input type="hidden" name="profile_visibility" value={profileVisibility} />
+      {isPublic && <input type="hidden" name="is_public" value="on" />}
+      {showKidsBelts && <input type="hidden" name="show_kids_belts" value="on" />}
+      {showBelt && <input type="hidden" name="show_belt" value="on" />}
+      {showAcademy && <input type="hidden" name="show_academy" value="on" />}
+      {showTrainingSince && <input type="hidden" name="show_training_since" value="on" />}
+      {showFavoriteGuard && <input type="hidden" name="show_favorite_guard" value="on" />}
+      {showFavoriteSubmission && <input type="hidden" name="show_favorite_submission" value="on" />}
+      {showInjuries && <input type="hidden" name="show_injuries" value="on" />}
+      {showCompetitions && <input type="hidden" name="show_competitions" value="on" />}
+      {showStats && <input type="hidden" name="show_stats" value="on" />}
+      {showFeed && <input type="hidden" name="show_feed" value="on" />}
+
       {/* Basic info */}
       <section>
         <h2 className="text-lg font-bold mb-4">Grunnleggende</h2>
@@ -153,28 +156,35 @@ export default function ProfileForm({
             <input
               type="file"
               accept="image/*"
-              onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) handleAvatarUpload(file)
+              }}
               className="block w-full text-sm text-muted file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-background file:font-semibold file:cursor-pointer hover:file:bg-primary-hover"
             />
+            {avatarUploading && <p className="text-xs text-muted mt-1">Laster opp...</p>}
+            {avatarError && <p className="text-xs text-red-400 mt-1">{avatarError}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-muted mb-2">Visningsnavn</label>
-            <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)}
+            <input type="text" name="display_name" defaultValue={profile?.display_name || ''}
               className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
           </div>
           <div>
             <label className="block text-sm font-medium text-muted mb-2">Brukernavn</label>
             <div className="flex items-center">
               <span className="text-muted mr-1">@</span>
-              <input type="text" value={username}
-                onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+              <input type="text" name="username" defaultValue={profile?.username || ''}
+                onChange={(e) => {
+                  e.target.value = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '')
+                }}
                 placeholder="brukernavn"
                 className="flex-1 px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-muted mb-2">Om meg</label>
-            <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3}
+            <textarea name="bio" defaultValue={profile?.bio || ''} rows={3}
               className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary resize-none" />
           </div>
         </div>
@@ -214,7 +224,8 @@ export default function ProfileForm({
           </div>
           <div>
             <label className="block text-sm font-medium text-muted mb-2">Grader (striper)</label>
-            <input type="number" value={beltDegrees} onChange={(e) => setBeltDegrees(e.target.value)}
+            <input type="number" name="belt_degrees" value={beltDegrees}
+              onChange={(e) => setBeltDegrees(e.target.value)}
               min="0" max="4"
               className="w-24 px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
           </div>
@@ -228,7 +239,7 @@ export default function ProfileForm({
           />
           <div>
             <label className="block text-sm font-medium text-muted mb-2">Vektklasse</label>
-            <select value={weightClass} onChange={(e) => setWeightClass(e.target.value)}
+            <select name="weight_class" defaultValue={profile?.weight_class || ''}
               className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground [&>option]:text-black [&>option]:bg-white focus:outline-none focus:border-primary">
               <option value="">Velg...</option>
               {WEIGHT_CLASSES.map((w) => <option key={w} value={w}>{w}</option>)}
@@ -241,14 +252,14 @@ export default function ProfileForm({
                 <span className="text-primary ml-2">— {yearsTrained} år</span>
               )}
             </label>
-            <input type="number" value={trainingSinceYear}
+            <input type="number" name="training_since_year" value={trainingSinceYear}
               onChange={(e) => setTrainingSinceYear(e.target.value)}
               placeholder="2020" min="1990" max={currentYear}
               className="w-32 px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
           </div>
           <div>
             <label className="block text-sm font-medium text-muted mb-2">Favorittguard</label>
-            <select value={favoriteGuard} onChange={(e) => setFavoriteGuard(e.target.value)}
+            <select name="favorite_guard" defaultValue={profile?.favorite_guard || ''}
               className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground [&>option]:text-black [&>option]:bg-white focus:outline-none focus:border-primary">
               <option value="">Velg...</option>
               {GUARDS.map((g) => <option key={g} value={g}>{g}</option>)}
@@ -256,7 +267,7 @@ export default function ProfileForm({
           </div>
           <div>
             <label className="block text-sm font-medium text-muted mb-2">Favorittsubmission</label>
-            <select value={favoriteSubmission} onChange={(e) => setFavoriteSubmission(e.target.value)}
+            <select name="favorite_submission" defaultValue={profile?.favorite_submission || ''}
               className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground [&>option]:text-black [&>option]:bg-white focus:outline-none focus:border-primary">
               <option value="">Velg...</option>
               {SUBMISSIONS.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -300,9 +311,7 @@ export default function ProfileForm({
               Visningsnavn for andre
               <span className="text-xs text-muted ml-1">(valgfritt — bruker visningsnavnet ditt hvis tomt)</span>
             </label>
-            <input type="text" value={publicDisplayName}
-              onChange={(e) => setPublicDisplayName(e.target.value)}
-              placeholder={displayName || 'Ditt visningsnavn'}
+            <input type="text" name="public_display_name" defaultValue={profile?.public_display_name ?? ''}
               className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
           </div>
         )}
@@ -337,10 +346,13 @@ export default function ProfileForm({
       <div className="sticky bottom-0 bg-background/95 backdrop-blur-md border-t border-white/10 p-4 -mx-6 -mb-6 mt-6 z-10">
         {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
 
-        <button type="submit" disabled={saving}
-          className="w-full py-3 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50">
-          {saving ? tCommon('loading') : tCommon('save')}
-        </button>
+        <SubmitButton
+          disabled={avatarUploading}
+          pendingText={tCommon('loading')}
+          className="w-full py-3"
+        >
+          {tCommon('save')}
+        </SubmitButton>
       </div>
     </form>
   )

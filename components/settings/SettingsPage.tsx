@@ -4,9 +4,10 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { deleteAllData, deleteAccount } from '@/lib/actions/account'
 import FeedbackForm from './FeedbackForm'
-import type { Feedback } from '@/lib/types/database'
+import NotificationSettings from '@/components/notifications/NotificationSettings'
+import type { Feedback, NotificationPreferences } from '@/lib/types/database'
 
 const STATUS_LABELS: Record<string, string> = {
   new: 'Sendt',
@@ -35,79 +36,30 @@ export default function SettingsPage({
   userEmail,
   profile,
   previousFeedback,
+  notificationPreferences,
 }: {
   locale: string
   userId: string
   userEmail: string
   profile: ProfileSummary | null
   previousFeedback: Feedback[]
+  notificationPreferences: NotificationPreferences
 }) {
   const [deleteStep, setDeleteStep] = useState<'idle' | 'confirm-data' | 'confirm-account'>('idle')
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const router = useRouter()
-  const supabase = createClient()
 
   const handleDeleteData = async () => {
     setIsDeleting(true)
     setDeleteError(null)
 
-    // Delete all user data from every table (RLS ensures only own data)
-    const tables = [
-      'feedback',
-      'reactions',
-      'comments',
-      'posts',
-      'media',
-      'session_techniques',
-      'training_sessions',
-      'gradings',
-      'competitions',
-      'injuries',
-      'follows',
-    ]
-
-    for (const table of tables) {
-      const { error } = await supabase.from(table).delete().eq('user_id', userId)
-      if (error && !error.message.includes('column')) {
-        // follows uses follower_id/following_id, handle separately
-        if (table === 'follows') {
-          await supabase.from('follows').delete().eq('follower_id', userId)
-          await supabase.from('follows').delete().eq('following_id', userId)
-          continue
-        }
-        // session_techniques uses session_id, skip direct user_id delete
-        if (table === 'session_techniques') continue
-      }
+    const result = await deleteAllData()
+    if (!result.success) {
+      setDeleteError(result.error)
+      setIsDeleting(false)
+      return
     }
-
-    // Reset profile to defaults (don't delete — it's auto-created by trigger)
-    await supabase.from('profiles').update({
-      display_name: null,
-      username: null,
-      avatar_url: null,
-      bio: null,
-      belt_rank: 'white',
-      belt_degrees: 0,
-      academy_name: null,
-      favorite_guard: null,
-      favorite_submission: null,
-      training_since_year: null,
-      training_preference: null,
-      passion_level: null,
-      currently_training: true,
-      heard_about_from: null,
-      is_public: false,
-      show_belt: true,
-      show_academy: true,
-      show_training_since: true,
-      show_favorite_guard: true,
-      show_favorite_submission: true,
-      show_injuries: false,
-      show_competitions: true,
-      show_stats: true,
-      show_feed: true,
-    }).eq('id', userId)
 
     setIsDeleting(false)
     setDeleteStep('idle')
@@ -118,11 +70,13 @@ export default function SettingsPage({
     setIsDeleting(true)
     setDeleteError(null)
 
-    // First delete all data
-    await handleDeleteData()
+    const result = await deleteAccount()
+    if (!result.success) {
+      setDeleteError(result.error)
+      setIsDeleting(false)
+      return
+    }
 
-    // Sign out
-    await supabase.auth.signOut()
     router.push(`/${locale}`)
   }
 
@@ -164,6 +118,15 @@ export default function SettingsPage({
             Se profil
           </Link>
         </div>
+      </section>
+
+      {/* Notifications */}
+      <section className="bg-surface rounded-2xl p-5">
+        <h2 className="text-lg font-bold mb-1">Varsler</h2>
+        <p className="text-sm text-muted mb-3">
+          Velg hvilke varsler du ønsker å motta.
+        </p>
+        <NotificationSettings preferences={notificationPreferences} />
       </section>
 
       {/* Feedback */}

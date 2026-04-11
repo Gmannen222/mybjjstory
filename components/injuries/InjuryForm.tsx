@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useActionState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { createInjury, updateInjury, deleteInjury, markInjuryRecovered } from '@/lib/actions/injuries'
+import SubmitButton from '@/components/ui/SubmitButton'
 import type { Injury, InjuryType, Severity, TrainingImpact } from '@/lib/types/database'
 
 const BODY_PARTS = [
@@ -40,69 +41,38 @@ export default function InjuryForm({
   injury?: Injury
 }) {
   const isEdit = !!injury
+  const router = useRouter()
+
+  // Hidden field state for button-selected values
   const [bodyPart, setBodyPart] = useState(injury?.body_part ?? '')
-  const [injuryType, setInjuryType] = useState<InjuryType | ''>(injury?.injury_type ?? '')
-  const [description, setDescription] = useState(injury?.description ?? '')
-  const [dateOccurred, setDateOccurred] = useState(injury?.date_occurred ?? new Date().toISOString().split('T')[0])
-  const [dateRecovered, setDateRecovered] = useState(injury?.date_recovered ?? '')
   const [severity, setSeverity] = useState<Severity>(injury?.severity ?? 'mild')
   const [trainingImpact, setTrainingImpact] = useState<TrainingImpact>(injury?.training_impact ?? 'none')
-  const [notes, setNotes] = useState(injury?.notes ?? '')
-  const [saving, setSaving] = useState(false)
-  const [deleting, setDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const [recovering, setRecovering] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
-  const router = useRouter()
-  const supabase = createClient()
+  const [createState, createAction] = useActionState(createInjury, { success: false, error: '' })
+  const [updateState, updateAction] = useActionState(updateInjury, { success: false, error: '' })
+  const state = isEdit ? updateState : createState
+  const formAction = isEdit ? updateAction : createAction
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!bodyPart) return
-    setSaving(true)
-    setError(null)
-
-    const { data: sessionData } = await supabase.auth.getSession()
-    if (!sessionData.session) { setSaving(false); return }
-
-    const payload = {
-      body_part: bodyPart,
-      injury_type: injuryType || null,
-      description: description || null,
-      date_occurred: dateOccurred,
-      date_recovered: dateRecovered || null,
-      severity,
-      training_impact: trainingImpact,
-      notes: notes || null,
+  // Redirect on success
+  useEffect(() => {
+    if (state.success) {
+      router.push(`/${locale}/injuries?saved=true`)
+      router.refresh()
     }
-
-    const { error: dbError } = isEdit
-      ? await supabase.from('injuries').update(payload).eq('id', injury.id)
-      : await supabase.from('injuries').insert({ ...payload, user_id: sessionData.session.user.id })
-
-    if (dbError) {
-      setError('Noe gikk galt')
-      setSaving(false)
-      return
-    }
-
-    router.push(`/${locale}/injuries?saved=true`)
-    router.refresh()
-  }
+  }, [state.success, locale, router])
 
   const handleMarkRecovered = async () => {
     if (!injury) return
-    setSaving(true)
-    const today = new Date().toISOString().split('T')[0]
+    setRecovering(true)
 
-    const { error: dbError } = await supabase
-      .from('injuries')
-      .update({ date_recovered: today })
-      .eq('id', injury.id)
-
-    if (dbError) {
-      setError('Kunne ikke oppdatere')
-      setSaving(false)
+    const result = await markInjuryRecovered(injury.id)
+    if (!result.success) {
+      setDeleteError(result.error)
+      setRecovering(false)
       return
     }
 
@@ -113,11 +83,11 @@ export default function InjuryForm({
   const handleDelete = async () => {
     if (!injury) return
     setDeleting(true)
+    setDeleteError(null)
 
-    const { error: dbError } = await supabase.from('injuries').delete().eq('id', injury.id)
-
-    if (dbError) {
-      setError('Slettingen mislyktes. Prøv igjen.')
+    const result = await deleteInjury(injury.id)
+    if (!result.success) {
+      setDeleteError(result.error)
       setDeleting(false)
       return
     }
@@ -127,12 +97,17 @@ export default function InjuryForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form action={formAction} className="space-y-6">
+      {isEdit && <input type="hidden" name="injury_id" value={injury.id} />}
+      <input type="hidden" name="body_part" value={bodyPart} />
+      <input type="hidden" name="severity" value={severity} />
+      <input type="hidden" name="training_impact" value={trainingImpact} />
+
       {/* Mark as recovered quick action */}
       {isEdit && !injury.date_recovered && (
-        <button type="button" onClick={handleMarkRecovered} disabled={saving}
+        <button type="button" onClick={handleMarkRecovered} disabled={recovering}
           className="w-full py-3 bg-green-500/10 text-green-400 font-semibold rounded-lg hover:bg-green-500/20 transition-colors disabled:opacity-50">
-          ✓ Marker som frisk
+          {recovering ? 'Oppdaterer...' : '✓ Marker som frisk'}
         </button>
       )}
 
@@ -152,7 +127,7 @@ export default function InjuryForm({
 
       <div>
         <label className="block text-sm font-medium text-muted mb-2">Type skade</label>
-        <select value={injuryType} onChange={(e) => setInjuryType(e.target.value as InjuryType)}
+        <select name="injury_type" defaultValue={injury?.injury_type ?? ''}
           className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground [&>option]:text-black [&>option]:bg-white focus:outline-none focus:border-primary">
           <option value="">Velg...</option>
           {INJURY_TYPES.map(({ value, label }) => (
@@ -191,7 +166,7 @@ export default function InjuryForm({
 
       <div>
         <label className="block text-sm font-medium text-muted mb-2">Beskrivelse</label>
-        <input type="text" value={description} onChange={(e) => setDescription(e.target.value)}
+        <input type="text" name="description" defaultValue={injury?.description ?? ''}
           placeholder="Kort beskrivelse av skaden"
           className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
       </div>
@@ -199,29 +174,32 @@ export default function InjuryForm({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-muted mb-2">Dato skadet</label>
-          <input type="date" value={dateOccurred} onChange={(e) => setDateOccurred(e.target.value)}
+          <input type="date" name="date_occurred" defaultValue={injury?.date_occurred ?? new Date().toISOString().split('T')[0]}
             required
             className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
         </div>
         <div>
           <label className="block text-sm font-medium text-muted mb-2">Dato frisk (valgfritt)</label>
-          <input type="date" value={dateRecovered} onChange={(e) => setDateRecovered(e.target.value)}
+          <input type="date" name="date_recovered" defaultValue={injury?.date_recovered ?? ''}
             className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
         </div>
       </div>
 
       <div>
         <label className="block text-sm font-medium text-muted mb-2">Notater</label>
-        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3}
+        <textarea name="notes" defaultValue={injury?.notes ?? ''} rows={3}
           className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary resize-none" />
       </div>
 
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {!state.success && state.error && <p className="text-red-500 text-sm">{state.error}</p>}
+      {deleteError && <p className="text-red-500 text-sm">{deleteError}</p>}
 
-      <button type="submit" disabled={saving}
-        className="w-full py-3 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50">
-        {saving ? 'Lagrer...' : isEdit ? 'Oppdater skade' : 'Lagre skade'}
-      </button>
+      <SubmitButton
+        pendingText="Lagrer..."
+        className="w-full py-3"
+      >
+        {isEdit ? 'Oppdater skade' : 'Lagre skade'}
+      </SubmitButton>
 
       {isEdit && (
         <div className="flex justify-center">

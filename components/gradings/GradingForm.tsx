@@ -1,11 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useActionState, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
+import { createGrading, updateGrading, deleteGrading } from '@/lib/actions/gradings'
+import type { ActionResult } from '@/lib/actions/posts'
 import type { BeltRank, Grading, GradingType } from '@/lib/types/database'
 import { BELT_COLORS, BELT_LABELS, ADULT_BELTS, KIDS_BELTS, BeltDisplay } from '@/components/ui/BeltBadge'
+import SubmitButton from '@/components/ui/SubmitButton'
 
 export default function GradingForm({
   locale,
@@ -20,75 +22,43 @@ export default function GradingForm({
   const [gradingType, setGradingType] = useState<GradingType>(grading?.grading_type ?? 'belt')
   const [beltRank, setBeltRank] = useState<BeltRank>(grading?.belt_rank ?? 'white')
   const [degrees, setDegrees] = useState(String(grading?.belt_degrees ?? 0))
-  const [date, setDate] = useState(grading?.date ?? new Date().toISOString().split('T')[0])
-  const [instructorName, setInstructorName] = useState(grading?.instructor_name ?? '')
-  const [academyName, setAcademyName] = useState(grading?.academy_name ?? '')
-  const [notes, setNotes] = useState(grading?.notes ?? '')
   const [showKidsBelts, setShowKidsBelts] = useState(showKidsBeltsDefault)
-  const [saving, setSaving] = useState(false)
-  const [deleting, setDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const router = useRouter()
-  const supabase = createClient()
   const t = useTranslations('gradings')
   const tCommon = useTranslations('common')
 
+  const initialState: ActionResult<{ id: string }> = { success: false, error: '' }
+  const initialUpdateState: ActionResult = { success: false, error: '' }
+
+  const [createState, createAction] = useActionState(createGrading, initialState)
+  const [updateState, updateAction] = useActionState(updateGrading, initialUpdateState)
+
+  const formAction = isEdit ? updateAction : createAction
+  const formState = isEdit ? updateState : createState
+
+  // Redirect on success
+  useEffect(() => {
+    if (formState.success) {
+      router.push(`/${locale}/gradings?saved=true`)
+      router.refresh()
+    }
+  }, [formState, locale, router])
+
   const availableBelts = showKidsBelts ? [...KIDS_BELTS, ...ADULT_BELTS.filter((b) => b !== 'white')] : ADULT_BELTS
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
-    setError(null)
-
-    const { data: session } = await supabase.auth.getSession()
-    if (!session.session) return
-
-    const beltDegrees = gradingType === 'stripe' ? parseInt(degrees) : parseInt(degrees)
-
-    const payload = {
-      belt_rank: beltRank,
-      belt_degrees: beltDegrees,
-      grading_type: gradingType,
-      date,
-      instructor_name: instructorName || null,
-      academy_name: academyName || null,
-      notes: notes || null,
-    }
-
-    const { error: dbError } = isEdit
-      ? await supabase.from('gradings').update(payload).eq('id', grading.id)
-      : await supabase.from('gradings').insert({ ...payload, user_id: session.session.user.id })
-
-    if (dbError) {
-      setError(tCommon('error'))
-      setSaving(false)
-      return
-    }
-
-    // Update profile belt to latest
-    await supabase
-      .from('profiles')
-      .update({
-        belt_rank: beltRank,
-        belt_degrees: beltDegrees,
-        show_kids_belts: showKidsBelts,
-      })
-      .eq('id', session.session.user.id)
-
-    router.push(`/${locale}/gradings?saved=true`)
-    router.refresh()
-  }
 
   const handleDelete = async () => {
     if (!grading) return
     setDeleting(true)
+    setDeleteError(null)
 
-    const { error: dbError } = await supabase.from('gradings').delete().eq('id', grading.id)
+    const result = await deleteGrading(grading.id)
 
-    if (dbError) {
-      setError(tCommon('deleteError'))
+    if (!result.success) {
+      setDeleteError(result.error)
       setDeleting(false)
       return
     }
@@ -98,7 +68,14 @@ export default function GradingForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form action={formAction} className="space-y-6">
+      {/* Hidden fields for server action */}
+      {isEdit && <input type="hidden" name="grading_id" value={grading.id} />}
+      <input type="hidden" name="grading_type" value={gradingType} />
+      <input type="hidden" name="belt_rank" value={beltRank} />
+      <input type="hidden" name="belt_degrees" value={degrees} />
+      <input type="hidden" name="show_kids_belts" value={String(showKidsBelts)} />
+
       {/* Grading type toggle */}
       <div>
         <label className="block text-sm font-medium text-muted mb-2">
@@ -205,8 +182,8 @@ export default function GradingForm({
         </label>
         <input
           type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
+          name="date"
+          defaultValue={grading?.date ?? new Date().toISOString().split('T')[0]}
           className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary"
           required
         />
@@ -218,8 +195,8 @@ export default function GradingForm({
         </label>
         <input
           type="text"
-          value={instructorName}
-          onChange={(e) => setInstructorName(e.target.value)}
+          name="instructor_name"
+          defaultValue={grading?.instructor_name ?? ''}
           className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary"
         />
       </div>
@@ -230,8 +207,8 @@ export default function GradingForm({
         </label>
         <input
           type="text"
-          value={academyName}
-          onChange={(e) => setAcademyName(e.target.value)}
+          name="academy_name"
+          defaultValue={grading?.academy_name ?? ''}
           className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary"
         />
       </div>
@@ -241,22 +218,25 @@ export default function GradingForm({
           {t('notes')}
         </label>
         <textarea
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
+          name="notes"
+          defaultValue={grading?.notes ?? ''}
           rows={3}
           className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary resize-none"
         />
       </div>
 
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {!formState.success && formState.error && (
+        <p className="text-red-500 text-sm">{formState.error}</p>
+      )}
 
-      <button
-        type="submit"
-        disabled={saving}
-        className="w-full py-3 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
+      {deleteError && <p className="text-red-500 text-sm">{deleteError}</p>}
+
+      <SubmitButton
+        pendingText={tCommon('saving')}
+        className="w-full"
       >
-        {saving ? tCommon('saving') : isEdit ? 'Oppdater gradering' : tCommon('save')}
-      </button>
+        {isEdit ? 'Oppdater gradering' : tCommon('save')}
+      </SubmitButton>
 
       {isEdit && (
         <div className="flex justify-center">

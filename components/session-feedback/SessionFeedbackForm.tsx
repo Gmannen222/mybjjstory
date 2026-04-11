@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useActionState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
+import { submitSessionFeedback } from '@/lib/actions/feedback'
+import SubmitButton from '@/components/ui/SubmitButton'
 import type { SessionFeedbackType } from '@/lib/types/database'
 
 const FEEDBACK_TYPES: { key: SessionFeedbackType; icon: string }[] = [
@@ -38,11 +40,10 @@ export default function SessionFeedbackForm({
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<{ id: string; username: string; display_name: string | null }[]>([])
   const [feedbackType, setFeedbackType] = useState<SessionFeedbackType>('encouragement')
-  const [message, setMessage] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
+
+  const [state, formAction] = useActionState(submitSessionFeedback, { success: false, error: '' })
 
   // Load sparring partners for this session
   useEffect(() => {
@@ -91,43 +92,16 @@ export default function SessionFeedbackForm({
     return () => clearTimeout(timeout)
   }, [searchQuery, supabase])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!recipientId || !message.trim()) return
-
-    setSaving(true)
-    setError(null)
-
-    const { data: sessionData } = await supabase.auth.getSession()
-    if (!sessionData.session) {
-      setSaving(false)
-      return
+  // Handle success
+  useEffect(() => {
+    if (state.success) {
+      setRecipientId('')
+      setSuccess(true)
+      setTimeout(() => setSuccess(false), 3000)
+      if (onSent) onSent()
+      router.refresh()
     }
-
-    const { error: dbError } = await supabase.from('session_feedback').insert({
-      session_id: sessionId,
-      sender_id: sessionData.session.user.id,
-      recipient_id: recipientId,
-      message: message.trim(),
-      feedback_type: feedbackType,
-    })
-
-    if (dbError) {
-      console.error('Failed to send feedback:', dbError)
-      setError(tCommon('error'))
-      setSaving(false)
-      return
-    }
-
-    setMessage('')
-    setRecipientId('')
-    setSaving(false)
-    setSuccess(true)
-    setTimeout(() => setSuccess(false), 3000)
-
-    if (onSent) onSent()
-    router.refresh()
-  }
+  }, [state.success, onSent, router])
 
   const selectSearchResult = (profile: { id: string; username: string; display_name: string | null }) => {
     setRecipientId(profile.id)
@@ -137,7 +111,11 @@ export default function SessionFeedbackForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form action={formAction} className="space-y-4">
+      <input type="hidden" name="session_id" value={sessionId} />
+      <input type="hidden" name="recipient_id" value={recipientId} />
+      <input type="hidden" name="feedback_type" value={feedbackType} />
+
       {/* Recipient selection */}
       <div>
         <label className="block text-sm font-medium text-muted mb-2">
@@ -237,25 +215,25 @@ export default function SessionFeedbackForm({
           {t('message')} *
         </label>
         <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          name="message"
           rows={3}
           required
+          key={state.success ? 'reset' : 'active'}
           placeholder={t('placeholder')}
           className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary resize-none"
         />
       </div>
 
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {!state.success && state.error && <p className="text-red-500 text-sm">{state.error}</p>}
       {success && <p className="text-green-500 text-sm">{t('sendSuccess')}</p>}
 
-      <button
-        type="submit"
-        disabled={saving || !recipientId || !message.trim()}
-        className="w-full py-3 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
+      <SubmitButton
+        pendingText={tCommon('saving')}
+        disabled={!recipientId}
+        className="w-full py-3"
       >
-        {saving ? tCommon('saving') : t('send')}
-      </button>
+        {t('send')}
+      </SubmitButton>
     </form>
   )
 }

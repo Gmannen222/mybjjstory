@@ -1,11 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import ReactionButton from '@/components/feed/ReactionButton'
 import CommentSection from '@/components/feed/CommentSection'
+import OnlineDot from '@/components/ui/OnlineDot'
+import { useOnlineStatus } from '@/components/realtime/RealtimeProvider'
+import { useRealtimeInserts } from '@/lib/hooks/useRealtimeInserts'
 
 interface PostWithProfile {
   id: string
@@ -41,6 +44,43 @@ export default function LoadMorePosts({
   const [userReactions, setUserReactions] = useState<Record<string, string>>(initialUserReactions)
   const [loading, setLoading] = useState(false)
   const [hasMore, setHasMore] = useState(initialPosts.length >= pageSize)
+  const [newPostCount, setNewPostCount] = useState(0)
+  const [pendingPosts, setPendingPosts] = useState<string[]>([])
+  const { isOnline } = useOnlineStatus()
+
+  const handleNewPost = useCallback(
+    (payload: Record<string, unknown>) => {
+      const postUserId = payload.user_id as string
+      // Don't count own posts
+      if (postUserId === userId) return
+      setPendingPosts((prev) => [...prev, payload.id as string])
+      setNewPostCount((prev) => prev + 1)
+    },
+    [userId]
+  )
+
+  useRealtimeInserts('posts', null, handleNewPost)
+
+  const showNewPosts = async () => {
+    if (pendingPosts.length === 0) return
+    const supabase = createClient()
+    const { data: newPosts } = await supabase
+      .from('posts')
+      .select(`
+        *,
+        profiles:user_id (display_name, avatar_url, belt_rank, username),
+        comments (count),
+        reactions (count)
+      `)
+      .in('id', pendingPosts)
+      .order('created_at', { ascending: false })
+
+    if (newPosts && newPosts.length > 0) {
+      setPosts((prev) => [...(newPosts as PostWithProfile[]), ...prev])
+    }
+    setPendingPosts([])
+    setNewPostCount(0)
+  }
 
   const loadMore = async () => {
     setLoading(true)
@@ -93,6 +133,15 @@ export default function LoadMorePosts({
 
   return (
     <>
+      {newPostCount > 0 && (
+        <button
+          onClick={showNewPosts}
+          className="w-full mt-4 px-4 py-2.5 bg-primary/10 border border-primary/30 rounded-xl text-sm font-semibold text-primary hover:bg-primary/20 transition-colors"
+        >
+          Vis {newPostCount} {newPostCount === 1 ? 'nytt innlegg' : 'nye innlegg'}
+        </button>
+      )}
+
       <div className="space-y-4 mt-6">
         {posts.map((post) => {
           const profile = post.profiles
@@ -105,7 +154,7 @@ export default function LoadMorePosts({
           return (
             <article key={post.id} className="bg-surface rounded-xl p-5">
               <div className="flex items-center gap-3 mb-3">
-                <Link href={profile?.username ? `/${locale}/profile/${profile.username}` : '#'} className="shrink-0">
+                <Link href={profile?.username ? `/${locale}/profile/${profile.username}` : '#'} className="shrink-0 relative">
                   {profile?.avatar_url ? (
                     <Image
                       src={profile.avatar_url}
@@ -119,6 +168,7 @@ export default function LoadMorePosts({
                       {(profile?.display_name || '?')[0].toUpperCase()}
                     </div>
                   )}
+                  <OnlineDot isOnline={isOnline(post.user_id)} size="sm" />
                 </Link>
                 <div>
                   <div className="font-semibold text-sm">

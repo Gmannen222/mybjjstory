@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { useOptimistic, useTransition } from 'react'
+import { toggleReaction } from '@/lib/actions/reactions'
 import type { ReactionType } from '@/lib/types/database'
 
 const REACTION_ICONS: Record<ReactionType, string> = {
@@ -22,44 +22,48 @@ interface ReactionButtonProps {
   userReaction: ReactionType | null
 }
 
+interface ReactionState {
+  myReaction: ReactionType | null
+  count: number
+}
+
 export default function ReactionButton({
   postId,
   initialCount,
   userReaction,
 }: ReactionButtonProps) {
-  const [count, setCount] = useState(initialCount)
-  const [myReaction, setMyReaction] = useState<ReactionType | null>(userReaction)
-  const supabase = createClient()
+  const [isPending, startTransition] = useTransition()
 
-  const handleReaction = async (type: ReactionType) => {
-    const { data: sessionData } = await supabase.auth.getSession()
-    if (!sessionData.session) return
-
-    if (myReaction === type) {
-      await supabase
-        .from('reactions')
-        .delete()
-        .eq('post_id', postId)
-        .eq('user_id', sessionData.session.user.id)
-      setMyReaction(null)
-      setCount((c) => c - 1)
-    } else {
-      if (myReaction) {
-        await supabase
-          .from('reactions')
-          .delete()
-          .eq('post_id', postId)
-          .eq('user_id', sessionData.session.user.id)
-      } else {
-        setCount((c) => c + 1)
+  const [optimistic, setOptimistic] = useOptimistic<ReactionState, ReactionType>(
+    { myReaction: userReaction, count: initialCount },
+    (state, clickedType) => {
+      if (state.myReaction === clickedType) {
+        // Toggling off the same reaction
+        return { myReaction: null, count: state.count - 1 }
       }
-      await supabase.from('reactions').insert({
-        post_id: postId,
-        user_id: sessionData.session.user.id,
-        type,
-      })
-      setMyReaction(type)
+      if (state.myReaction) {
+        // Switching to a different reaction — count stays the same
+        return { myReaction: clickedType, count: state.count }
+      }
+      // Adding a new reaction
+      return { myReaction: clickedType, count: state.count + 1 }
     }
+  )
+
+  const handleReaction = (type: ReactionType) => {
+    startTransition(async () => {
+      setOptimistic(type)
+
+      const formData = new FormData()
+      formData.set('post_id', postId)
+      formData.set('type', type)
+
+      const result = await toggleReaction(formData)
+
+      if (!result.success) {
+        console.error('Reaksjonsfeil:', result.error)
+      }
+    })
   }
 
   return (
@@ -68,18 +72,21 @@ export default function ReactionButton({
         <button
           key={type}
           onClick={() => handleReaction(type)}
-          aria-label={`${REACTION_LABELS[type]}${myReaction === type ? ' (aktiv)' : ''}`}
-          aria-pressed={myReaction === type}
+          disabled={isPending}
+          aria-label={`${REACTION_LABELS[type]}${optimistic.myReaction === type ? ' (aktiv)' : ''}`}
+          aria-pressed={optimistic.myReaction === type}
           className={`px-2.5 py-2.5 rounded-lg text-sm transition-all min-w-[44px] min-h-[44px] flex items-center justify-center ${
-            myReaction === type
+            optimistic.myReaction === type
               ? 'bg-primary/20 scale-110'
               : 'hover:bg-surface-hover'
-          }`}
+          } ${isPending ? 'opacity-70 pointer-events-none' : ''}`}
         >
           {REACTION_ICONS[type]}
         </button>
       ))}
-      {count > 0 && <span className="text-xs text-muted ml-1">{count}</span>}
+      {optimistic.count > 0 && (
+        <span className="text-xs text-muted ml-1">{optimistic.count}</span>
+      )}
     </div>
   )
 }

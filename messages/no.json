@@ -171,7 +171,9 @@
     },
     "comment": "Kommenter",
     "comments": "kommentarer",
-    "share": "Del"
+    "share": "Del",
+    "newPostsSingular": "Vis {count} nytt innlegg",
+    "newPostsPlural": "Vis {count} nye innlegg"
   },
   "profile": {
     "title": "Min profil",
@@ -515,6 +517,32 @@
     "sentBy": "Fra",
     "sentTo": "Til",
     "you": "deg"
+  },
+  "notifications": {
+    "title": "Varsler",
+    "subtitle": "Velg hvilke varsler du ønsker å motta.",
+    "pushStatus": "Push-varsler",
+    "pushEnabled": "Varsler er aktivert",
+    "pushDisabled": "Varsler er deaktivert",
+    "pushNotSupported": "Nettleseren din støtter ikke push-varsler",
+    "activate": "Aktiver",
+    "deactivate": "Deaktiver",
+    "comments": "Kommentarer",
+    "commentsDesc": "Noen kommenterer på innlegget ditt",
+    "reactions": "Reaksjoner",
+    "reactionsDesc": "Noen reagerer på innlegget ditt",
+    "follows": "Følgere",
+    "followsDesc": "Noen begynner å følge deg",
+    "achievements": "Achievements",
+    "achievementsDesc": "Du låser opp en ny achievement",
+    "trainingReminder": "Treningspåminnelse",
+    "trainingReminderDesc": "Daglig påminnelse om å trene",
+    "promptText": "Vil du motta varsler om kommentarer, reaksjoner og achievements?",
+    "promptActivate": "Aktiver varsler",
+    "promptDismiss": "Ikke nå",
+    "saving": "Lagrer...",
+    "saved": "Lagret!",
+    "saveError": "Kunne ikke lagre. Prøv igjen."
   },
   "admin": {
     "title": "Admin",

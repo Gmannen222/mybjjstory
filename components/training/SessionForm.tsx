@@ -1,11 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useActionState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
 import TechniquePicker from '@/components/training/TechniquePicker'
+import SubmitButton from '@/components/ui/SubmitButton'
+import { createSession, updateSession, deleteSession } from '@/lib/actions/training'
 import type { TrainingSession, TrainingType, MoodType, TechniqueCategory } from '@/lib/types/database'
+import type { ActionResult } from '@/lib/actions/posts'
 
 const TRAINING_TYPES: TrainingType[] = [
   'gi',
@@ -40,102 +42,45 @@ export default function SessionForm({
   existingTechniques?: SelectedTechnique[]
 }) {
   const isEdit = !!existingSession
-  const [date, setDate] = useState(existingSession?.date ?? new Date().toISOString().split('T')[0])
   const [type, setType] = useState<TrainingType>(existingSession?.type ?? 'gi')
-  const [durationMin, setDurationMin] = useState(existingSession?.duration_min?.toString() ?? '')
-  const [notes, setNotes] = useState(existingSession?.notes ?? '')
   const [effortRpe, setEffortRpe] = useState(existingSession?.effort_rpe?.toString() ?? '')
+  const [rpeSelected, setRpeSelected] = useState(!!existingSession?.effort_rpe)
   const [moodBefore, setMoodBefore] = useState<MoodType | ''>(existingSession?.mood_before ?? '')
   const [moodAfter, setMoodAfter] = useState<MoodType | ''>(existingSession?.mood_after ?? '')
-  const [bodyWeightKg, setBodyWeightKg] = useState(existingSession?.body_weight_kg?.toString() ?? '')
   const [techniques, setTechniques] = useState<SelectedTechnique[]>(existingTechniques ?? [])
-  const [rpeSelected, setRpeSelected] = useState(!!existingSession?.effort_rpe)
-  const [saving, setSaving] = useState(false)
-  const [deleting, setDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const router = useRouter()
-  const supabase = createClient()
   const t = useTranslations('training')
   const tCommon = useTranslations('common')
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
-    setError(null)
+  const action = isEdit ? updateSession : createSession
 
-    const { data: authSession } = await supabase.auth.getSession()
-    if (!authSession.session) return
+  const [state, formAction] = useActionState<ActionResult<{ id: string }>, FormData>(
+    action,
+    { success: false, error: '' }
+  )
 
-    const payload = {
-      date,
-      type,
-      duration_min: durationMin ? parseInt(durationMin) : null,
-      notes: notes || null,
-      effort_rpe: effortRpe ? parseInt(effortRpe) : null,
-      mood_before: moodBefore || null,
-      mood_after: moodAfter || null,
-      body_weight_kg: bodyWeightKg ? parseFloat(bodyWeightKg) : null,
+  // Handle successful save — navigate and trigger achievements
+  useEffect(() => {
+    if (state.success) {
+      fetch('/api/achievements', { method: 'POST' }).catch(console.error)
+      router.push(`/${locale}/training?saved=true`)
+      router.refresh()
     }
-
-    if (isEdit) {
-      const { error: updateError } = await supabase
-        .from('training_sessions')
-        .update(payload)
-        .eq('id', existingSession.id)
-
-      if (updateError) {
-        setError(tCommon('error'))
-        setSaving(false)
-        return
-      }
-
-      // Update techniques: delete old, insert new
-      await supabase.from('session_techniques').delete().eq('session_id', existingSession.id)
-
-      if (techniques.length > 0) {
-        await supabase.from('session_techniques').insert(
-          techniques.map((t) => ({ session_id: existingSession.id, name: t.name, category: t.category }))
-        )
-      }
-    } else {
-      const { data: newSession, error: sessionError } = await supabase
-        .from('training_sessions')
-        .insert({ ...payload, user_id: authSession.session.user.id })
-        .select('id')
-        .single()
-
-      if (sessionError || !newSession) {
-        setError(tCommon('error'))
-        setSaving(false)
-        return
-      }
-
-      if (techniques.length > 0) {
-        await supabase.from('session_techniques').insert(
-          techniques.map((t) => ({ session_id: newSession.id, name: t.name, category: t.category }))
-        )
-      }
-    }
-
-    // Check achievements after saving (via API route with service role)
-    fetch('/api/achievements', { method: 'POST' }).catch(console.error)
-
-    router.push(`/${locale}/training?saved=true`)
-    router.refresh()
-  }
+  }, [state, locale, router])
 
   const handleDelete = async () => {
     if (!existingSession) return
     setDeleting(true)
+    setDeleteError(null)
 
-    await supabase.from('session_techniques').delete().eq('session_id', existingSession.id)
-    await supabase.from('media').delete().eq('session_id', existingSession.id)
-    const { error: dbError } = await supabase.from('training_sessions').delete().eq('id', existingSession.id)
+    const result = await deleteSession(existingSession.id)
 
-    if (dbError) {
-      setError(tCommon('deleteError'))
+    if (!result.success) {
+      setDeleteError(result.error)
       setDeleting(false)
       return
     }
@@ -144,16 +89,26 @@ export default function SessionForm({
     router.refresh()
   }
 
+  const error = (!state.success && state.error) ? state.error : deleteError
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form action={formAction} className="space-y-6">
+      {/* Hidden fields for server action */}
+      {isEdit && <input type="hidden" name="session_id" value={existingSession.id} />}
+      <input type="hidden" name="type" value={type} />
+      <input type="hidden" name="mood_before" value={moodBefore} />
+      <input type="hidden" name="mood_after" value={moodAfter} />
+      <input type="hidden" name="effort_rpe" value={rpeSelected ? effortRpe : ''} />
+      <input type="hidden" name="techniques" value={JSON.stringify(techniques)} />
+
       <div>
         <label className="block text-sm font-medium text-muted mb-2">
           {t('date')}
         </label>
         <input
           type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
+          name="date"
+          defaultValue={existingSession?.date ?? new Date().toISOString().split('T')[0]}
           className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary"
           required
         />
@@ -187,8 +142,8 @@ export default function SessionForm({
         </label>
         <input
           type="number"
-          value={durationMin}
-          onChange={(e) => setDurationMin(e.target.value)}
+          name="duration_min"
+          defaultValue={existingSession?.duration_min?.toString() ?? ''}
           placeholder="60"
           min="1"
           max="480"
@@ -280,8 +235,8 @@ export default function SessionForm({
             </label>
             <input
               type="number"
-              value={bodyWeightKg}
-              onChange={(e) => setBodyWeightKg(e.target.value)}
+              name="body_weight_kg"
+              defaultValue={existingSession?.body_weight_kg?.toString() ?? ''}
               placeholder="75.0"
               min="30"
               max="200"
@@ -295,8 +250,8 @@ export default function SessionForm({
               {t('notes')}
             </label>
             <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              name="notes"
+              defaultValue={existingSession?.notes ?? ''}
               rows={4}
               className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary resize-none"
             />
@@ -306,13 +261,12 @@ export default function SessionForm({
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
 
-      <button
-        type="submit"
-        disabled={saving}
-        className="w-full py-3 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
+      <SubmitButton
+        pendingText={tCommon('saving')}
+        className="w-full"
       >
-        {saving ? tCommon('saving') : isEdit ? 'Oppdater trening' : t('save')}
-      </button>
+        {isEdit ? 'Oppdater trening' : t('save')}
+      </SubmitButton>
 
       {isEdit && !showDeleteConfirm && (
         <button

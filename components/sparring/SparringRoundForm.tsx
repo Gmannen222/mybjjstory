@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useActionState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { createClient } from '@/lib/supabase/client'
+import { createRound } from '@/lib/actions/sparring'
+import SubmitButton from '@/components/ui/SubmitButton'
 
 const RATING_LABELS = [
   { key: 'intensity', emojis: ['💤', '😌', '😤', '💪', '🔥'] },
@@ -15,14 +16,6 @@ const RATING_LABELS = [
 
 type RatingKey = 'intensity' | 'technique' | 'flow' | 'learning' | 'mood'
 
-const DB_FIELD_MAP: Record<RatingKey, string> = {
-  intensity: 'intensity',
-  technique: 'technique_rating',
-  flow: 'flow_rating',
-  learning: 'learning_rating',
-  mood: 'mood_rating',
-}
-
 export default function SparringRoundForm({
   sessionId,
   onSaved,
@@ -33,9 +26,7 @@ export default function SparringRoundForm({
   const t = useTranslations('sparring')
   const tCommon = useTranslations('common')
   const router = useRouter()
-  const supabase = createClient()
 
-  const [partnerName, setPartnerName] = useState('')
   const [ratings, setRatings] = useState<Record<RatingKey, number | null>>({
     intensity: null,
     technique: null,
@@ -43,60 +34,33 @@ export default function SparringRoundForm({
     learning: null,
     mood: null,
   })
-  const [notes, setNotes] = useState('')
   const [isShared, setIsShared] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+
+  const [state, formAction] = useActionState(createRound, { success: false, error: '' })
+
+  // Reset form on success
+  useEffect(() => {
+    if (state.success) {
+      setRatings({ intensity: null, technique: null, flow: null, learning: null, mood: null })
+      setIsShared(false)
+      if (onSaved) onSaved()
+      router.refresh()
+    }
+  }, [state.success, onSaved, router])
 
   const setRating = (key: RatingKey, value: number) => {
     setRatings((prev) => ({ ...prev, [key]: value }))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!partnerName.trim()) return
-    setSaving(true)
-    setError(null)
-
-    const { data: sessionData } = await supabase.auth.getSession()
-    if (!sessionData.session) {
-      setSaving(false)
-      return
-    }
-
-    const payload: Record<string, unknown> = {
-      session_id: sessionId,
-      user_id: sessionData.session.user.id,
-      partner_name: partnerName.trim(),
-      notes: notes.trim() || null,
-      is_shared: isShared,
-    }
-
-    for (const key of Object.keys(ratings) as RatingKey[]) {
-      payload[DB_FIELD_MAP[key]] = ratings[key]
-    }
-
-    const { error: dbError } = await supabase.from('sparring_rounds').insert(payload)
-
-    if (dbError) {
-      console.error('Failed to save sparring round:', dbError)
-      setError(tCommon('error'))
-      setSaving(false)
-      return
-    }
-
-    setPartnerName('')
-    setRatings({ intensity: null, technique: null, flow: null, learning: null, mood: null })
-    setNotes('')
-    setIsShared(false)
-    setSaving(false)
-
-    if (onSaved) onSaved()
-    router.refresh()
-  }
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form action={formAction} className="space-y-5">
+      <input type="hidden" name="session_id" value={sessionId} />
+      <input type="hidden" name="is_shared" value={String(isShared)} />
+      {/* Hidden inputs for ratings */}
+      {(Object.keys(ratings) as RatingKey[]).map((key) => (
+        <input key={key} type="hidden" name={key} value={ratings[key] ?? ''} />
+      ))}
+
       {/* Partner name */}
       <div>
         <label className="block text-sm font-medium text-muted mb-2">
@@ -104,8 +68,7 @@ export default function SparringRoundForm({
         </label>
         <input
           type="text"
-          value={partnerName}
-          onChange={(e) => setPartnerName(e.target.value)}
+          name="partner_name"
           placeholder={t('partnerPlaceholder')}
           required
           className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary"
@@ -152,8 +115,7 @@ export default function SparringRoundForm({
           {t('notes')}
         </label>
         <textarea
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
+          name="notes"
           rows={3}
           placeholder={t('notesPlaceholder')}
           className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary resize-none"
@@ -171,15 +133,14 @@ export default function SparringRoundForm({
         <span className="text-sm text-muted">{t('shareWith')}</span>
       </label>
 
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {!state.success && state.error && <p className="text-red-500 text-sm">{state.error}</p>}
 
-      <button
-        type="submit"
-        disabled={saving || !partnerName.trim()}
-        className="w-full py-3 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50"
+      <SubmitButton
+        pendingText={tCommon('saving')}
+        className="w-full py-3"
       >
-        {saving ? tCommon('saving') : t('save')}
-      </button>
+        {t('save')}
+      </SubmitButton>
     </form>
   )
 }

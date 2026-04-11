@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useActionState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { createCompetition, updateCompetition, deleteCompetition } from '@/lib/actions/competitions'
+import SubmitButton from '@/components/ui/SubmitButton'
 import type { Competition, CompetitionResult, CompetitionSource } from '@/lib/types/database'
 
 const RESULTS: { value: CompetitionResult; label: string; icon: string }[] = [
@@ -28,73 +29,37 @@ export default function CompetitionForm({
   competition?: Competition
 }) {
   const isEdit = !!competition
-  const [eventName, setEventName] = useState(competition?.event_name ?? '')
-  const [eventDate, setEventDate] = useState(competition?.event_date ?? new Date().toISOString().split('T')[0])
-  const [organization, setOrganization] = useState(competition?.organization ?? '')
-  const [weightClass, setWeightClass] = useState(competition?.weight_class ?? '')
-  const [beltDivision, setBeltDivision] = useState(competition?.belt_division ?? '')
+  const router = useRouter()
+
+  // Hidden field state for button-selected values
   const [giNogi, setGiNogi] = useState<'gi' | 'nogi'>(competition?.gi_nogi ?? 'gi')
   const [result, setResult] = useState<CompetitionResult | ''>(competition?.result ?? '')
-  const [wins, setWins] = useState(String(competition?.wins ?? 0))
-  const [losses, setLosses] = useState(String(competition?.losses ?? 0))
   const [source, setSource] = useState<CompetitionSource>(competition?.source ?? 'manual')
-  const [sourceUrl, setSourceUrl] = useState(competition?.source_url ?? '')
-  const [notes, setNotes] = useState(competition?.notes ?? '')
-  const [saving, setSaving] = useState(false)
-  const [deleting, setDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
-  const router = useRouter()
-  const supabase = createClient()
+  const [createState, createAction] = useActionState(createCompetition, { success: false, error: '' })
+  const [updateState, updateAction] = useActionState(updateCompetition, { success: false, error: '' })
+  const state = isEdit ? updateState : createState
+  const formAction = isEdit ? updateAction : createAction
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!eventName.trim()) return
-    setSaving(true)
-    setError(null)
-
-    const { data: sessionData } = await supabase.auth.getSession()
-    if (!sessionData.session) { setSaving(false); return }
-
-    const payload = {
-      event_name: eventName.trim(),
-      event_date: eventDate || null,
-      organization: organization || null,
-      weight_class: weightClass || null,
-      belt_division: beltDivision || null,
-      gi_nogi: giNogi,
-      result: result || null,
-      wins: parseInt(wins),
-      losses: parseInt(losses),
-      source,
-      source_url: sourceUrl || null,
-      verified: source !== 'manual',
-      notes: notes || null,
+  // Redirect on success
+  useEffect(() => {
+    if (state.success) {
+      router.push(`/${locale}/competitions?saved=true`)
+      router.refresh()
     }
-
-    const { error: dbError } = isEdit
-      ? await supabase.from('competitions').update(payload).eq('id', competition.id)
-      : await supabase.from('competitions').insert({ ...payload, user_id: sessionData.session.user.id })
-
-    if (dbError) {
-      setError('Noe gikk galt')
-      setSaving(false)
-      return
-    }
-
-    router.push(`/${locale}/competitions?saved=true`)
-    router.refresh()
-  }
+  }, [state.success, locale, router])
 
   const handleDelete = async () => {
     if (!competition) return
     setDeleting(true)
+    setDeleteError(null)
 
-    const { error: dbError } = await supabase.from('competitions').delete().eq('id', competition.id)
-
-    if (dbError) {
-      setError('Slettingen mislyktes. Prøv igjen.')
+    const result = await deleteCompetition(competition.id)
+    if (!result.success) {
+      setDeleteError(result.error)
       setDeleting(false)
       return
     }
@@ -104,10 +69,15 @@ export default function CompetitionForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form action={formAction} className="space-y-6">
+      {isEdit && <input type="hidden" name="competition_id" value={competition.id} />}
+      <input type="hidden" name="gi_nogi" value={giNogi} />
+      <input type="hidden" name="result" value={result} />
+      <input type="hidden" name="source" value={source} />
+
       <div>
         <label className="block text-sm font-medium text-muted mb-2">Arrangement *</label>
-        <input type="text" value={eventName} onChange={(e) => setEventName(e.target.value)}
+        <input type="text" name="event_name" defaultValue={competition?.event_name ?? ''}
           placeholder="Oslo Open 2026" required
           className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
       </div>
@@ -115,12 +85,12 @@ export default function CompetitionForm({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-muted mb-2">Dato</label>
-          <input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)}
+          <input type="date" name="event_date" defaultValue={competition?.event_date ?? new Date().toISOString().split('T')[0]}
             className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
         </div>
         <div>
           <label className="block text-sm font-medium text-muted mb-2">Organisasjon</label>
-          <input type="text" value={organization} onChange={(e) => setOrganization(e.target.value)}
+          <input type="text" name="organization" defaultValue={competition?.organization ?? ''}
             placeholder="IBJJF, SJJIF..."
             className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
         </div>
@@ -129,13 +99,13 @@ export default function CompetitionForm({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-muted mb-2">Vektklasse</label>
-          <input type="text" value={weightClass} onChange={(e) => setWeightClass(e.target.value)}
+          <input type="text" name="weight_class" defaultValue={competition?.weight_class ?? ''}
             placeholder="-76kg"
             className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
         </div>
         <div>
           <label className="block text-sm font-medium text-muted mb-2">Beltedivisjon</label>
-          <input type="text" value={beltDivision} onChange={(e) => setBeltDivision(e.target.value)}
+          <input type="text" name="belt_division" defaultValue={competition?.belt_division ?? ''}
             placeholder="Blue belt adult"
             className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
         </div>
@@ -172,12 +142,12 @@ export default function CompetitionForm({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-muted mb-2">Seire</label>
-          <input type="number" value={wins} onChange={(e) => setWins(e.target.value)} min="0"
+          <input type="number" name="wins" defaultValue={competition?.wins ?? 0} min="0"
             className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
         </div>
         <div>
           <label className="block text-sm font-medium text-muted mb-2">Tap</label>
-          <input type="number" value={losses} onChange={(e) => setLosses(e.target.value)} min="0"
+          <input type="number" name="losses" defaultValue={competition?.losses ?? 0} min="0"
             className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
         </div>
       </div>
@@ -196,7 +166,7 @@ export default function CompetitionForm({
         {source !== 'manual' && (
           <div>
             <label className="block text-sm font-medium text-muted mb-2">Lenke til resultat</label>
-            <input type="url" value={sourceUrl} onChange={(e) => setSourceUrl(e.target.value)}
+            <input type="url" name="source_url" defaultValue={competition?.source_url ?? ''}
               placeholder="https://smoothcomp.com/..."
               className="w-full px-4 py-3 bg-background border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary" />
           </div>
@@ -205,16 +175,18 @@ export default function CompetitionForm({
 
       <div>
         <label className="block text-sm font-medium text-muted mb-2">Notater</label>
-        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3}
+        <textarea name="notes" defaultValue={competition?.notes ?? ''} rows={3}
           className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-foreground focus:outline-none focus:border-primary resize-none" />
       </div>
 
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {!state.success && state.error && <p className="text-red-500 text-sm">{state.error}</p>}
 
-      <button type="submit" disabled={saving}
-        className="w-full py-3 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50">
-        {saving ? 'Lagrer...' : isEdit ? 'Oppdater konkurranse' : 'Lagre konkurranse'}
-      </button>
+      <SubmitButton
+        pendingText="Lagrer..."
+        className="w-full py-3"
+      >
+        {isEdit ? 'Oppdater konkurranse' : 'Lagre konkurranse'}
+      </SubmitButton>
 
       {isEdit && (
         <div className="flex justify-center">
@@ -245,6 +217,7 @@ export default function CompetitionForm({
               </button>
             </div>
           )}
+          {deleteError && <p className="text-red-500 text-sm mt-2">{deleteError}</p>}
         </div>
       )}
     </form>

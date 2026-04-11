@@ -1,55 +1,46 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { useActionState, useEffect, useRef, useState } from 'react'
+import { createPost, type ActionResult } from '@/lib/actions/posts'
+import SubmitButton from '@/components/ui/SubmitButton'
+
+const initialState: ActionResult<{ id: string }> = { success: true }
 
 export default function CreatePostForm({ locale }: { locale: string }) {
+  const [state, formAction] = useActionState(createPost, initialState)
   const [content, setContent] = useState('')
-  const [posting, setPosting] = useState(false)
-  const router = useRouter()
-  const supabase = createClient()
+  const formRef = useRef<HTMLFormElement>(null)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!content.trim()) return
-
-    setPosting(true)
-
-    const { data: sessionData } = await supabase.auth.getSession()
-    if (!sessionData.session) {
-      setPosting(false)
-      return
+  useEffect(() => {
+    if (state.success && state.data) {
+      setContent('')
+      formRef.current?.reset()
     }
-
-    await supabase.from('posts').insert({
-      user_id: sessionData.session.user.id,
-      content: content.trim(),
-      post_type: 'text',
-    })
-
-    setContent('')
-    setPosting(false)
-    router.refresh()
-  }
+  }, [state])
 
   return (
-    <form onSubmit={handleSubmit} className="bg-surface rounded-xl p-4">
+    <form ref={formRef} action={formAction} className="bg-surface rounded-xl p-4">
       <textarea
+        name="content"
         value={content}
         onChange={(e) => setContent(e.target.value)}
         placeholder="Del noe med fellesskapet..."
         rows={3}
         className="w-full bg-transparent border-none text-foreground resize-none focus:outline-none"
       />
+
+      {!state.success && (
+        <p className="text-red-400 text-sm mt-1">{state.error}</p>
+      )}
+
       <div className="flex justify-end mt-2">
-        <button
-          type="submit"
-          disabled={posting || !content.trim()}
-          className="px-4 py-2 bg-primary text-background font-semibold rounded-lg hover:bg-primary-hover transition-colors text-sm disabled:opacity-50"
+        <SubmitButton
+          disabled={!content.trim()}
+          pendingText="Publiserer..."
+          className="text-sm py-2"
         >
-          {posting ? 'Publiserer...' : 'Publiser'}
-        </button>
+          Publiser
+        </SubmitButton>
       </div>
     </form>
   )

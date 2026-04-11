@@ -17,7 +17,7 @@ export default async function Settings({
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('display_name, username, avatar_url, belt_rank, academy_name')
+    .select('display_name, username, avatar_url, belt_rank, academy_name, notification_preferences')
     .eq('id', user.id)
     .single()
 
@@ -35,6 +35,13 @@ export default async function Settings({
       userEmail={user.email ?? ''}
       profile={profile}
       previousFeedback={feedback || []}
+      notificationPreferences={profile?.notification_preferences ?? {
+        comments: true,
+        reactions: true,
+        follows: true,
+        achievements: true,
+        training_reminder: false,
+      }}
     />
   )
 }

@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { useState, useEffect, useActionState } from 'react'
+import { submitFeedback } from '@/lib/actions/feedback'
+import SubmitButton from '@/components/ui/SubmitButton'
 import type { FeedbackType } from '@/lib/types/database'
 
 const FEEDBACK_TYPES: { value: FeedbackType; label: string; icon: string }[] = [
@@ -20,47 +20,23 @@ export default function FeedbackForm({
   userEmail: string
 }) {
   const [type, setType] = useState<FeedbackType>('suggestion')
-  const [message, setMessage] = useState('')
-  const [contactEmail, setContactEmail] = useState(userEmail)
-  const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
-  const supabase = createClient()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!message.trim()) return
-    setSending(true)
-    setError(null)
+  const [state, formAction] = useActionState(submitFeedback, { success: false, error: '' })
 
-    const { data: sessionData } = await supabase.auth.getSession()
-    if (!sessionData.session) { setSending(false); return }
-
-    const { error: insertError } = await supabase.from('feedback').insert({
-      user_id: sessionData.session.user.id,
-      type,
-      message: message.trim(),
-      contact_email: contactEmail || null,
-    })
-
-    if (insertError) {
-      setError('Kunne ikke sende. Prøv igjen.')
-      setSending(false)
-      return
+  // Show success message and auto-reset
+  useEffect(() => {
+    if (state.success) {
+      setSent(true)
+      const timer = setTimeout(() => setSent(false), 3000)
+      return () => clearTimeout(timer)
     }
-
-    setSent(true)
-    setMessage('')
-    setSending(false)
-    router.refresh()
-
-    // Reset success state after 3s
-    setTimeout(() => setSent(false), 3000)
-  }
+  }, [state.success])
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form action={formAction} className="space-y-4">
+      <input type="hidden" name="type" value={type} />
+
       {/* Type picker */}
       <div className="flex gap-2">
         {FEEDBACK_TYPES.map(({ value, label, icon }) => (
@@ -82,8 +58,8 @@ export default function FeedbackForm({
 
       {/* Message */}
       <textarea
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
+        name="message"
+        key={state.success ? 'reset' : 'active'}
         placeholder={
           type === 'bug'
             ? 'Beskriv feilen du opplevde...'
@@ -105,25 +81,22 @@ export default function FeedbackForm({
         </label>
         <input
           type="email"
-          value={contactEmail}
-          onChange={(e) => setContactEmail(e.target.value)}
+          name="contact_email"
+          defaultValue={userEmail}
           className="w-full px-4 py-2.5 bg-background border border-white/10 rounded-xl text-foreground focus:outline-none focus:border-primary text-sm"
         />
       </div>
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {!state.success && state.error && <p className="text-sm text-red-500">{state.error}</p>}
 
-      <button
-        type="submit"
-        disabled={sending || !message.trim()}
-        className={`w-full py-3 font-semibold rounded-xl transition-all text-sm disabled:opacity-50 ${
-          sent
-            ? 'bg-green-500/20 text-green-400'
-            : 'bg-primary text-background hover:bg-primary-hover'
+      <SubmitButton
+        pendingText="Sender..."
+        className={`w-full py-3 rounded-xl text-sm ${
+          sent ? 'bg-green-500/20 text-green-400' : ''
         }`}
       >
-        {sent ? '✓ Takk for tilbakemeldingen!' : sending ? 'Sender...' : 'Send tilbakemelding'}
-      </button>
+        {sent ? '✓ Takk for tilbakemeldingen!' : 'Send tilbakemelding'}
+      </SubmitButton>
     </form>
   )
 }

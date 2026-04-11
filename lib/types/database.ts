@@ -213,6 +213,7 @@ export interface Comment {
   post_id: string
   user_id: string
   content: string
+  image_url?: string | null
   created_at: string
 }
 
@@ -299,6 +300,14 @@ export interface Feedback {
   admin_reply: string | null
   replied_at: string | null
   created_at: string
+}
+
+export interface NotificationPreferences {
+  comments: boolean
+  reactions: boolean
+  follows: boolean
+  achievements: boolean
+  training_reminder: boolean
 }
 
 export interface Academy {
