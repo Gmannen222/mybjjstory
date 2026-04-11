@@ -31,6 +31,7 @@ proxy.ts               — next-intl middleware (NOT middleware.ts)
 - Components organized by feature: `components/[feature]/ComponentName.tsx`
 - Error pattern: console.error + surface to user via state (no toast library)
 - One feature per commit — don't batch multiple features at end of session
+- **Norwegian text MUST use æøå** — never substitute with ae/o/a. All user-facing strings (in messages/no.json, hardcoded labels, i18n keys) must use proper Norwegian characters: ø (not o), æ (not ae), å (not a). Examples: "økter" not "okter", "søk" not "sok", "første" not "forste", "spørsmål" not "sporsmal"
 
 ## Key Patterns
 - **Server components** fetch data, **client components** handle interactivity

@@ -25,9 +25,9 @@ function formatDateTime(dateStr: string): string {
 }
 
 const ROLE_LABELS: Record<string, string> = {
-  athlete: 'Utover',
+  athlete: 'Utøver',
   competitor: 'Konkurrent',
-  instructor: 'Instruktor',
+  instructor: 'Instruktør',
   academy: 'Akademi',
 }
 
@@ -64,7 +64,7 @@ export default function UserDetailPanel({
 
     if (updateError) {
       console.error('Ban error:', updateError)
-      setError('Kunne ikke utestenge brukeren. Prov igjen.')
+      setError('Kunne ikke utestenge brukeren. Prøv igjen.')
       setLoading(false)
       return
     }
@@ -91,7 +91,7 @@ export default function UserDetailPanel({
 
     if (updateError) {
       console.error('Unban error:', updateError)
-      setError('Kunne ikke fjerne utestengelsen. Prov igjen.')
+      setError('Kunne ikke fjerne utestengelsen. Prøv igjen.')
       setLoading(false)
       return
     }

@@ -173,7 +173,7 @@ export default function AcademyApproval({
                     ? 'bg-green-400/10 text-green-400 hover:bg-green-400/20'
                     : 'bg-white/5 text-muted hover:bg-white/10'
                 }`}
-                title={isHidden ? 'Gjor synlig for brukere' : 'Skjul fra brukere'}
+                title={isHidden ? 'Gjør synlig for brukere' : 'Skjul fra brukere'}
               >
                 {loading === 'toggleVisibility' ? '...' : isHidden ? 'Vis' : 'Skjul'}
               </button>
