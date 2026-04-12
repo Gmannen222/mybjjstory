@@ -61,26 +61,31 @@ const SEVERITY_COLORS: Record<string, string> = {
 export default function Dashboard({
   locale,
   userId,
+  initialProfile,
 }: {
   locale: string
   userId: string
+  initialProfile: ProfileData | null
 }) {
-  const [profile, setProfile] = useState<ProfileData | null>(null)
+  const [profile] = useState<ProfileData | null>(initialProfile)
   const [stats, setStats] = useState<Stats | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [statsLoading, setStatsLoading] = useState(true)
   const [showSettings, setShowSettings] = useState(false)
-  const [dashConfig, setDashConfig] = useState<DashboardConfig>(DEFAULT_DASHBOARD)
+  const [dashConfig, setDashConfig] = useState<DashboardConfig>({
+    ...DEFAULT_DASHBOARD,
+    ...(initialProfile?.dashboard_config ?? {}),
+  })
   const t = useTranslations('home')
   const tTraining = useTranslations('training')
 
   useEffect(() => {
     const supabase = createClient()
-    async function load() {
+    async function loadStats() {
       const now = new Date()
       const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
       const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())
 
-      const [weekRes, monthRes, totalRes, profileRes, compRes, goldRes, injuryRes, recentRes] = await Promise.all([
+      const [weekRes, monthRes, totalRes, compRes, goldRes, injuryRes, recentRes] = await Promise.all([
         supabase
           .from('training_sessions')
           .select('id', { count: 'exact', head: true })
@@ -96,11 +101,6 @@ export default function Dashboard({
           .select('id', { count: 'exact', head: true })
           .eq('user_id', userId),
         supabase
-          .from('profiles')
-          .select('belt_rank, belt_degrees, display_name, avatar_config, dashboard_config, favorite_guard, favorite_submission, training_since_year, academy_name')
-          .eq('id', userId)
-          .single(),
-        supabase
           .from('competitions')
           .select('id', { count: 'exact', head: true })
           .eq('user_id', userId),
@@ -114,7 +114,6 @@ export default function Dashboard({
           .select('id', { count: 'exact', head: true })
           .eq('user_id', userId)
           .is('date_recovered', null),
-        // Get recent sessions for streak calculation
         supabase
           .from('training_sessions')
           .select('date')
@@ -145,13 +144,6 @@ export default function Dashboard({
         }
       }
 
-      if (profileRes.error) {
-        console.error('Dashboard profile fetch error:', profileRes.error)
-      }
-      const profileData = profileRes.data as ProfileData | null
-      setProfile(profileData)
-      setDashConfig({ ...DEFAULT_DASHBOARD, ...(profileData?.dashboard_config ?? {}) })
-
       setStats({
         weekCount: weekRes.count ?? 0,
         monthCount: monthRes.count ?? 0,
@@ -161,32 +153,10 @@ export default function Dashboard({
         activeInjuries: injuryRes.count ?? 0,
         streakDays,
       })
-      setLoading(false)
+      setStatsLoading(false)
     }
-    load()
+    loadStats()
   }, [userId])
-
-  if (loading) {
-    return (
-      <div className="max-w-5xl mx-auto px-4 py-10">
-        <div className="animate-pulse space-y-6">
-          {/* Skeleton hero */}
-          <div className="bg-surface rounded-2xl p-8">
-            <div className="flex flex-col items-center gap-4">
-              <div className="w-28 h-56 bg-surface-hover rounded-2xl" />
-              <div className="h-8 bg-surface-hover rounded w-48" />
-              <div className="h-6 bg-surface-hover rounded w-32" />
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-24 bg-surface rounded-xl" />
-            ))}
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   const avatarConfig: AvatarConfig = {
     ...DEFAULT_AVATAR,
@@ -196,11 +166,11 @@ export default function Dashboard({
 
   const weekGoal = 3
   const weekProgress = Math.min((stats?.weekCount ?? 0) / weekGoal, 1)
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 sm:py-10">
-      {/* Hero card */}
+      {/* Hero card — renders immediately with server-side profile */}
       <div className="relative bg-surface rounded-2xl overflow-hidden mb-6">
-        {/* Background effects */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-transparent" />
         <div className="absolute top-0 right-0 w-80 h-80 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
 
@@ -211,11 +181,8 @@ export default function Dashboard({
               <Link href={`/${locale}/profile/avatar`} className="group relative flex-shrink-0">
                 <div className="absolute inset-0 bg-primary/20 rounded-2xl blur-xl scale-90 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="relative">
-                  {/* SVG progress ring around avatar */}
                   <svg className="absolute -inset-3 w-[calc(100%+24px)] h-[calc(100%+24px)]" viewBox="0 0 100 200">
-                    {/* Background ring */}
                     <ellipse cx="50" cy="100" rx="48" ry="98" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="2" />
-                    {/* Progress ring */}
                     <ellipse
                       cx="50" cy="100" rx="48" ry="98"
                       fill="none"
@@ -237,7 +204,7 @@ export default function Dashboard({
             {/* Welcome + belt + meta */}
             <div className="flex-1 text-center sm:text-left">
               <h1 className="text-2xl sm:text-3xl font-bold">
-                {t('welcome')}, {profile?.display_name || 'utøver'}!
+                {t('welcome')}{profile?.display_name ? `, ${profile.display_name}` : ''}!
               </h1>
 
               {dashConfig.showBelt && profile?.belt_rank && (
@@ -251,7 +218,6 @@ export default function Dashboard({
                 </div>
               )}
 
-              {/* Meta tags */}
               <div className="mt-3 flex flex-wrap items-center justify-center sm:justify-start gap-3 text-xs text-muted">
                 {profile?.academy_name && (
                   <span className="flex items-center gap-1">
@@ -312,41 +278,48 @@ export default function Dashboard({
 
       {/* Stats row */}
       {dashConfig.showTrainingStats && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-          {/* Streak - special card */}
-          <div className={`relative bg-surface rounded-xl p-4 text-center border overflow-hidden ${
-            (stats?.streakDays ?? 0) > 0 ? 'border-orange-500/20' : 'border-white/5'
-          }`}>
-            {(stats?.streakDays ?? 0) > 0 && (
-              <div className="absolute inset-0 bg-gradient-to-t from-orange-500/5 to-transparent" />
-            )}
-            <div className="relative">
-              <div className="text-lg mb-1">🔥</div>
-              <div className={`text-2xl sm:text-3xl font-bold ${(stats?.streakDays ?? 0) > 0 ? 'text-orange-400' : 'text-muted'}`}>
-                {stats?.streakDays ?? 0}
-              </div>
-              <div className="text-xs text-muted mt-0.5">Streak</div>
-            </div>
+        statsLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-24 bg-surface rounded-xl animate-pulse" />
+            ))}
           </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+            <div className={`relative bg-surface rounded-xl p-4 text-center border overflow-hidden ${
+              (stats?.streakDays ?? 0) > 0 ? 'border-orange-500/20' : 'border-white/5'
+            }`}>
+              {(stats?.streakDays ?? 0) > 0 && (
+                <div className="absolute inset-0 bg-gradient-to-t from-orange-500/5 to-transparent" />
+              )}
+              <div className="relative">
+                <div className="text-lg mb-1">🔥</div>
+                <div className={`text-2xl sm:text-3xl font-bold ${(stats?.streakDays ?? 0) > 0 ? 'text-orange-400' : 'text-muted'}`}>
+                  {stats?.streakDays ?? 0}
+                </div>
+                <div className="text-xs text-muted mt-0.5">Streak</div>
+              </div>
+            </div>
 
-          <Link href={`/${locale}/training`} className="bg-surface rounded-xl p-4 text-center border border-white/5 hover:border-primary/20 transition-colors">
-            <div className="text-lg mb-1">📅</div>
-            <div className="text-2xl sm:text-3xl font-bold">{stats?.weekCount ?? 0}<span className="text-sm font-normal text-muted">/{weekGoal}</span></div>
-            <div className="text-xs text-muted mt-0.5">{tTraining('stats.thisWeek')}</div>
-          </Link>
+            <Link href={`/${locale}/training`} className="bg-surface rounded-xl p-4 text-center border border-white/5 hover:border-primary/20 transition-colors">
+              <div className="text-lg mb-1">📅</div>
+              <div className="text-2xl sm:text-3xl font-bold">{stats?.weekCount ?? 0}<span className="text-sm font-normal text-muted">/{weekGoal}</span></div>
+              <div className="text-xs text-muted mt-0.5">{tTraining('stats.thisWeek')}</div>
+            </Link>
 
-          <Link href={`/${locale}/training`} className="bg-surface rounded-xl p-4 text-center border border-white/5 hover:border-primary/20 transition-colors">
-            <div className="text-lg mb-1">📊</div>
-            <div className="text-2xl sm:text-3xl font-bold">{stats?.monthCount ?? 0}</div>
-            <div className="text-xs text-muted mt-0.5">{tTraining('stats.thisMonth')}</div>
-          </Link>
+            <Link href={`/${locale}/training`} className="bg-surface rounded-xl p-4 text-center border border-white/5 hover:border-primary/20 transition-colors">
+              <div className="text-lg mb-1">📊</div>
+              <div className="text-2xl sm:text-3xl font-bold">{stats?.monthCount ?? 0}</div>
+              <div className="text-xs text-muted mt-0.5">{tTraining('stats.thisMonth')}</div>
+            </Link>
 
-          <Link href={`/${locale}/training`} className="bg-surface rounded-xl p-4 text-center border border-white/5 hover:border-primary/20 transition-colors">
-            <div className="text-lg mb-1">🥋</div>
-            <div className="text-2xl sm:text-3xl font-bold text-primary">{stats?.totalCount ?? 0}</div>
-            <div className="text-xs text-muted mt-0.5">{tTraining('stats.total')}</div>
-          </Link>
-        </div>
+            <Link href={`/${locale}/training`} className="bg-surface rounded-xl p-4 text-center border border-white/5 hover:border-primary/20 transition-colors">
+              <div className="text-lg mb-1">🥋</div>
+              <div className="text-2xl sm:text-3xl font-bold text-primary">{stats?.totalCount ?? 0}</div>
+              <div className="text-xs text-muted mt-0.5">{tTraining('stats.total')}</div>
+            </Link>
+          </div>
+        )
       )}
 
       {/* Training chart */}
@@ -418,7 +391,6 @@ export default function Dashboard({
               { href: `/${locale}/feed`, icon: '📰', label: 'Feed', accent: 'hover:border-purple-500/30' },
               { href: `/${locale}/gradings`, icon: '🏅', label: 'Graderinger', accent: 'hover:border-orange-500/30' },
               { href: `/${locale}/injuries`, icon: '🩹', label: 'Skader', accent: 'hover:border-red-500/30' },
-              { href: `/${locale}/achievements`, icon: '🏅', label: 'Prestasjoner', accent: 'hover:border-amber-500/30' },
             ].map(({ href, icon, label, accent }) => (
               <Link
                 key={href}
@@ -453,6 +425,7 @@ export default function Dashboard({
 
 function RecentTraining({ userId, locale }: { userId: string; locale: string }) {
   const [sessions, setSessions] = useState<RecentSession[]>([])
+  const [loading, setLoading] = useState(true)
   const tTraining = useTranslations('training')
 
   useEffect(() => {
@@ -463,8 +436,24 @@ function RecentTraining({ userId, locale }: { userId: string; locale: string }) 
       .eq('user_id', userId)
       .order('date', { ascending: false })
       .limit(5)
-      .then(({ data }) => setSessions(data || []))
+      .then(({ data }) => {
+        setSessions(data || [])
+        setLoading(false)
+      })
   }, [userId])
+
+  if (loading) {
+    return (
+      <div className="mb-8">
+        <div className="h-4 w-32 bg-surface-hover rounded animate-pulse mb-3" />
+        <div className="space-y-2">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-16 bg-surface rounded-xl animate-pulse" />
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   if (sessions.length === 0) {
     return (
@@ -537,6 +526,7 @@ interface ActiveInjury {
 
 function ActiveInjuriesList({ userId, locale }: { userId: string; locale: string }) {
   const [injuries, setInjuries] = useState<ActiveInjury[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const supabase = createClient()
@@ -547,8 +537,24 @@ function ActiveInjuriesList({ userId, locale }: { userId: string; locale: string
       .is('date_recovered', null)
       .order('date_occurred', { ascending: false })
       .limit(5)
-      .then(({ data }) => setInjuries(data || []))
+      .then(({ data }) => {
+        setInjuries(data || [])
+        setLoading(false)
+      })
   }, [userId])
+
+  if (loading) {
+    return (
+      <div className="mb-8">
+        <div className="h-4 w-28 bg-surface-hover rounded animate-pulse mb-3" />
+        <div className="space-y-2">
+          {[1, 2].map((i) => (
+            <div key={i} className="h-16 bg-surface rounded-xl animate-pulse" />
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   if (injuries.length === 0) return null
 

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
 
@@ -75,9 +76,9 @@ export default function LoginPage() {
 
         <p className="text-xs text-muted">
           Ved å logge inn godtar du våre{' '}
-          <a href={`/${locale}/terms`} className="text-primary hover:underline">vilkår</a>
+          <Link href={`/${locale}/terms`} className="text-primary hover:underline">vilkår</Link>
           {' '}og{' '}
-          <a href={`/${locale}/privacy`} className="text-primary hover:underline">personvernregler</a>
+          <Link href={`/${locale}/privacy`} className="text-primary hover:underline">personvernregler</Link>
         </p>
       </div>
     </div>

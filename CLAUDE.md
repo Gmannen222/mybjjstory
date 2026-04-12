@@ -41,6 +41,12 @@ proxy.ts               — next-intl middleware (NOT middleware.ts)
 - Test files next to source: `lib/__tests__/foo.test.ts` or `components/__tests__/Foo.test.tsx`
 - **Norwegian text MUST use æøå** — never substitute with ae/o/a. All user-facing strings (in messages/no.json, hardcoded labels, i18n keys) must use proper Norwegian characters: ø (not o), æ (not ae), å (not a). Examples: "økter" not "okter", "søk" not "sok", "første" not "forste", "spørsmål" not "sporsmal"
 
+## Architecture Rules (prevent recurring bugs)
+- **Navigation:** NAV_ITEMS and SUB_PATH_MAP live ONLY in `lib/navigation.ts` — never hardcode routes in Header/BottomNav. When adding a new page under an existing tab, add it to SUB_PATH_MAP.
+- **Auth state:** Access via `useAuthProfile()` from `lib/hooks/useAuthProfile.tsx` — never call `onAuthStateChange` directly in components.
+- **Display name:** Canonical source is `profiles.display_name`, NOT `session.user.user_metadata`. All components showing user name must read from AuthProfileProvider or server-side profile prop.
+- **Testing:** When fixing a bug, write the test that would have caught it BEFORE the code fix. New nav routes must pass the nav consistency test (`lib/__tests__/navigation.test.ts`).
+
 ## Key Patterns
 - **Server components** fetch data, **client components** handle interactivity
 - **Server Actions** with `ActionResult` pattern for all mutations (`lib/actions/`)

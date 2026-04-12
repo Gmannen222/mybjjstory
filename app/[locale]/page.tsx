@@ -18,7 +18,13 @@ export default async function HomePage({
   } = await supabase.auth.getUser()
 
   if (user) {
-    return <Dashboard locale={locale} userId={user.id} />
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('belt_rank, belt_degrees, display_name, avatar_config, dashboard_config, favorite_guard, favorite_submission, training_since_year, academy_name')
+      .eq('id', user.id)
+      .single()
+
+    return <Dashboard locale={locale} userId={user.id} initialProfile={profile} />
   }
 
   return <LandingPage locale={locale} />
@@ -76,7 +82,7 @@ async function LandingPage({ locale }: { locale: string }) {
             >
               {t('cta.button')}
             </Link>
-            <p className="text-sm text-muted">Alle som registrerer seg i beta beholder tilgangen etter lansering.</p>
+            <p className="text-sm text-muted">{t('hero.betaNote')}</p>
           </div>
 
           {/* Belt progression preview */}
@@ -131,22 +137,17 @@ async function LandingPage({ locale }: { locale: string }) {
           {features.map(({ icon, key, color }) => (
             <div
               key={key}
-              className="group relative bg-surface rounded-2xl p-6 border border-white/5 hover:border-primary/30 hover:scale-[1.03] hover:shadow-[0_0_40px_-10px_rgba(201,168,76,0.2)] transition-all duration-300 cursor-default overflow-hidden"
+              className="relative bg-surface rounded-2xl p-6 border border-white/5 overflow-hidden"
             >
-              <div className={`absolute inset-0 bg-gradient-to-br ${color} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+              <div className={`absolute inset-0 bg-gradient-to-br ${color} to-transparent opacity-50`} />
               <div className="relative">
-                <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300 inline-block">{icon}</div>
+                <div className="text-4xl mb-4 inline-block">{icon}</div>
                 <h3 className="text-lg font-bold mb-2">
                   {t(`features.${key}.title` as Parameters<typeof t>[0])}
                 </h3>
                 <p className="text-sm text-muted leading-relaxed">
                   {t(`features.${key}.desc` as Parameters<typeof t>[0])}
                 </p>
-                <div className="mt-4 h-5">
-                  <span className="text-xs text-primary font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    {t('features.cta')} →
-                  </span>
-                </div>
               </div>
             </div>
           ))}
@@ -192,16 +193,16 @@ async function LandingPage({ locale }: { locale: string }) {
 
         <div className="space-y-3 max-w-lg mx-auto">
           {/* Adult belts */}
-          {(['white', 'blue', 'purple', 'brown', 'black'] as const).map((rank, i) => (
+          {(['white', 'blue', 'purple', 'brown', 'black'] as const).map((rank) => (
             <div key={rank} className="flex items-center gap-4">
               <div className="flex-1">
-                <BeltDisplay rank={rank} degrees={i} size="md" />
+                <BeltDisplay rank={rank} degrees={0} size="md" />
               </div>
             </div>
           ))}
           {/* Kids belt examples */}
           <div className="mt-6 pt-6 border-t border-white/5">
-            <p className="text-xs text-muted text-center mb-4 uppercase tracking-wider">Barnebelter</p>
+            <p className="text-xs text-muted text-center mb-4 uppercase tracking-wider">{t('belts.kids')}</p>
             <div className="grid grid-cols-2 gap-3">
               {(['grey', 'yellow', 'orange', 'green'] as const).map((rank) => (
                 <BeltDisplay key={rank} rank={rank} degrees={2} size="sm" />

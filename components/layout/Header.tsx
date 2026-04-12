@@ -3,45 +3,19 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
+import { NAV_ITEMS, isActivePath } from '@/lib/navigation'
+import { useAuthProfile } from '@/lib/hooks/useAuthProfile'
 import AuthButton from '@/components/auth/AuthButton'
 import AdminLink from '@/components/admin/AdminLink'
 import InstallButton from '@/components/layout/InstallButton'
 
-const NAV_LINKS = [
-  { key: 'home', path: '' },
-  { key: 'training', path: '/training' },
-  { key: 'progress', path: '/progress' },
-  { key: 'feed', path: '/feed' },
-  { key: 'profile', path: '/profile' },
-] as const
-
-// Sub-paths that should highlight the parent tab
-const SUB_PATH_MAP: Record<string, string> = {
-  '/gradings': '/progress',
-  '/competitions': '/progress',
-  '/sparring': '/progress',
-  '/academies': '/feed',
-  '/injuries': '/profile',
-  '/settings': '/profile',
-  '/feedback': '/profile',
-}
+const headerItems = NAV_ITEMS.filter((item) => item.showInHeader)
 
 export default function Header() {
   const locale = useLocale()
   const pathname = usePathname()
   const t = useTranslations('nav')
-
-  const isActive = (path: string) => {
-    const full = `/${locale}${path}`
-    if (path === '') {
-      return pathname === `/${locale}` || pathname === `/${locale}/`
-    }
-    if (pathname.startsWith(full)) return true
-    for (const [sub, parent] of Object.entries(SUB_PATH_MAP)) {
-      if (parent === path && pathname.startsWith(`/${locale}${sub}`)) return true
-    }
-    return false
-  }
+  const { isAuthenticated } = useAuthProfile()
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-background/80 backdrop-blur-md">
@@ -53,26 +27,28 @@ export default function Header() {
           MyBJJStory
         </Link>
 
-        <nav className="hidden sm:flex items-center gap-5 text-sm text-muted">
-          {NAV_LINKS.map(({ key, path }) => {
-            const href = `/${locale}${path}`
-            const active = isActive(path)
-            return (
-              <Link
-                key={key}
-                href={href}
-                className={`transition-colors ${
-                  active
-                    ? 'text-primary font-semibold'
-                    : 'hover:text-foreground'
-                }`}
-              >
-                {t(key)}
-              </Link>
-            )
-          })}
-          <AdminLink />
-        </nav>
+        {isAuthenticated && (
+          <nav className="hidden sm:flex items-center gap-5 text-sm text-muted">
+            {headerItems.map(({ key, path }) => {
+              const href = `/${locale}${path}`
+              const active = isActivePath(pathname, locale, path)
+              return (
+                <Link
+                  key={key}
+                  href={href}
+                  className={`py-2 px-1 transition-colors ${
+                    active
+                      ? 'text-primary font-semibold'
+                      : 'hover:text-foreground'
+                  }`}
+                >
+                  {t(key)}
+                </Link>
+              )
+            })}
+            <AdminLink />
+          </nav>
+        )}
 
         <div className="flex items-center gap-2">
           <InstallButton />

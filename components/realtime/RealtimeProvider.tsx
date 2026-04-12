@@ -1,8 +1,8 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useMemo } from 'react'
 import { usePresence, type PresenceUser } from '@/lib/hooks/usePresence'
-import { createClient } from '@/lib/supabase/client'
+import { useAuthProfile } from '@/lib/hooks/useAuthProfile'
 
 interface OnlineStatusContextType {
   isOnline: (userId: string) => boolean
@@ -17,34 +17,16 @@ const OnlineStatusContext = createContext<OnlineStatusContextType>({
 })
 
 export function RealtimeProvider({ children }: { children: React.ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<{
-    id: string
-    display_name: string
-    avatar_url: string | null
-  } | undefined>(undefined)
+  const { user, profile } = useAuthProfile()
 
-  useEffect(() => {
-    const supabase = createClient()
-
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) return
-
-      supabase
-        .from('profiles')
-        .select('display_name, avatar_url')
-        .eq('id', user.id)
-        .single()
-        .then(({ data }) => {
-          if (data) {
-            setCurrentUser({
-              id: user.id,
-              display_name: data.display_name || 'Anonym',
-              avatar_url: data.avatar_url,
-            })
-          }
-        })
-    })
-  }, [])
+  const currentUser = useMemo(() => {
+    if (!user) return undefined
+    return {
+      id: user.id,
+      display_name: profile?.display_name || 'Anonym',
+      avatar_url: profile?.avatar_url ?? null,
+    }
+  }, [user, profile])
 
   const { onlineUsers, isOnline, onlineCount } = usePresence(currentUser)
 

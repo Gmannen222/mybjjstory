@@ -3,54 +3,40 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
+import { NAV_ITEMS, isActivePath } from '@/lib/navigation'
+import { useAuthProfile } from '@/lib/hooks/useAuthProfile'
 
-const NAV_ITEMS = [
-  { key: 'home', path: '', icon: '🏠' },
-  { key: 'training', path: '/training', icon: '🥋' },
-  { key: 'progress', path: '/progress', icon: '📊' },
-  { key: 'feed', path: '/feed', icon: '📰' },
-  { key: 'profile', path: '/profile', icon: '👤' },
-] as const
-
-// Sub-paths that should highlight the parent tab
-const SUB_PATH_MAP: Record<string, string> = {
-  '/gradings': '/progress',
-  '/competitions': '/progress',
-  '/sparring': '/progress',
-  '/academies': '/feed',
-  '/my-academy': '/feed',
-  '/injuries': '/profile',
-  '/settings': '/profile',
-  '/feedback': '/profile',
-  '/inbox': '/profile',
-  '/onboarding': '__none__',
-}
+const bottomItems = NAV_ITEMS.filter((item) => item.showInBottomNav)
 
 export default function BottomNav() {
   const pathname = usePathname()
   const locale = useLocale()
   const t = useTranslations('nav')
+  const { isAuthenticated, loading } = useAuthProfile()
 
-  const isActive = (path: string) => {
-    const full = `/${locale}${path}`
-    // Home tab: only active on exact dashboard path
-    if (path === '') {
-      return pathname === `/${locale}` || pathname === `/${locale}/`
-    }
-    if (pathname.startsWith(full)) return true
-    // Check if current path is a sub-path of this tab
-    for (const [sub, parent] of Object.entries(SUB_PATH_MAP)) {
-      if (parent === path && pathname.startsWith(`/${locale}${sub}`)) return true
-    }
-    return false
+  if (loading) {
+    return (
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-background/95 backdrop-blur-md safe-area-pb">
+        <div className="flex items-center justify-around h-16">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="flex flex-col items-center gap-0.5 min-w-[56px] min-h-[48px] justify-center">
+              <div className="w-6 h-6 rounded bg-surface-hover animate-pulse" />
+              <div className="w-8 h-2 rounded bg-surface-hover animate-pulse" />
+            </div>
+          ))}
+        </div>
+      </nav>
+    )
   }
+
+  if (!isAuthenticated) return null
 
   return (
     <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-background/95 backdrop-blur-md safe-area-pb">
       <div className="flex items-center justify-around h-16">
-        {NAV_ITEMS.map(({ key, path, icon }) => {
+        {bottomItems.map(({ key, path, icon }) => {
           const href = `/${locale}${path}`
-          const active = isActive(path)
+          const active = isActivePath(pathname, locale, path)
 
           return (
             <Link

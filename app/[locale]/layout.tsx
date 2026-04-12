@@ -6,6 +6,7 @@ import Header from '@/components/layout/Header'
 import BottomNav from '@/components/layout/BottomNav'
 import BanCheck from '@/components/auth/BanCheck'
 import PushPrompt from '@/components/notifications/PushPrompt'
+import { AuthProfileProvider } from '@/lib/hooks/useAuthProfile'
 import { RealtimeProvider } from '@/components/realtime/RealtimeProvider'
 
 export default async function LocaleLayout({
@@ -30,13 +31,15 @@ export default async function LocaleLayout({
           Hopp til innhold
         </a>
         <NextIntlClientProvider messages={messages}>
-          <RealtimeProvider>
-            <BanCheck locale={locale} />
-            <Header />
-            <main id="main-content" className="flex-1 pb-20 sm:pb-0">{children}</main>
-            <BottomNav />
-            <PushPrompt />
-          </RealtimeProvider>
+          <AuthProfileProvider>
+            <RealtimeProvider>
+              <BanCheck locale={locale} />
+              <Header />
+              <main id="main-content" className="flex-1 pb-24 sm:pb-0">{children}</main>
+              <BottomNav />
+              <PushPrompt />
+            </RealtimeProvider>
+          </AuthProfileProvider>
         </NextIntlClientProvider>
       </body>
     </html>

@@ -1,33 +1,16 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
-import type { Session } from '@supabase/supabase-js'
+import { useAuthProfile } from '@/lib/hooks/useAuthProfile'
 
 export default function AuthButton({ compact = false }: { compact?: boolean }) {
-  const [session, setSession] = useState<Session | null>(null)
-  const [loading, setLoading] = useState(true)
-  const supabase = createClient()
+  const { user, profile, loading, isAuthenticated } = useAuthProfile()
   const t = useTranslations('auth')
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session)
-      setLoading(false)
-    })
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-    })
-
-    return () => subscription.unsubscribe()
-  }, [supabase.auth])
-
   const handleSignIn = async () => {
+    const supabase = createClient()
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -37,18 +20,17 @@ export default function AuthButton({ compact = false }: { compact?: boolean }) {
   }
 
   const handleSignOut = async () => {
+    const supabase = createClient()
     await supabase.auth.signOut()
-    setSession(null)
   }
 
   if (loading) {
     return <div className="h-10 w-20 animate-pulse rounded-lg bg-surface" />
   }
 
-  if (session) {
-    const user = session.user
-    const name = user.user_metadata?.full_name || user.email
-    const avatar = user.user_metadata?.avatar_url
+  if (isAuthenticated && user) {
+    const name = profile?.display_name || user.user_metadata?.full_name || user.email
+    const avatar = profile?.avatar_url || user.user_metadata?.avatar_url
 
     return (
       <div className="flex items-center gap-3">

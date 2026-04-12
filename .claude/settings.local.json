@@ -21,7 +21,8 @@
       "WebFetch(domain:www.beltchecker.com)",
       "Skill(update-config)",
       "Skill(update-config:*)",
-      "mcp__supabase__execute_sql"
+      "mcp__supabase__execute_sql",
+      "WebFetch(domain:www.frontlineacademy.no)"
     ]
   }
 }

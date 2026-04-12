@@ -81,7 +81,7 @@ export function BeltBadge({
     >
       {label}
       {degrees !== undefined && degrees > 0 && (
-        <span className="opacity-80">&middot; {degrees} stripe{degrees > 1 ? 's' : ''}</span>
+        <span className="opacity-80">&middot; {degrees} {degrees > 1 ? 'striper' : 'stripe'}</span>
       )}
     </span>
   )

@@ -26,8 +26,7 @@
       "title1": "Din BJJ-reise,",
       "title2": "dokumentert.",
       "subtitle": "Logg treninger, dokumenter graderinger, del med fellesskapet. Alt du trenger for å følge din progresjon i brasiliansk jiu-jitsu.",
-      "cta": "Kom i gang gratis",
-      "secondary": "Se funksjoner"
+      "betaNote": "Alle som registrerer seg i beta beholder tilgangen etter lansering."
     },
     "stats": {
       "free": "Gratis i beta",
@@ -60,8 +59,7 @@
       "pwa": {
         "title": "Mobilapp",
         "desc": "Installer appen på telefonen. Fungerer offline — perfekt for når du er på matta."
-      },
-      "cta": "Kom i gang gratis"
+      }
     },
     "howItWorks": {
       "title": "Slik fungerer det",
@@ -80,7 +78,8 @@
     },
     "belts": {
       "title": "Alle belter, én reise",
-      "subtitle": "Uansett om du nettopp begynte eller har trent i 20 år — MyBJJStory er for deg."
+      "subtitle": "Uansett om du nettopp begynte eller har trent i 20 år — MyBJJStory er for deg.",
+      "kids": "Barnebelter"
     },
     "cta": {
       "title": "Bli med i beta!",
