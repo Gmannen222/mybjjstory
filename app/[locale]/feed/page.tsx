@@ -29,6 +29,7 @@ export default async function FeedPage({
       comments (count),
       reactions (count)
     `)
+    .eq('moderation_status', 'active')
     .order('created_at', { ascending: false })
     .limit(PAGE_SIZE)
 

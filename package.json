@@ -20,10 +20,12 @@
     "next-intl": "^4.9.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
+    "resend": "^6.10.0",
     "serwist": "^9.5.7",
     "web-push": "^3.6.7"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@serwist/next": "^9.5.7",
     "@tailwindcss/postcss": "^4.2.2",
     "@testing-library/jest-dom": "^6.9.1",

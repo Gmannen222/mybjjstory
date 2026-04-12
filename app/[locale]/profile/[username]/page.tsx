@@ -36,7 +36,7 @@ export default async function PublicProfilePage({
       ? supabase.from('injuries').select('*').eq('user_id', p.id).is('date_recovered', null).order('date_occurred', { ascending: false })
       : { data: null },
     p.show_feed
-      ? supabase.from('posts').select('*, comments (count), reactions (count)').eq('user_id', p.id).order('created_at', { ascending: false }).limit(10)
+      ? supabase.from('posts').select('*, comments (count), reactions (count)').eq('user_id', p.id).eq('moderation_status', 'active').order('created_at', { ascending: false }).limit(10)
       : { data: null },
   ])
 

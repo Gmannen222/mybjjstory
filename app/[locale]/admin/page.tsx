@@ -37,6 +37,7 @@ export default async function AdminDashboardPage({
     { count: totalGradings },
     { count: newFeedback },
     { count: pendingAcademies },
+    { count: pendingReports },
     { data: recentUsers },
     { data: activeTrainers },
     { data: beltData },
@@ -48,6 +49,7 @@ export default async function AdminDashboardPage({
     supabase.from('gradings').select('*', { count: 'exact', head: true }),
     supabase.from('feedback').select('*', { count: 'exact', head: true }).eq('status', 'new'),
     supabase.from('academies').select('*', { count: 'exact', head: true }).eq('is_active', false),
+    supabase.from('content_reports').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase
       .from('profiles')
       .select('id')
@@ -140,6 +142,29 @@ export default async function AdminDashboardPage({
               )
             })}
           </div>
+        </div>
+
+        {/* Moderation queue */}
+        <div className="bg-surface rounded-xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-bold">Moderering</h2>
+            {(pendingReports || 0) > 0 && (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-red-400/20 text-red-400 font-medium">
+                {pendingReports} ventende
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-muted">
+            {(pendingReports || 0) === 0
+              ? 'Ingen rapportert innhold venter på behandling.'
+              : `${pendingReports} rapporter venter på gjennomgang.`}
+          </p>
+          <Link
+            href={`/${locale}/admin/moderation`}
+            className="block mt-4 text-sm text-primary hover:underline"
+          >
+            Gå til moderering →
+          </Link>
         </div>
 
         {/* Recent feedback */}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
@@ -8,6 +8,7 @@ import { BeltDisplay, BELT_LABELS } from '@/components/ui/BeltBadge'
 import AvatarSVG, { DEFAULT_AVATAR, type AvatarConfig } from '@/components/avatar/AvatarSVG'
 import DashboardSettings from './DashboardSettings'
 import TrainingChart from './TrainingChart'
+import TopTrainerBadge, { type TopTrainerData } from './TopTrainerBadge'
 import AchievementsList from '@/components/achievements/AchievementsList'
 import type { DashboardConfig } from '@/lib/types/database'
 
@@ -33,6 +34,13 @@ interface ProfileData {
   favorite_submission: string | null
   training_since_year: number | null
   academy_name: string | null
+  academy_id: string | null
+}
+
+export interface RecentAchievement {
+  name: string
+  icon: string
+  earned_at: string
 }
 
 interface Stats {
@@ -43,6 +51,7 @@ interface Stats {
   goldCount: number
   activeInjuries: number
   streakDays: number
+  bestStreak: number
 }
 
 interface RecentSession {
@@ -62,10 +71,16 @@ export default function Dashboard({
   locale,
   userId,
   initialProfile,
+  topTrainer,
+  lastTrainingDate,
+  recentAchievement,
 }: {
   locale: string
   userId: string
   initialProfile: ProfileData | null
+  topTrainer?: TopTrainerData | null
+  lastTrainingDate?: string | null
+  recentAchievement?: RecentAchievement | null
 }) {
   const [profile] = useState<ProfileData | null>(initialProfile)
   const [stats, setStats] = useState<Stats | null>(null)
@@ -118,17 +133,18 @@ export default function Dashboard({
           .from('training_sessions')
           .select('date')
           .eq('user_id', userId)
-          .order('date', { ascending: false })
-          .limit(30),
+          .order('date', { ascending: false }),
       ])
 
-      // Calculate streak
+      // Calculate current streak and best streak from all training dates
       let streakDays = 0
+      let bestStreak = 0
       if (recentRes.data && recentRes.data.length > 0) {
         const dates = [...new Set(recentRes.data.map((s: { date: string }) => s.date))].sort().reverse()
         const today = now.toISOString().split('T')[0]
         const yesterday = new Date(now.getTime() - 86400000).toISOString().split('T')[0]
 
+        // Current streak
         if (dates[0] === today || dates[0] === yesterday) {
           streakDays = 1
           for (let i = 1; i < dates.length; i++) {
@@ -142,6 +158,22 @@ export default function Dashboard({
             }
           }
         }
+
+        // Best streak (all-time)
+        const sorted = [...dates].sort()
+        let run = 1
+        for (let i = 1; i < sorted.length; i++) {
+          const prev = new Date(sorted[i - 1] as string)
+          const curr = new Date(sorted[i] as string)
+          if ((curr.getTime() - prev.getTime()) / 86400000 <= 1) {
+            run++
+          } else {
+            if (run > bestStreak) bestStreak = run
+            run = 1
+          }
+        }
+        if (run > bestStreak) bestStreak = run
+        bestStreak = Math.max(bestStreak, streakDays)
       }
 
       setStats({
@@ -152,6 +184,7 @@ export default function Dashboard({
         goldCount: goldRes.count ?? 0,
         activeInjuries: injuryRes.count ?? 0,
         streakDays,
+        bestStreak,
       })
       setStatsLoading(false)
     }
@@ -167,8 +200,30 @@ export default function Dashboard({
   const weekGoal = 3
   const weekProgress = Math.min((stats?.weekCount ?? 0) / weekGoal, 1)
 
+  // "Sist trent" helper — capture time once on mount
+  const [now] = useState(() => Date.now())
+  const lastTrainedLabel = useMemo(() => {
+    if (!lastTrainingDate) return ''
+    const today = new Date(now).toISOString().split('T')[0]
+    const yesterday = new Date(now - 86400000).toISOString().split('T')[0]
+    if (lastTrainingDate === today) return t('lastTrainedToday')
+    if (lastTrainingDate === yesterday) return t('lastTrainedYesterday')
+    const diff = Math.floor((now - new Date(lastTrainingDate).getTime()) / 86400000)
+    return t('lastTrainedDaysAgo', { count: diff })
+  }, [lastTrainingDate, now, t])
+
+  const daysSinceTraining = useMemo(() => {
+    if (!lastTrainingDate) return 999
+    return Math.floor((now - new Date(lastTrainingDate).getTime()) / 86400000)
+  }, [lastTrainingDate, now])
+
+  const isNewUser = !statsLoading && (stats?.totalCount ?? 0) === 0
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 sm:py-10">
+      {/* Top trainer badge */}
+      {topTrainer && <TopTrainerBadge data={topTrainer} />}
+
       {/* Hero card — renders immediately with server-side profile */}
       <div className="relative bg-surface rounded-2xl overflow-hidden mb-6">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-transparent" />
@@ -231,7 +286,25 @@ export default function Dashboard({
                     {new Date().getFullYear() - profile.training_since_year} år
                   </span>
                 )}
+                {lastTrainingDate && (
+                  <span className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 bg-green-400 rounded-full" />
+                    {t('lastTrained')}: {lastTrainedLabel}
+                  </span>
+                )}
               </div>
+
+              {/* Recent achievement */}
+              {recentAchievement && (
+                <Link
+                  href={`/${locale}/achievements`}
+                  className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full text-xs hover:bg-amber-500/15 transition-colors"
+                >
+                  <span>{recentAchievement.icon}</span>
+                  <span className="text-amber-400 font-medium">{recentAchievement.name}</span>
+                  <span className="text-muted">{t('recentBadge')}</span>
+                </Link>
+              )}
             </div>
 
             {/* Right side: settings + CTA */}
@@ -276,8 +349,23 @@ export default function Dashboard({
         </div>
       )}
 
+      {/* Empty state for new users */}
+      {isNewUser && (
+        <div className="bg-surface rounded-2xl border border-primary/20 p-8 mb-6 text-center">
+          <div className="text-5xl mb-4">🥋</div>
+          <h2 className="text-xl font-bold mb-2">{t('emptyTitle')}</h2>
+          <p className="text-muted text-sm mb-6 max-w-md mx-auto">{t('emptySubtitle')}</p>
+          <Link
+            href={`/${locale}/training/new`}
+            className="inline-block px-8 py-3 bg-primary text-background font-bold rounded-xl hover:bg-primary-hover transition-all hover:scale-105 hover:shadow-[0_0_20px_-3px_rgba(201,168,76,0.4)]"
+          >
+            {t('emptyCta')}
+          </Link>
+        </div>
+      )}
+
       {/* Stats row */}
-      {dashConfig.showTrainingStats && (
+      {!isNewUser && dashConfig.showTrainingStats && (
         statsLoading ? (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
             {[1, 2, 3, 4].map((i) => (
@@ -297,7 +385,12 @@ export default function Dashboard({
                 <div className={`text-2xl sm:text-3xl font-bold ${(stats?.streakDays ?? 0) > 0 ? 'text-orange-400' : 'text-muted'}`}>
                   {stats?.streakDays ?? 0}
                 </div>
-                <div className="text-xs text-muted mt-0.5">Streak</div>
+                <div className="text-[10px] text-muted mt-0.5">{t('streakDays')}</div>
+                {(stats?.bestStreak ?? 0) > (stats?.streakDays ?? 0) && (
+                  <div className="text-[9px] text-orange-400/60 mt-0.5">
+                    {t('bestStreak', { count: stats!.bestStreak })}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -323,9 +416,9 @@ export default function Dashboard({
       )}
 
       {/* Training chart */}
-      {dashConfig.showTrainingStats && (
+      {!isNewUser && dashConfig.showTrainingStats && (
         <div className="mb-6">
-          <TrainingChart userId={userId} />
+          <TrainingChart userId={userId} weekGoal={weekGoal} />
         </div>
       )}
 
@@ -384,23 +477,33 @@ export default function Dashboard({
         <div className="mb-8">
           <h2 className="text-sm font-semibold text-muted uppercase tracking-wider mb-3">Hurtigvalg</h2>
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
-            {[
-              { href: `/${locale}/training/new`, icon: '🥋', label: tTraining('newSession'), accent: 'hover:border-blue-500/30' },
-              { href: `/${locale}/training`, icon: '📋', label: tTraining('title'), accent: 'hover:border-green-500/30' },
-              { href: `/${locale}/competitions`, icon: '🏆', label: 'Konkurranser', accent: 'hover:border-yellow-500/30' },
-              { href: `/${locale}/feed`, icon: '📰', label: 'Feed', accent: 'hover:border-purple-500/30' },
-              { href: `/${locale}/gradings`, icon: '🏅', label: 'Graderinger', accent: 'hover:border-orange-500/30' },
-              { href: `/${locale}/injuries`, icon: '🩹', label: 'Skader', accent: 'hover:border-red-500/30' },
-            ].map(({ href, icon, label, accent }) => (
-              <Link
-                key={href}
-                href={href}
-                className={`bg-surface border border-white/5 rounded-xl p-3 text-center transition-all duration-200 hover:scale-[1.05] hover:shadow-lg ${accent}`}
-              >
-                <div className="text-xl sm:text-2xl mb-1">{icon}</div>
-                <div className="text-[11px] sm:text-xs font-medium text-muted">{label}</div>
-              </Link>
-            ))}
+            {(() => {
+              const highlightTraining = daysSinceTraining >= 2
+
+              const actions = [
+                { href: `/${locale}/training/new`, icon: '🥋', label: tTraining('newSession'), accent: 'hover:border-blue-500/30', highlight: highlightTraining },
+                { href: `/${locale}/training`, icon: '📋', label: tTraining('title'), accent: 'hover:border-green-500/30', highlight: false },
+                { href: `/${locale}/competitions`, icon: '🏆', label: 'Konkurranser', accent: 'hover:border-yellow-500/30', highlight: false },
+                { href: `/${locale}/feed`, icon: '📰', label: 'Feed', accent: 'hover:border-purple-500/30', highlight: false },
+                { href: `/${locale}/gradings`, icon: '🏅', label: 'Graderinger', accent: 'hover:border-orange-500/30', highlight: false },
+                { href: `/${locale}/injuries`, icon: '🩹', label: 'Skader', accent: 'hover:border-red-500/30', highlight: false },
+              ]
+
+              return actions.map(({ href, icon, label, accent, highlight }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`bg-surface border rounded-xl p-3 text-center transition-all duration-200 hover:scale-[1.05] hover:shadow-lg ${accent} ${
+                    highlight
+                      ? 'border-primary/40 shadow-[0_0_15px_-3px_rgba(201,168,76,0.3)] ring-1 ring-primary/20'
+                      : 'border-white/5'
+                  }`}
+                >
+                  <div className="text-xl sm:text-2xl mb-1">{icon}</div>
+                  <div className={`text-[11px] sm:text-xs font-medium ${highlight ? 'text-primary' : 'text-muted'}`}>{label}</div>
+                </Link>
+              ))
+            })()}
           </div>
         </div>
       )}

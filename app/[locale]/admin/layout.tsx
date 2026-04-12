@@ -32,6 +32,12 @@ export default async function AdminLayout({
             Dashboard
           </Link>
           <Link
+            href={`/${locale}/admin/moderation`}
+            className="text-muted hover:text-foreground transition-colors"
+          >
+            Moderering
+          </Link>
+          <Link
             href={`/${locale}/admin/feedback`}
             className="text-muted hover:text-foreground transition-colors"
           >

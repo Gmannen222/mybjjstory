@@ -9,7 +9,7 @@ interface WeekData {
   minutes: number
 }
 
-export default function TrainingChart({ userId }: { userId: string }) {
+export default function TrainingChart({ userId, weekGoal = 3 }: { userId: string; weekGoal?: number }) {
   const [weeks, setWeeks] = useState<WeekData[]>([])
   const [loading, setLoading] = useState(true)
   const [mode, setMode] = useState<'count' | 'minutes'>('count')
@@ -104,10 +104,22 @@ export default function TrainingChart({ userId }: { userId: string }) {
       </div>
 
       {/* Bar chart */}
-      <div className="flex items-end gap-1 h-32">
+      <div className="flex items-end gap-1 h-32 relative">
+        {/* Goal line (only in count mode) */}
+        {mode === 'count' && weekGoal <= maxVal && (
+          <div
+            className="absolute left-0 right-0 border-t border-dashed border-primary/40 pointer-events-none z-10"
+            style={{ bottom: `${(weekGoal / maxVal) * 100 + 16}px` }}
+          >
+            <span className="absolute -top-3 right-0 text-[9px] text-primary/60 font-medium">
+              Mål: {weekGoal}
+            </span>
+          </div>
+        )}
         {weeks.map((w, i) => {
           const val = mode === 'count' ? w.count : w.minutes
           const height = maxVal > 0 ? (val / maxVal) * 100 : 0
+          const meetsGoal = mode === 'count' && val >= weekGoal
           return (
             <div key={i} className="flex-1 flex flex-col items-center gap-1">
               <span className={`text-[10px] font-medium ${val > 0 ? 'text-foreground' : 'text-transparent'}`}>
@@ -116,7 +128,7 @@ export default function TrainingChart({ userId }: { userId: string }) {
               <div className="w-full flex items-end" style={{ height: '100px' }}>
                 <div
                   className={`w-full rounded-t transition-all duration-500 ${
-                    val > 0 ? 'bg-primary' : 'bg-white/5'
+                    meetsGoal ? 'bg-green-500' : val > 0 ? 'bg-primary' : 'bg-white/5'
                   }`}
                   style={{ height: `${Math.max(height, 4)}%` }}
                 />

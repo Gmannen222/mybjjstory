@@ -18,13 +18,58 @@ export default async function HomePage({
   } = await supabase.auth.getUser()
 
   if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('belt_rank, belt_degrees, display_name, avatar_config, dashboard_config, favorite_guard, favorite_submission, training_since_year, academy_name')
-      .eq('id', user.id)
-      .single()
+    const [profileRes, lastTrainingRes, recentAchievementRes] = await Promise.all([
+      supabase
+        .from('profiles')
+        .select('belt_rank, belt_degrees, display_name, avatar_config, dashboard_config, favorite_guard, favorite_submission, training_since_year, academy_name, academy_id')
+        .eq('id', user.id)
+        .single(),
+      supabase
+        .from('training_sessions')
+        .select('date')
+        .eq('user_id', user.id)
+        .order('date', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      supabase
+        .from('user_achievements')
+        .select('earned_at, achievements(name, icon)')
+        .eq('user_id', user.id)
+        .order('earned_at', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ])
 
-    return <Dashboard locale={locale} userId={user.id} initialProfile={profile} />
+    const profile = profileRes.data
+
+    // Fetch top trainer if user has an academy
+    let topTrainer = null
+    if (profile?.academy_id) {
+      const { data } = await supabase.rpc('get_academy_top_trainer', {
+        p_academy_id: profile.academy_id,
+      })
+      topTrainer = data
+    }
+
+    const achievement = recentAchievementRes.data
+    const recentAchievement = achievement
+      ? {
+          name: (achievement.achievements as unknown as { name: string }).name,
+          icon: (achievement.achievements as unknown as { icon: string }).icon,
+          earned_at: achievement.earned_at,
+        }
+      : null
+
+    return (
+      <Dashboard
+        locale={locale}
+        userId={user.id}
+        initialProfile={profile}
+        topTrainer={topTrainer}
+        lastTrainingDate={lastTrainingRes.data?.date ?? null}
+        recentAchievement={recentAchievement}
+      />
+    )
   }
 
   return <LandingPage locale={locale} />

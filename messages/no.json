@@ -18,7 +18,17 @@
     "subtitle": "Din personlige BJJ-reise",
     "logTraining": "Logg trening",
     "viewFeed": "Se feed",
-    "welcome": "Velkommen tilbake"
+    "welcome": "Velkommen tilbake",
+    "streakDays": "Dager på rad",
+    "bestStreak": "Beste: {count}",
+    "lastTrained": "Sist trent",
+    "lastTrainedToday": "I dag",
+    "lastTrainedYesterday": "I går",
+    "lastTrainedDaysAgo": "{count} dager siden",
+    "emptyTitle": "Velkommen til MyBJJStory!",
+    "emptySubtitle": "Logg din første trening for å se statistikk og følge progresjonen din.",
+    "emptyCta": "Logg din første trening",
+    "recentBadge": "Nylig opptjent"
   },
   "landing": {
     "hero": {
@@ -643,6 +653,20 @@
       "fieldAffiliation": "Tilknytning",
       "fieldDescription": "Beskrivelse",
       "fieldHeadInstructor": "Hovedinstruktør"
+    }
+  },
+  "moderation": {
+    "report": {
+      "button": "Rapporter",
+      "title": "Rapporter innhold",
+      "reason_inappropriate": "Upassende innhold",
+      "reason_spam": "Spam",
+      "reason_harassment": "Trakassering",
+      "reason_other": "Annet",
+      "descriptionPlaceholder": "Beskriv problemet (valgfritt)...",
+      "cancel": "Avbryt",
+      "submit": "Send rapport",
+      "sent": "Takk! Rapporten er sendt."
     }
   }
 }

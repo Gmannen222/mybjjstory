@@ -301,8 +301,13 @@ export interface Feedback {
   admin_note: string | null
   admin_reply: string | null
   replied_at: string | null
+  email_sent_at: string | null
   created_at: string
 }
+
+export type ContentReportReason = 'inappropriate' | 'spam' | 'harassment' | 'other'
+export type ContentReportStatus = 'pending' | 'reviewed' | 'dismissed'
+export type ModerationStatus = 'active' | 'hidden' | 'removed'
 
 export interface NotificationPreferences {
   comments: boolean
